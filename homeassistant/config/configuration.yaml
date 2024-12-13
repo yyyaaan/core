@@ -9,3 +9,13 @@ frontend:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - 192.168.4.81
+    - 62.113.179.42
+    - 172.18.0.5      # docker inspect nginx | grep IPAddress
+  ip_ban_enabled: false
+  login_attempts_threshold: 5
