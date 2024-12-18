@@ -1,9 +1,5 @@
 data
-secrets.yaml
-.storage
-.cloud
-.uix-secrets
-auth.json
+config
 
 # Logs
 logs
