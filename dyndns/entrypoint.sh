@@ -18,5 +18,6 @@ while true; do
   echo "> $(curl -s "https://svc.joker.com/nic/update?username=$U1&password=$P1&myip=$external_ip&hostname=$D1") $D1"
   echo "> $(curl -s "https://svc.joker.com/nic/update?username=$U2&password=$P2&myip=$external_ip&hostname=$D2") $D2"
 
-  sleep 900
+  echo "> $(curl -s -X POST "https://pi.yan.fi/play/scheduled")"
+  sleep 3500
 done
