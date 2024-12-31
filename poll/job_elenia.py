@@ -40,7 +40,7 @@ def login(user, password):
         }
     )
 
-    print("AWS Cognito".ljust(15), login.status_code, end=" ")
+    print("AWS Cognito".ljust(15), login.status_code, f"u{len(user)}p{len(password)}", end=" ")
     if login.status_code > 299:
         raise Exception(f"Exception {login.status_code}")
     token_aws = login.json()["AuthenticationResult"]["AccessToken"]
@@ -86,30 +86,17 @@ def get_meter_reading(token):
 
 # %%
 def main():
-    with open("/mnt/token_aws", "r") as f:
-        token_aws = f.read()
-
-    with open("/mnt/token_elenia", "r") as f:
-        token = f.read()
-
     try:
+        with open("/mnt/token_elenia", "r") as f:
+            token = f.read()
         meter = get_meter_reading(token)
     except Exception:
-        try:
-            token = get_service_token(token_aws)
-            with open("/mnt/token_elenia", "w") as f:
-                f.write(token)
-            meter = get_meter_reading(token)
-
-        except Exception as e:
-            print(e)
-            token_aws = login(user, password)
-            with open("/mnt/token_aws", "w") as f:
-                f.write(token_aws)
-            token = get_service_token(token_aws)
-            with open("/mnt/token_elenia", "w") as f:
-                f.write(token)
-            meter = get_meter_reading(token)
+        print()
+        token_aws = login(user, password)
+        token = get_service_token(token_aws)
+        with open("/mnt/token_elenia", "w") as f:
+            f.write(token)
+        meter = get_meter_reading(token)
 
     with open("/media/data_energy.txt", "a") as f:
         f.write(f"\n{meter[-1]['dt']}\n{meter[-1]['a']}")
