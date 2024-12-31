@@ -7,7 +7,7 @@ docker tag playwright:release yyyaaan/playright:v0.4.7
 """
 from datetime import datetime, UTC
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from os import getenv
 from uvicorn import run
 
@@ -20,6 +20,18 @@ app = FastAPI()
 @app.get("/")
 async def root():
     return {"message": "server is up", "paths": ["/view", "/scheduled&audience=0", "now"]}
+
+
+@app.get("/logs", response_class=PlainTextResponse)
+async def logs():
+    logs = []
+    for filename in ["elenia", "dyndns", "extra"]:
+        try:
+            with open(f"/mnt/{filename}.log", "r") as f:
+                logs.append(f.read())
+        except Exception:
+            pass
+    return "\n\n\n".join(logs)
 
 
 @app.get("/view")
