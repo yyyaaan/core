@@ -40,7 +40,7 @@ def login(user, password):
         }
     )
 
-    print("AWS Cognito".ljust(15), login.status_code, f"u{len(user)}p{len(password)}", end=" ")
+    print("AWS".ljust(12), login.status_code, f"u{len(user)}p{len(password)}", end=" ")
     if login.status_code > 299:
         raise Exception(f"Exception {login.status_code}")
     token_aws = login.json()["AuthenticationResult"]["AccessToken"]
@@ -55,7 +55,7 @@ def get_service_token(token_aws):
         headers={"Authorization": f"Bearer {token_aws}"}
     )
 
-    print("Elenia Cust".ljust(15), auth.status_code, end=" ")
+    print("Elenia Cust".ljust(12), auth.status_code, end=" ")
     if auth.status_code > 299:
         raise Exception(f"Exception {auth.status_code}")
     token = auth.json()["token"]
@@ -80,7 +80,7 @@ def get_meter_reading(token):
     if meter_reading.status_code > 299:
         raise Exception(f"Exception {meter_reading.status_code}")
     meter = meter_reading.json()
-    print("data", len(meter), "till", meter[-1]['dt'], "|", meter[-1]['a'])
+    print(f"n={len(meter)}", meter[-1]['dt'][-11:],  meter[-1]['a'])
     return meter
 
 
