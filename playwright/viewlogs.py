@@ -4,9 +4,12 @@ def view_logs(filename = ""):
     """
     filename, if empty, shows the most useful summary and links
     """
+    log_fixtures = ["elenia", "dyndns", "extra"]
+
     if len(filename):
+        fullpath = f"/mnt/{filename}.log" if filename in log_fixtures else f"/mnt/archive/{filename}"
         try:
-            with open(f"/mnt/archive/{filename}", "r") as f:
+            with open(fullpath, "r") as f:
                 content = f.read()
         except Exception as e:
             content = str(e)
@@ -19,7 +22,7 @@ def view_logs(filename = ""):
     log_latest = []
     log_files = []
 
-    for filename in ["elenia", "dyndns", "extra"]:
+    for filename in log_fixtures:
         try:
             with open(f"/mnt/{filename}.log", "r") as f:
                 content = f.read()
@@ -30,10 +33,10 @@ def view_logs(filename = ""):
         except Exception:
             pass
 
-    log_files = [x.split("/")[-1] for x in log_files]
+    log_files = log_fixtures + [x.split("/")[-1] for x in log_files]
 
     links = [f'<a href="/play/logs?filename={x}">{x}</a>' for x in log_files]
-    content = "\n\n".join(log_latest)
+    content = "\n".join(log_latest)
     return (
         "<p>"
         f'<code>{content.replace("\n", "<br>")}</code>'

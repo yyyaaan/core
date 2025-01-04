@@ -16,3 +16,10 @@ with open("/media/data_energy.txt", "r") as f:
 
 with open("/media/data_energy.txt", "w") as f:
     f.write(data_energy[-29:])
+
+
+with open("/media/data_energy_prices.txt", "r") as f:
+    data_energy = f.read()
+
+with open("/media/data_energy_prices.txt", "w") as f:
+    f.write(data_energy[-60:])
