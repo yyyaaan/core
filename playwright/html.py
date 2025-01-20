@@ -1,8 +1,22 @@
+from datetime import datetime
+from json import loads, dumps
+
 from bbcsports import bbc_sports
 from sryhma import bonus_doubled
 
 
-def sports_and_bonus():
+def sports_and_bonus(refresh=False):
+    cache_path = "cached_sports_and_bounus.json"
+
+    if not refresh:
+        try:
+            with open(cache_path, "r") as f:
+                output = loads(f.read())
+                print("sports_and_bonus from cache ok")
+                return output
+        except Exception as e:
+            print(e)
+
     output = bbc_sports()
     bonus = bonus_doubled()
     if bonus["flag"]:
@@ -20,12 +34,15 @@ def sports_and_bonus():
         </p>
         """
 
-    output["html"] += """
+    output["html"] += f"""
         <p><small>
             <a href="https://www.bbc.com/sport/football/scores-fixtures">BBC Sports</a> |
             <a href="https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/">HOK Elanto</a> |
             <a href="https://hameenmaa.fi/ajankohtaista/?cat=etu-s-etukortilla">Hämeenmaa</a> |
             <a href="https://vbo.fi/ajankohtaista-osuuskaupastasi/?cat=edut-ja-vinkit">VBO</a>
+            <br>Updated: {datetime.now():%b%d %H:%M:%S}
         </small></p>
     """
+    with open(cache_path, "w") as f:
+        f.write(dumps(output))
     return output

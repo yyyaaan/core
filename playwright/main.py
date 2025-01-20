@@ -29,7 +29,7 @@ async def logs(filename: str = ""):
 
 @app.get("/view")
 def view():
-    return HTMLResponse(content=sports_and_bonus()["html"])
+    return HTMLResponse(content=sports_and_bonus(refresh=False)["html"])
 
 
 @app.post("/scheduled")
@@ -46,7 +46,7 @@ def scheduled(request: Request):
         n_audience = 1
 
     if str(the_hour) == str(hour_bbc):
-        payload = sports_and_bonus()
+        payload = sports_and_bonus(refresh=True)
         SendGrid().send_email(
             subject=payload["title"],
             content=payload["html"],
