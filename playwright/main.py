@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse
 from os import getenv
 from uvicorn import run
 
-from html import sports_and_bonus
+from html import sports_and_bonus, html_water
 from shared import SendGrid
 from viewlogs import view_logs
 
@@ -26,6 +26,12 @@ async def root():
 @app.get("/logs")
 async def logs(filename: str = ""):
     return HTMLResponse(content=view_logs(filename))
+
+
+@app.get("/tech")
+async def tech():
+    return HTMLResponse(content=html_water())
+
 
 @app.get("/view")
 def view():

@@ -1,4 +1,4 @@
-cd /media/exports
+cd /media/frigate/exports
 
 echo "$(date +"@%b%d %H:%M:%S")"
 current_date=$(date +%Y%m%d)

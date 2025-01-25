@@ -3,6 +3,13 @@ from json import loads, dumps
 
 from bbcsports import bbc_sports
 from sryhma import bonus_doubled
+from water import WaterMeter
+
+def html_water():
+    output = f"""
+        <img src="data:image/jpeg;base64,{WaterMeter().get_snapshot_base64()}" alt="snapshot" />
+    """
+    return output
 
 
 def sports_and_bonus(refresh=False):
