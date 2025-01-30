@@ -6,14 +6,15 @@ docker build --platform=linux/amd64 -t playwright:release .
 docker tag playwright:release yyyaaan/playright:v0.4.7
 """
 from datetime import datetime, UTC
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
 from os import getenv
 from uvicorn import run
 
-from html import sports_and_bonus, html_water
+from html import sports_and_bonus
 from shared import SendGrid
 from viewlogs import view_logs
+from water import WaterMeter
 
 app = FastAPI()
 
@@ -28,9 +29,9 @@ async def logs(filename: str = ""):
     return HTMLResponse(content=view_logs(filename))
 
 
-@app.get("/tech")
-async def tech():
-    return HTMLResponse(content=html_water())
+@app.get("/water.jpg", responses={200: {"content": {"image/jpeg": {}}}})
+async def water_jpg():
+    return Response(content=WaterMeter().get_snapshot_content(), media_type="image/jpeg")
 
 
 @app.get("/view")

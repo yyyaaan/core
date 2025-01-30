@@ -1,6 +1,7 @@
 data
 config
 token*
+credentials
 
 # Logs
 logs
