@@ -1,6 +1,15 @@
+.*
+*.db*
 data
-config
+config/ha/www
+config/ha/custom_components
+config/ha/backups
+config/hb/backups
+config/hb/accessories
+config/hb/persist
 token*
+auth*
+password.txt
 credentials
 
 # Logs
