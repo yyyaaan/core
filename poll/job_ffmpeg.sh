@@ -24,8 +24,38 @@ ffmpeg \
     -hide_banner \
     -loglevel error \
     -threads 2 \
+    "/media/DayIn1/OneMinX_$previous_day.mp4"
+
+echo "=TimelapseDone= $(date +"%H:%M:%S")"
+
+ffmpeg \
+    -i "/media/DayIn1/OneMinX_$previous_day.mp4" \
+    -metadata:s:v rotate=-90 \
+    -codec copy \
+    -hide_banner \
+    -loglevel error \
     "/media/DayIn1/OneMin_$previous_day.mp4"
 
-echo "$(date +"=DONE= %H:%M:%S")"
-
+echo "=VideoCodex= $(date +"%H:%M:%S")"
 # check default codec ffmpeg -h muxer=mp4
+
+
+#################################################
+### UPLOAD ###
+#################################################
+
+gcloud auth login --cred-file=/gcpstorage.json
+gcloud config set disable_prompts true
+gcloud config set project yyyaaannn
+gcloud config set storage/parallel_composite_upload_enabled True
+
+dest="$(date -d "yesterday 13:00" '+%Y%m')/yard_$(date -d "yesterday 13:00" '+%Y%m%d').mp4"
+
+gcloud storage cp "/media/DayIn1/OneMin_$previous_day.mp4"  "gs://yyyiot/onemin/$dest"
+gcloud storage cp "$input_file" "gs://yyyiot/cam/$dest"
+
+echo "=UploadDone= $(date +"%H:%M:%S")"
+
+
+# cleanup
+rm "/media/DayIn1/OneMinX_$previous_day.mp4"
