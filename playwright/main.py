@@ -11,10 +11,11 @@ from fastapi.responses import HTMLResponse
 from os import getenv
 from uvicorn import run
 
-from html import sports_and_bonus
-from shared import SendGrid
-from viewlogs import view_logs
-from water import WaterMeter
+from play.html import sports_and_bonus
+from utils.SendGrid import SendGrid
+from utils.ViewLogs import ViewLogs
+from energy.WaterMeter import WaterMeter
+from energy.Electricity import Electricity
 
 app = FastAPI()
 
@@ -26,12 +27,23 @@ async def root():
 
 @app.get("/logs")
 async def logs(filename: str = ""):
-    return HTMLResponse(content=view_logs(filename))
+    return HTMLResponse(content=ViewLogs.view_logs(filename))
+
+
+@app.get("/spot.svg", responses={200: {"content": {"image/svg+xml": {}}}})
+async def spot():
+    return Response(
+        content=Electricity().get_current_svg(),
+        media_type="image/svg+xml"
+    )
 
 
 @app.get("/water.jpg", responses={200: {"content": {"image/jpeg": {}}}})
 async def water_jpg():
-    return Response(content=WaterMeter().get_snapshot_content(), media_type="image/jpeg")
+    return Response(
+        content=WaterMeter().get_snapshot_content(),
+        media_type="image/jpeg"
+    )
 
 
 @app.get("/view")

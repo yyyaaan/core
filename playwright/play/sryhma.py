@@ -1,4 +1,4 @@
-from shared import PlayPage
+from play.PlayPage import PlayPage
 
 
 def play_hok_elanto():

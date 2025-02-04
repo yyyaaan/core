@@ -1,8 +1,8 @@
 from datetime import datetime
 from json import loads, dumps
 
-from bbcsports import bbc_sports
-from sryhma import bonus_doubled
+from play.bbcsports import bbc_sports
+from play.sryhma import bonus_doubled
 
 
 def sports_and_bonus(refresh=False):
