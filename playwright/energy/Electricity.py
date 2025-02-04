@@ -10,12 +10,12 @@ from requests import get
 
 class Electricity:
     cache_file = "/tmp/cache/spot_price.json"
-    cache_svg_folder = "/tmp/cache/svg/"
+    cache_html_folder = "/tmp/cache/html/"
     spot_prices_fi = {}
     output_time_fmt = "%H"
 
-    def __determine_cache_svg_filename(self):
-        return f"{self.cache_svg_folder}{datetime.now():%H}.svg"
+    def __determine_cache_html_filename(self):
+        return f"{self.cache_html_folder}{datetime.now():%H}.html"
 
     def __determine_update_strategy(self):
         self.get_spot_prices()
@@ -25,11 +25,11 @@ class Electricity:
             self.get_spot_prices(force_update=True)
         return None
 
-    def get_current_svg(self):
-        """get SVG from cache or render a new one"""
+    def get_current_plot(self):
+        """get plot from cache or render a new one"""
 
-        current_file = self.__determine_cache_svg_filename()
-        available_files = glob(f"{self.cache_svg_folder}*.svg")
+        current_file = self.__determine_cache_html_filename()
+        available_files = glob(f"{self.cache_html_folder}*.html")
 
         print(current_file, available_files)
 
@@ -38,17 +38,17 @@ class Electricity:
                 _ = [remove(x) for x in available_files]
             except Exception as e:
                 print(e)
-            self.render_plot_to_svg()
+            self.render_plot_to_html()
 
         with open(current_file, "r") as f:
             return f.read()
         return ""
 
-    def render_plot_to_svg(self):
-        """create SVG for the hour use get_svg for caching"""
+    def render_plot_to_html(self):
+        """create html for the hour use get_current_plot for caching"""
         self.__determine_update_strategy()
-        if not path.exists(self.cache_svg_folder):
-            makedirs(self.cache_svg_folder)
+        if not path.exists(self.cache_html_folder):
+            makedirs(self.cache_html_folder)
 
         data = self.spot_prices_fi
         helsinki_tz = timezone('Europe/Helsinki')
@@ -58,6 +58,7 @@ class Electricity:
             entry["ts"] = helsinki_time.strftime(self.output_time_fmt)
             entry["cent"] = round(entry["price"] * 1.255 / 10, 2)
             entry["ts"] = "24" if entry["ts"] == "00" else entry["ts"]
+            entry["date"] = helsinki_time.strftime("%d%b")
 
         now = datetime.now()
         yesterday_end = datetime(now.year, now.month, now.day)
@@ -93,7 +94,7 @@ class Electricity:
         )
         fig.update_xaxes(title=None)
         fig.update_yaxes(title=None)
-        fig.write_image(self.__determine_cache_svg_filename())
+        fig.write_html(self.__determine_cache_html_filename())
         return None
 
     def get_spot_prices(self, force_update=False):
@@ -110,7 +111,7 @@ class Electricity:
                 url=(
                     "https://dashboard.elering.ee/api/nps/price"
                     f"?start={datetime.now()-timedelta(days=1):%Y-%m-%d}T20:59:59.999Z"
-                    f"&end={datetime.now()+timedelta(days=1):%Y-%m-%d}T03:59:59.999Z"
+                    f"&end={datetime.now()+timedelta(days=1):%Y-%m-%d}T23:59:59.999Z"
                 )
             )
             print("Elering EE", spot_price.status_code, end=" ")
@@ -123,6 +124,6 @@ class Electricity:
                 f"{datetime.fromtimestamp(spot_prices_fi[0]['timestamp']):%b%d %H:%M}",   # noqa: E501
                 f"{datetime.fromtimestamp(spot_prices_fi[-1]['timestamp']):%b%d %H:%M}",  # noqa: E501
             ),
-        
+
         self.spot_prices_fi = spot_prices_fi
         return spot_prices_fi

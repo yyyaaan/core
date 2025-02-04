@@ -30,12 +30,9 @@ async def logs(filename: str = ""):
     return HTMLResponse(content=ViewLogs.view_logs(filename))
 
 
-@app.get("/spot.svg", responses={200: {"content": {"image/svg+xml": {}}}})
+@app.get("/spot")
 async def spot():
-    return Response(
-        content=Electricity().get_current_svg(),
-        media_type="image/svg+xml"
-    )
+    return HTMLResponse(content=Electricity().get_current_plot())
 
 
 @app.get("/water.jpg", responses={200: {"content": {"image/jpeg": {}}}})
