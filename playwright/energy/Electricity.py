@@ -64,7 +64,11 @@ class Electricity:
         yesterday_end = datetime(now.year, now.month, now.day)
         data = [x for x in data if x['timestamp'] > yesterday_end.timestamp()]
         current_hour = now.strftime(self.output_time_fmt.replace("%M", "00"))
-        price_now = next(x['cent'] for x in data if x['ts'] == current_hour)
+        try:
+            price_now = next(x['cent'] for x in data if x['ts'] == current_hour)  # noqa: E501
+        except Exception:
+            price_now = "Refresh Required"
+            self.get_spot_prices(force_update=True)
 
         plot_data = {
             "ts": [x['ts'] for x in data],
@@ -94,7 +98,10 @@ class Electricity:
         )
         fig.update_xaxes(title=None)
         fig.update_yaxes(title=None)
-        fig.write_html(self.__determine_cache_html_filename())
+        fig.write_html(
+            file=self.__determine_cache_html_filename(),
+            config={'displayModeBar': False},
+        )
         return None
 
     def get_spot_prices(self, force_update=False):
