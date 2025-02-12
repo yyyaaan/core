@@ -19,7 +19,7 @@ fi
 ffmpeg \
     -i "$input_file" \
     -vf setpts=0.1*PTS \
-    -r 60 \
+    -r 120 \
     -crf 28 \
     -hide_banner \
     -loglevel error \
