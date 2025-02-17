@@ -2,7 +2,7 @@ from datetime import datetime
 
 tag = f"{datetime.now():%Y%m%d}"
 
-for log in ["dyndns", "elenia", "video"]:
+for log in ["dyndns", "elenia"]:
     with open(f"/mnt/{log}.log", "r") as f:
         content = f.read()
     with open(f"/mnt/archive/{log}.{tag}.log", "w") as f:
