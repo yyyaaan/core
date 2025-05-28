@@ -9,10 +9,11 @@ from datetime import datetime, UTC
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
 from os import getenv
+from pytz import timezone
 from uvicorn import run
 
 from play.html import sports_and_bonus
-from utils.SendGrid import SendGrid
+from utils.EmailClient import EmailClient
 from utils.ViewLogs import ViewLogs
 from energy.WaterMeter import WaterMeter
 from energy.Electricity import Electricity
@@ -54,8 +55,8 @@ def scheduled(request: Request):
     Scheduled tasks. Optional query parameter: now, audience
     """
     params = request.query_params
-    the_hour = datetime.now(UTC).hour
-    hour_bbc = the_hour if "now" in params else getenv("HOUR_BBC", "7")
+    the_hour = datetime.now(timezone("Europe/Helsinki")).hour
+    hour_bbc = the_hour if "now" in params else getenv("HOUR_BBC", "9")
     try:
         n_audience = int(params.get("audience", ""))
     except Exception:
@@ -63,7 +64,7 @@ def scheduled(request: Request):
 
     if str(the_hour) == str(hour_bbc):
         payload = sports_and_bonus(refresh=True)
-        SendGrid().send_email(
+        EmailClient().send_email(
             subject=payload["title"],
             content=payload["html"],
             audience_length=abs(n_audience),
