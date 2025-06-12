@@ -8,6 +8,7 @@ config/ha/backups
 config/hb/backups
 config/hb/accessories
 config/hb/persist
+config/frigate/model_cache
 token*
 auth*
 password.txt
