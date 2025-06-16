@@ -11,8 +11,17 @@ file_size=$(stat -c %s "$input_file" | numfmt --to=iec)
 if [ "$file_date" = "$current_date" ]; then
     echo "The file $input_file ($file_size) is create today $(date -r "$input_file" +%b%dT%H:%M:%S)."
 else
-    echo "Failed. The latest file '$input_file' was created $file_date."
-    exit 0
+    echo "Pause for retry. The latest file '$input_file' was created $file_date."
+    sleep 50m
+    input_file=$(ls -t | head -n 1)
+    file_date=$(date -r "$input_file" +%Y%m%d)
+    file_size=$(stat -c %s "$input_file" | numfmt --to=iec)
+    if [ "$file_date" = "$current_date" ]; then
+        echo "The file $input_file ($file_size) is create today $(date -r "$input_file" +%b%dT%H:%M:%S)."
+    else
+        echo "Failed. The latest file '$input_file' was created $file_date."
+        exit 0
+    fi
 fi
 
 # -crf 0-51 & -qp 0-38/23
