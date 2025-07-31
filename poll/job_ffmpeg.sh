@@ -59,3 +59,10 @@ echo "=UploadDone= $(date +"%H:%M:%S")"
 
 # cleanup
 rm "/media/DayIn1/OneMinX_$previous_day.mp4"
+
+# fast sratch
+ffmpeg \
+    -i "/media/DayIn1/OneMin_$previous_day.mp4" \
+    -vf "scale=-2:1620" -r 30 -crf 35 \
+    -loglevel error \
+    "/media/DayIn1/A_$previous_day.mp4"
