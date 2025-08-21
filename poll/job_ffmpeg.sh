@@ -31,8 +31,8 @@ echo "=TimelapseCopyDone= $(date +"%H:%M:%S")"
 
 ffmpeg \
     -i "/media/DayIn1/OneMinX_$previous_day.mp4" \
-    -metadata:s:v rotate=-90 \
-    -codec copy \
+    -vf "transpose=1" \
+    -threads 2 \
     -hide_banner \
     -loglevel error \
     "/media/DayIn1/OneMin_$previous_day.mp4"

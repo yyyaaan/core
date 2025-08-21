@@ -20,7 +20,7 @@ r = post(
     url=f"http://192.168.4.81:5000/api/export/yard/start/{ts0}/end/{ts}",
     json={
         "playback": "timelapse_25x", # actual speed set in frigate config
-        "name": f"day15min_{datetime.fromtimestamp(ts0):%Y%m%d}.mp4"
+        "name": f"day90sec_{datetime.fromtimestamp(ts0):%Y%m%d}.mp4"
     }
 )
 
