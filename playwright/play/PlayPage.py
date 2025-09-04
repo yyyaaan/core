@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 from random import randint
 
 
@@ -23,25 +23,38 @@ class PlayPage:
         override_headers={},
         timeout=30000,
     ):
-        self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.launch()
-        self.context = self.browser.new_context()
+        self.url = url
+        self.wait_for_load_state = wait_for_load_state
+        self.cookies = cookies
+        self.override_headers = override_headers
+        self.timeout = timeout
+        self.playwright = None
+        self.browser = None
+        self.page = None
 
-        self.context.set_default_timeout(timeout)
-        if len(cookies):
-            self.context.add_cookies(cookies)
+    async def __aenter__(self):
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch()
+        self.context = await self.browser.new_context()
 
-        self.page = self.context.new_page()
-        self.page.set_viewport_size({"width": 1680, "height": 1080})
-        self.page.set_extra_http_headers({
+        self.context.set_default_timeout(self.timeout)
+        if len(self.cookies):
+            self.context.add_cookies(self.cookies)
+
+        self.page = await self.context.new_page()
+        await self.page.set_viewport_size({"width": 1680, "height": 1080})
+        await self.page.set_extra_http_headers({
             "User-Agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",  # noqa: E501
-            'Accept-Language': 'en',
-            **override_headers,
+            "Accept-Language": "en",
+            **self.override_headers,
         })
-        self.page.goto(url)
-        if len(wait_for_load_state):
-            self.page.wait_for_load_state(wait_for_load_state)
-        return None
+        await self.page.goto(self.url)
+        if len(self.wait_for_load_state):
+            await self.page.wait_for_load_state(self.wait_for_load_state)
+        return self
 
-    def stop(self):
-        self.playwright.stop()
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.browser:
+            await self.browser.close()
+        if self.playwright:
+            await self.playwright.stop()

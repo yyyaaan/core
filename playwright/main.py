@@ -45,12 +45,13 @@ async def water_jpg():
 
 
 @app.get("/view")
-def view():
-    return HTMLResponse(content=sports_and_bonus(refresh=False)["html"])
+async def view():
+    content = await sports_and_bonus(refresh=False)
+    return HTMLResponse(content=content["html"])
 
 
 @app.post("/scheduled")
-def scheduled(request: Request):
+async def scheduled(request: Request):
     """
     Scheduled tasks. Optional query parameter: now, audience
     """
@@ -63,7 +64,7 @@ def scheduled(request: Request):
         n_audience = 1
 
     if str(the_hour) == str(hour_bbc):
-        payload = sports_and_bonus(refresh=True)
+        payload = await sports_and_bonus(refresh=True)
         EmailClient().send_email(
             subject=payload["title"],
             content=payload["html"],

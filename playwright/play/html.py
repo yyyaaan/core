@@ -1,11 +1,12 @@
 from datetime import datetime
 from json import loads, dumps
+import asyncio
 
 from play.bbcsports import bbc_sports
 from play.sryhma import bonus_doubled
 
 
-def sports_and_bonus(refresh=False):
+async def sports_and_bonus(refresh=False):
     cache_path = "/tmp/cache/cached_sports_and_bounus.json"
 
     if not refresh:
@@ -17,8 +18,8 @@ def sports_and_bonus(refresh=False):
         except Exception as e:
             print(e)
 
-    output = bbc_sports()
-    bonus = bonus_doubled()
+    output, bonus = await asyncio.gather(bbc_sports(), bonus_doubled())
+
     if bonus["flag"]:
         output["title"] = f"BonusX2 {output['title']}"
         output["html"] = f"""
