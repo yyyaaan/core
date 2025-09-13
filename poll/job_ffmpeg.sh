@@ -45,25 +45,42 @@ echo "=VideoRotation= $(date +"%H:%M:%S")"
 ### UPLOAD ###
 #################################################
 
-gcloud auth login --cred-file=/gcpstorage.json
-gcloud config set disable_prompts true
-gcloud config set project yyyaaannn
-gcloud config set storage/parallel_composite_upload_enabled True
+# dest="$(date -d "yesterday 13:00" '+%Y%m')/yard_$(date -d "yesterday 13:00" '+%Y%m%d').mp4"
 
-dest="$(date -d "yesterday 13:00" '+%Y%m')/yard_$(date -d "yesterday 13:00" '+%Y%m%d').mp4"
-
-gcloud storage cp "/media/DayIn1/OneMin_$previous_day.mp4"  "gs://yyyiot/onemin/$dest"
-# gcloud storage cp "$input_file" "gs://yyyiot/cam/$dest"  # 15min clip removed
+# gcloud auth login --cred-file=/gcpstorage.json
+# gcloud config set disable_prompts true
+# gcloud config set project yyyaaannn
+# gcloud config set storage/parallel_composite_upload_enabled True
+# gcloud storage cp "/media/DayIn1/OneMin_$previous_day.mp4"  "gs://yyyiot/onemin/$dest"
+# gcloud storage cp "$input_file" "gs://yyyiot/cam/$dest" 
+python /app/helper_upload.py --source-file "/media/DayIn1/OneMin_$previous_day.mp4" --bucket-name yyyCam --dest-path "onemin/$(date -d "yesterday 13:00" '+%Y%m')"
 
 echo "=UploadDone= $(date +"%H:%M:%S")"
 
 
-# cleanup
+#################################################
+### Finial Cleanup and Fast Loading ###
+#################################################
 rm "/media/DayIn1/OneMinX_$previous_day.mp4"
 
-# fast sratch
 ffmpeg \
     -i "/media/DayIn1/OneMin_$previous_day.mp4" \
     -vf "scale=-2:1620" -r 30 -crf 35 \
     -loglevel error \
     "/media/DayIn1/A_$previous_day.mp4"
+
+
+#################################################
+### Backup Procedures ###
+#################################################
+echo "=MariaDBDump= $(date +"%H:%M:%S")"
+export MYSQL_PWD=$MARIADB_ROOT_PASSWORD
+mariadb-dump -h 192.168.4.81 -u root --all-databases | gzip > mariadb_dump.sql.gz
+python /app/helper_upload.py --source-file mariadb_dump.sql.gz --bucket-name yyyBackup --dest-path "Database10DaySnapshots" && rm mariadb_dump.sql.gz
+echo "=UploadDone= $(date +"%H:%M:%S")"
+
+echo "=ConfBackups= $(date +"%H:%M:%S")"
+zip -qr config_archive.zip /backup -x '*/backup/*' '*/backups/*'
+python /app/helper_upload.py --source-file config_archive.zip --bucket-name yyyBackup --dest-path "Configs10DaySnapshots" && rm config_archive.zip
+echo "=UploadDone= $(date +"%H:%M:%S")"
+
