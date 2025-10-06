@@ -23,6 +23,7 @@ COPY . /app
 COPY crontab /etc/cron.d/mounted-cron
 RUN chmod +x /app/job_dyndns.sh
 RUN chmod +x /app/job_ffmpeg.sh
+RUN chmod +x /app/job_backup.sh
 
 WORKDIR /app
 

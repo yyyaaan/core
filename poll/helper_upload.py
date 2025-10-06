@@ -6,7 +6,7 @@ python /app/helper_upload.py --source-file mariadb_dump.sql.gz --bucket-name yyy
 import os
 import sys
 import argparse
-from b2sdk.v2 import B2Api, InMemoryAccountInfo, TqdmProgressListener
+from b2sdk.v2 import B2Api, InMemoryAccountInfo, TqdmProgressListener, SimpleProgressListener
 
 B2_KEY_ID = os.environ.get('BACKBLAZE_KEY_ID')
 B2_APP_KEY = os.environ.get('BACKBLAZE_KEY')
@@ -42,7 +42,8 @@ def main():
 
     try:
         bucket = b2_api.get_bucket_by_name(bucket_name)
-        progress_listener = TqdmProgressListener(f'Uploading {file_name}')
+        # progress_listener = TqdmProgressListener(f'Uploading {file_name}')
+        progress_listener = SimpleProgressListener(f'Uploading {file_name}')
         uploaded_file = bucket.upload_local_file(
             local_file=source_file_path,
             file_name=b2_file_name,
