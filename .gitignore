@@ -15,6 +15,7 @@ password.txt
 credentials
 database.yaml
 secrets.yaml
+app.yaml
 
 # Logs
 logs

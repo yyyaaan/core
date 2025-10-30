@@ -1,5 +1,6 @@
 # %%
 from datetime import datetime, timedelta
+from http.cookies import SimpleCookie
 from json import loads, dumps
 from os import getenv
 from requests import get, post
@@ -7,61 +8,63 @@ from requests import get, post
 user, password = getenv("ELENIA_U"), getenv("ELENIA_P")
 fixed_unit_price = 8.96  # cent/kWh
 
-# %% AWS Cognito access token
+
+# %% Proxy and application tokens
 def login(user, password):
     login = post(
-        url="https://cognito-idp.eu-west-1.amazonaws.com/",
+        url="https://api.aina.elenia.fi/api/auth/login/credentials-authentication",
         headers={
-            "accept": "*/*",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "accept-language": "en-US,en;q=0.9,fi-FI;q=0.8,fi;q=0.7,zh-CN;q=0.6,zh;q=0.5",
-            "cache-control": "max-age=0",
-            "content-type": "application/x-amz-json-1.1",
-            "dnt": "1",
-            "origin": "https://idm.asiakas.elenia.fi",
-            "priority": "u=1, i",
-            "referer": "https://idm.asiakas.elenia.fi/",
-            "sec-ch-ua": "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?1",
-            "sec-ch-ua-platform": "\"Android\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "cross-site",
-            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36",
-            "x-amz-target": "AWSCognitoIdentityProviderService.InitiateAuth",
-            "x-amz-user-agent": "aws-amplify/5.0.4 js amplify-authenticator"
-        },
-        json={
-            "AuthFlow": "USER_PASSWORD_AUTH",
-            "ClientId": "k4s2pnm04536t1bm72bdatqct",
-            "AuthParameters": {
-                "USERNAME": user,
-                "PASSWORD": password
+                "accept": "application/json, text/plain, */*",
+                "content-type": "application/json",
+                "origin": "https://aina.elenia.fi",
+                "referer": "https://aina.elenia.fi/",
+                "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
             },
-            "ClientMetadata": {}
+        json={
+            "email": user,
+            "password": password
         }
     )
+    print("Login", login.status_code, f"u{len(user)}p{len(password)}", end=" ")
+    login.raise_for_status()
+    cookies_login = SimpleCookie()
+    cookies_login.load(login.headers["set-cookie"])
+    session_id = cookies_login.get("sessionId").value
+    csrf_token = cookies_login.get("csrf_token").value
+    access_token = cookies_login.get("access_token").value
+    id_token = cookies_login.get("id_token").value
+    refresh_token = cookies_login.get("refresh_token").value
+    print(f"{session_id} {csrf_token[:5]}*** OK")
 
-    print("AWS", login.status_code, f"u{len(user)}p{len(password)}", end=" ")
-    if login.status_code > 299:
-        raise Exception(f"Exception {login.status_code}")
-    token_aws = login.json()["AuthenticationResult"]["AccessToken"]
-    print(token_aws[:9], "***", sep="")
-    return token_aws
+    proxy = post(
+        url="https://api.aina.elenia.fi/api/auth/access/token/6255f4a4-9091-70be-d4d0-c3b13c8d1773",
+        headers={
+            "accept": "application/json, text/plain, */*",
+            "cookie": f"sessionId={session_id}; csrf_token={csrf_token}; access_token={access_token}; id_token={id_token}; refresh_token={refresh_token}",
+            "x-csrf-token": csrf_token,
+            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
+        }
+    )
+    print("Proxy", login.status_code, f"csrf{len(csrf_token)}", end=" ")
+    proxy.raise_for_status()
+    cookies_proxy = SimpleCookie()
+    cookies_proxy.load(proxy.headers["set-cookie"])
+    applications_token = cookies_proxy.get("applications_token").value
+    print(f"{applications_token[:5]}***")
+    return applications_token
 
 
 # %%
-def get_service_token(token_aws):
+def get_service_token(application_token):
     auth = get(
         url="https://public.sgp-prod.aws.elenia.fi/api/gen/customer_data_and_token",
-        headers={"Authorization": f"Bearer {token_aws}"}
+        headers={"Authorization": f"Bearer {application_token}"}
     )
 
-    print("Elenia Cust", auth.status_code, end=" ")
-    if auth.status_code > 299:
-        raise Exception(f"Exception {auth.status_code}")
+    print("SvcApp", auth.status_code, end=" ")
+    auth.raise_for_status()
     token = auth.json()["token"]
-    print(token[:9], "***", sep="")
+    print(f"{token[:5]}***")
     return token
 
 
@@ -78,9 +81,8 @@ def get_meter_reading(token):
         }
     )
 
-    print("Elenia Meter", meter_reading.status_code, end=" ")
-    if meter_reading.status_code > 299:
-        raise Exception(f"Exception {meter_reading.status_code}")
+    print("Meter", meter_reading.status_code, end=" ")
+    meter_reading.raise_for_status()
     meter = meter_reading.json()
     print(f"n={len(meter)}", meter[-1]['dt'][-11:],  meter[-1]['a'])
     return meter
@@ -145,8 +147,8 @@ def main():
         meter = get_meter_reading(token)
     except Exception:
         print()
-        token_aws = login(user, password)
-        token = get_service_token(token_aws)
+        token_app = login(user, password)
+        token = get_service_token(token_app)
         with open("/mnt/token_elenia", "w") as f:
             f.write(token)
         meter = get_meter_reading(token)
