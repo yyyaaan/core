@@ -4,18 +4,22 @@ from play.PlayPage import PlayPage
 
 async def play_hok_elanto():
     async with PlayPage(
-        "https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/",
+        "https://hok-elanto.fi/s-etukortti/ajankohtaista-asiakasomistajalle",
         timeout=12000,
     ) as play:  # noqa: E501
-        output = "failed to load content"
-        for x in await play.page.query_selector_all("div.so-widget-sow-editor-base"):
-            title_element = await x.query_selector("h3")
+        output = ">>>ready>>>"
+        for x in await play.page.query_selector_all("body > div:nth-child(2) > div > main > div:nth-child(3) > div > div > article"):
+            title_element = await x.query_selector("h2")
             title = await title_element.text_content()
             if title and "tuplana" in title.lower():
-                output_element = await x.query_selector("div#layout-column_column-3 > div:last-child")
-                output = await output_element.text_content()
+                elements = await x.query_selector_all("span")
+                for each_span in elements:
+                    span_text = await each_span.text_content()
+                    output =  output + "\n" + span_text
 
-        print("Before processing:", output.replace("\n", ""))
+
+        output = "\n".join([x for x in output.split("\n") if x.startswith("-")])
+        print("Before processing Hok-Elanto:", output)
         return output
 
 
@@ -75,12 +79,12 @@ async def bonus_doubled():
     else:
         text_hok_elanto = results[2]
 
-    shops = [x for x in text_hok_elanto.split("\n") if len(x) > 5]
+    shops = [x for x in text_hok_elanto.split("\n") if "Ei kampanjoita tällä hetkellä" not in x]
     shops += [text_vbo] if len(text_vbo) > 3 else []
     shops += [text_hameenmaa] if len(text_hameenmaa) > 3 else []
-    if len(shops) > 1:
+    if len(shops):
         output = {
             "flag": True,
-            "text": "- " + "<br/>- ".join(shops[1:]),
+            "text": "- " + "<br/>- ".join(shops),
         }
     return output
