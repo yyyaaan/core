@@ -5,7 +5,7 @@ RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
 # deps
 RUN apt update && apt install -y mosquitto-clients libsm6 libxext6
-RUN pip install fastapi opencv-python pandas plotly pytest-playwright pytz uvicorn
+RUN pip install fastapi jinja2 markdown opencv-python pandas plotly pytest-playwright pytz uvicorn
 RUN playwright install-deps
 
 # Set user and folder

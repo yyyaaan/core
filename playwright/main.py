@@ -3,13 +3,16 @@ docker build -t playwright:macos .
 docker run -it --rm -v ./:/home/appuser/src -p 7999:7999 --entrypoint bash playwright:macos
 uvicorn main:app --port 7999 --host 0.0.0.0 --reload
 docker build --platform=linux/amd64 -t playwright:release .
-docker tag playwright:release yyyaaan/playright:v0.4.7
+docker tag playwright:release yyyaaan/playright:v0.5.0
 """
-from datetime import datetime, UTC
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse
+from datetime import datetime
+from markdown import markdown
 from os import getenv
 from pytz import timezone
+
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from uvicorn import run
 
 from play.html import sports_and_bonus
@@ -41,6 +44,34 @@ async def water_jpg():
     return Response(
         content=WaterMeter().get_snapshot_content(),
         media_type="image/jpeg"
+    )
+
+
+@app.get("/markdown", response_class=HTMLResponse)
+async def html_render_markdown(
+    request: Request,
+    title: str = "Minimal Page",
+    file_name: str = "base.md",
+    style_name: str = "base.css"
+):
+    try:
+        with open(f"/mnt/{file_name}", "r", encoding="utf8") as f:
+            markdown_content = f.read()
+        with open(f"/mnt/{style_name}", "r", encoding="utf8") as f:
+            style_content = f.read()
+    except Exception as e:
+        markdown_content = f"# Error details: {e}"
+        style_content = ""
+
+    return Jinja2Templates(directory="templates/").TemplateResponse(
+        request=request,
+        name="minimal.html",
+        context={
+            "request": request,
+            "title": title,
+            "rendered_markdown": markdown(markdown_content),
+            "style_content": style_content,
+        }
     )
 
 

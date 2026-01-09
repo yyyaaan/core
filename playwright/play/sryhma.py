@@ -79,7 +79,7 @@ async def bonus_doubled():
     else:
         text_hok_elanto = results[2]
 
-    shops = [x for x in text_hok_elanto.split("\n") if "Ei kampanjoita tällä hetkellä" not in x]
+    shops = [x for x in text_hok_elanto.split("\n") if "Ei kampanjoita tällä hetkellä" not in x and len(x) > 5]
     shops += [text_vbo] if len(text_vbo) > 3 else []
     shops += [text_hameenmaa] if len(text_hameenmaa) > 3 else []
     if len(shops):
