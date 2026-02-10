@@ -2,6 +2,7 @@
 *.pem
 *.db*
 data
+zzz
 config/ha/www
 config/ha/custom_components
 config/ha/backups
