@@ -6,6 +6,7 @@ docker build --platform=linux/amd64 -t playwright:release .
 docker tag playwright:release yyyaaan/playright:v0.5.0
 """
 from datetime import datetime
+from glob import glob
 from markdown import markdown
 from os import getenv
 from pytz import timezone
@@ -54,13 +55,15 @@ async def html_render_markdown(
     file_name: str = "base.md",
     style_name: str = "base.css"
 ):
+    folder = "/mnt/md"
     try:
-        with open(f"/mnt/{file_name}", "r", encoding="utf8") as f:
+        with open(f"{folder}/{file_name}", "r", encoding="utf8") as f:
             markdown_content = f.read()
-        with open(f"/mnt/{style_name}", "r", encoding="utf8") as f:
+        with open(f"{folder}/{style_name}", "r", encoding="utf8") as f:
             style_content = f.read()
     except Exception as e:
-        markdown_content = f"# Error details: {e}"
+        markdown_content = f"## Error details: {e}"
+        markdown_content += "\n\n" + ", ".join(["`"+x.replace("{folder}/base_", "").replace(".md", "")+"`" for x in glob("{folder}/*.md")]) + "\n"
         style_content = ""
 
     return Jinja2Templates(directory="templates/").TemplateResponse(
