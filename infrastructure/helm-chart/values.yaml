@@ -3,6 +3,28 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+frigate:
+  namespace: home-internal
+  image:
+    repository: ghcr.io/blakeblackshear/frigate
+    tag: "0.17.0"
+    pullPolicy: IfNotPresent
+  envFromSecret: frigate-credentials
+  hostPathForData: /Users/yyy/Lab/home/data/temporary/frigate
+  memDiskSize: 900Mi
+  ingress:
+    host: frigate.omop.fi
+
+mqtt:
+  namespace: home-internal
+  image:
+    repository: eclipse-mosquitto
+    tag: "2.1-alpine"
+    pullPolicy: IfNotPresent
+  hostPathForConfig: /Users/yyy/Lab/home/config/mqtt/config
+  ingress:
+    host: mqtt.omop.fi
+
 play:
   image:
     repository: play
