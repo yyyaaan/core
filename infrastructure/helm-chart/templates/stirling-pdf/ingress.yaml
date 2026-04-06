@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pdf-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - {{ .Values.stirlingPdf.ingress.host }}
+    secretName: pdf-tls-cert
+  rules:
+  - host: {{ .Values.stirlingPdf.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pdf-svc
+            port:
+              number: 80

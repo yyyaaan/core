@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdf
+  labels:
+    app.kubernetes.io/name: pdf
+spec:
+  replicas: {{ .Values.stirlingPdf.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pdf
+  template:
+    metadata:
+      labels:
+        app: pdf
+    spec:
+      containers:
+      - name: pdf
+        image: {{ .Values.stirlingPdf.image.repository }}:{{ .Values.stirlingPdf.image.tag }}
+        imagePullPolicy: {{ .Values.stirlingPdf.image.pullPolicy }}
+        envFrom:

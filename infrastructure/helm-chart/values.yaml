@@ -1,0 +1,26 @@
+domain: omop.fi
+
+certManager:
+  issuerName: letsencrypt-prod
+
+play:
+  image:
+    repository: play
+    tag: local
+    pullPolicy: Never
+  evnFromSecret: frigate-credentials
+  hostPathForData: /Users/yyy/Lab/home/data/app
+  memDiskSize: 100Mi
+  service:
+    targetPort: 7999
+  ingress:
+    host: play.omop.fi
+
+stirlingPdf:
+  replicas: 1
+  image:
+    repository: stirlingtools/stirling-pdf
+    tag: latest
+    pullPolicy: IfNotPresent
+  ingress:
+    host: pdf.omop.fi
