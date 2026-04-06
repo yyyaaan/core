@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: play-svc
+  namespace: {{ .Values.play.namespace }}
   labels:
     app: play
 spec:

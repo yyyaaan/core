@@ -4,7 +4,7 @@ metadata:
   name: frigate-ingress
   namespace: {{ .Values.frigate.namespace }}
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
 spec:
   ingressClassName: traefik
   tls:
@@ -21,4 +21,4 @@ spec:
           service:
             name: frigate-service
             port:
-              number: 8971 # Routes main traffic to the Frigate Web UI
+              number: 8971

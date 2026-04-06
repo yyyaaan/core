@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: play
+  namespace: {{ .Values.play.namespace }}
   labels:
     app.kubernetes.io/name: play
 spec:
@@ -22,7 +23,7 @@ spec:
         imagePullPolicy: {{ .Values.play.image.pullPolicy }}
         envFrom:
         - secretRef:
-            name: {{ .Values.play.evnFromSecret }}
+            name: {{ .Values.play.envFromSecret }}
         volumeMounts:
         - name: data-volume
           mountPath: /mnt

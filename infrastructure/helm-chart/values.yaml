@@ -27,11 +27,12 @@ mqtt:
   hostPathData: /Users/yyy/Lab/home/config/mqtt/config # updated from previous, one level down
 
 play:
+  namespace: web
   image:
     repository: play
     tag: local
     pullPolicy: Never
-  evnFromSecret: frigate-credentials
+  envFromSecret: web-credentials
   hostPathForData: /Users/yyy/Lab/home/data/app
   memDiskSize: 100Mi
   service:
@@ -40,6 +41,7 @@ play:
     host: play.omop.fi
 
 stirlingPdf:
+  namespace: web
   replicas: 1
   image:
     repository: stirlingtools/stirling-pdf

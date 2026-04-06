@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: play-ingress
+  namespace: {{ .Values.play.namespace }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
 spec:

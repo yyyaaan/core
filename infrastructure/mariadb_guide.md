@@ -1,18 +1,10 @@
-### Step 1: Stop the Bleeding (Docker)
-You must stop the Docker container so it doesn't write new data while you are copying it, otherwise your database will corrupt.
 
 ```bash
 docker stop mariadb-container-name
-```
 
-### Step 2: Extract the Data from Docker
-We need to get the data out of the invisible Docker volume and onto your Mac's normal hard drive as a single file. We will spin up a temporary, throwaway Docker container just to zip the files.
-
-Run this in your terminal (replace `your_docker_volume_name` with the actual volume name):
-```bash
+# extract: mounts your Docker volume, mounts your current folder, zips the data up, and drops `mariadb-backup.tar` right on your machine
 docker run --rm -v your_docker_volume_name:/var/lib/mysql -v $(pwd):/backup ubuntu tar cvf /backup/mariadb-backup.tar -C /var/lib/mysql .
 ```
-*(This command mounts your Docker volume, mounts your current Mac folder, zips the data up, and drops `mariadb-backup.tar` right onto your Mac).*
 
 ### Step 3: Create the Kubernetes PVC
 Now, switch your brain to Kubernetes. Create your `PersistentVolumeClaim` so Kubernetes knows you want disk space.

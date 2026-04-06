@@ -1,4 +1,4 @@
-# Orbstack only, needs traefik | https://docs.orbstack.dev/kubernetes/
+# OrbStack only, needs traefik | https://docs.orbstack.dev/kubernetes/
 # helm repo add traefik https://traefik.github.io/charts
 # helm repo update
 # helm install traefik traefik/traefik
@@ -14,8 +14,9 @@ kubectl apply -f infrastructure/bootstrap/k8s-cloudflared-tunnel-deployment.yaml
 
 # create namespace and secrets
 kubectl create namespace home-internal
-kubectl create secret generic frigate-credentials --from-env-file=./credentials/frigate.env
-kubectl create secret generic frigate-credentials --namespace home-internal --from-env-file=./credentials/frigate.env
+kubectl create namespace web
+kubectl create secret generic web-credentials -n web --from-env-file=./credentials/frigate.env
+kubectl create secret generic frigate-credentials -n home-internal --from-env-file=./credentials/frigate.env
 
 ###
 ###
@@ -24,6 +25,7 @@ docker build -t play:local ./services/playwright # docker run --rm -p 7999:7999 
 
 # scaling down pdf
 kubectl scale deployment pdf --replicas=0
+kubectl scale deployment frigate -n home-internal --replicas=0
 
 # all the rest managed with helm
-helm upgrade --install v0 ./infrastructure/helm-chart
+helm upgrade --install omop-fi ./infrastructure/helm-chart
