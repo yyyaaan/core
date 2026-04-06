@@ -29,3 +29,6 @@ kubectl scale deployment frigate -n home-internal --replicas=0
 
 # all the rest managed with helm
 helm upgrade --install omop-fi ./infrastructure/helm-chart
+
+
+## rule to allow MQTT access if necessary
