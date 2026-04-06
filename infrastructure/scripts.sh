@@ -15,6 +15,7 @@ kubectl apply -f infrastructure/bootstrap/k8s-cloudflared-tunnel-deployment.yaml
 # create namespace and secrets
 kubectl create namespace home-internal
 kubectl create secret generic frigate-credentials --from-env-file=./credentials/frigate.env
+kubectl create secret generic frigate-credentials --namespace home-internal --from-env-file=./credentials/frigate.env
 
 ###
 ###

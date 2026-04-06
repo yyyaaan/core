@@ -10,8 +10,11 @@ frigate:
     tag: "0.17.0"
     pullPolicy: IfNotPresent
   envFromSecret: frigate-credentials
-  hostPathForData: /Users/yyy/Lab/home/data/temporary/frigate
-  memDiskSize: 900Mi
+  privileged: true
+  shmSize: 384Mi
+  cacheSize: 900Mi
+  hostPathConfig: /Users/yyy/Lab/home/config/frigate
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/frigate
   ingress:
     host: frigate.omop.fi
 
@@ -21,9 +24,7 @@ mqtt:
     repository: eclipse-mosquitto
     tag: "2.1-alpine"
     pullPolicy: IfNotPresent
-  hostPathForConfig: /Users/yyy/Lab/home/config/mqtt/config
-  ingress:
-    host: mqtt.omop.fi
+  hostPathData: /Users/yyy/Lab/home/config/mqtt/config # updated from previous, one level down
 
 play:
   image:
