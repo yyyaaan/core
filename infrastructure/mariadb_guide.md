@@ -6,9 +6,6 @@ docker stop mariadb-container-name
 docker run --rm -v your_docker_volume_name:/var/lib/mysql -v $(pwd):/backup ubuntu tar cvf /backup/mariadb-backup.tar -C /var/lib/mysql .
 ```
 
-### Step 3: Create the Kubernetes PVC
-Now, switch your brain to Kubernetes. Create your `PersistentVolumeClaim` so Kubernetes knows you want disk space.
-
 **`mariadb-pvc.yaml`**
 ```yaml
 apiVersion: v1
@@ -24,9 +21,6 @@ spec:
       storage: 5Gi
 ```
 Apply it: `kubectl apply -f mariadb-pvc.yaml`
-
-### Step 4: The "Migration Pod" (The Magic Trick)
-Here is the catch: Kubernetes doesn't actually create the underlying folder on the hard drive until a Pod *asks* for it. So, we create a temporary "sleepy" pod that mounts the empty PVC.
 
 **`migration-pod.yaml`**
 ```yaml
@@ -51,8 +45,7 @@ spec:
 Apply it: `kubectl apply -f migration-pod.yaml`
 Wait for it to be ready: `kubectl get pods`
 
-### Step 5: Transfer and Extract (`kubectl cp`)
-Now we inject your data directly into the Kubernetes PVC using the Kubernetes copy command.
+Migration Maria DB data starts
 
 1. **Copy the tar file into the pod:**
    ```bash
@@ -74,8 +67,7 @@ Now we inject your data directly into the Kubernetes PVC using the Kubernetes co
    exit
    ```
 
-### Step 6: Clean Up and Deploy!
-Your PVC is now fully loaded with your old Docker data and has the correct permissions!
+Clean up and ready for deployment
 
 1. **Delete the migration pod:**
    ```bash

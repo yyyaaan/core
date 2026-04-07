@@ -20,7 +20,6 @@ auth:
     - "^/public/.*"
     - "^/docs$"
     - "^/openapi.json$"
-    - "^/spot$"
     - "^/favicon.ico$"
     - "^/api/health$"
     - "^/robots.txt$"

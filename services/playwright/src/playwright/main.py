@@ -35,12 +35,12 @@ async def logs(filename: str = ""):
     return HTMLResponse(content=ViewLogs.view_logs(filename))
 
 
-@app.get("/spot")
+@app.get("/public/spot")
 async def spot():
     return HTMLResponse(content=Electricity().get_current_plot())
 
 
-@app.get("/water.jpg", responses={200: {"content": {"image/jpeg": {}}}})
+@app.get("/public/water.jpg", responses={200: {"content": {"image/jpeg": {}}}})
 async def water_jpg():
     return Response(
         content=WaterMeter().get_snapshot_content(),
