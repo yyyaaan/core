@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oauth2-proxy-ingress
+  namespace: {{ .Values.auth.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - {{ .Values.auth.authDomain }}
+    secretName: auth-tls-cert
+  rules:
+  - host: {{ .Values.auth.authDomain }}
+    http:
+      paths:
+      - path: /oauth2
+        pathType: Prefix
+        backend:
+          service:
+            name: oauth2-proxy
+            port:
+              number: 4180

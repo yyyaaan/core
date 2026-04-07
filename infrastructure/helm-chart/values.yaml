@@ -3,6 +3,20 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+auth:
+  namespace: auth
+  replicas: 1
+  enableMultiAuth: false
+  image:
+    repository: quay.io/oauth2-proxy/oauth2-proxy
+    tag: "v7.15.1-alpine"
+    pullPolicy: IfNotPresent
+  cookieDomain: .omop.fi
+  cookieSecure: true
+  emailDomain: "*"
+  authDomain: auth.omop.fi
+  envFromSecret: oauth2-proxy-credentials
+
 frigate:
   namespace: home-internal
   image:

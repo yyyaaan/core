@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.stirlingPdf.namespace }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+    traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:

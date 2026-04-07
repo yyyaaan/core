@@ -1,0 +1,29 @@
+{{- if .Values.auth.enableMultiAuth }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth2-proxy-config
+  namespace: {{ .Values.auth.namespace }}
+data:
+  alpha-config.yaml: |
+    server:
+      BindAddress: "0.0.0.0:4180"
+    providers:
+      - id: "google"
+        provider: "google"
+        clientID: "${GOOGLE_CLIENT_ID}"
+        clientSecret: "${GOOGLE_CLIENT_SECRET}"
+      - id: "github"
+        provider: "github"
+        clientID: "${GITHUB_CLIENT_ID}"
+        clientSecret: "${GITHUB_CLIENT_SECRET}"
+      - id: "microsoft"
+        provider: "azure" # Entra ID
+        clientID: "${MICROSOFT_CLIENT_ID}"
+        clientSecret: "${MICROSOFT_CLIENT_SECRET}"
+    upstreamConfig:
+      upstreams:
+        - id: "static"
+          path: "/"
+          uri: "file:///dev/null"
+{{- end }}
