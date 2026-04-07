@@ -21,4 +21,7 @@ spec:
       - name: pdf
         image: {{ .Values.stirlingPdf.image.repository }}:{{ .Values.stirlingPdf.image.tag }}
         imagePullPolicy: {{ .Values.stirlingPdf.image.pullPolicy }}
-        envFrom:
+        env:
+          - name: SECURITY_ENABLELOGIN
+            value: "false"    # middleware handles authentication
+        

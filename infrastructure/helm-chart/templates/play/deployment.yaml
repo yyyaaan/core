@@ -22,8 +22,10 @@ spec:
         image: {{ .Values.play.image.repository }}:{{ .Values.play.image.tag }}
         imagePullPolicy: {{ .Values.play.image.pullPolicy }}
         envFrom:
-        - secretRef:
-            name: {{ .Values.play.envFromSecret }}
+        {{- range .Values.play.envFromSecretList }}
+          - secretRef:
+              name: {{ . | quote }}
+        {{- end }}
         volumeMounts:
         - name: data-volume
           mountPath: /mnt

@@ -32,7 +32,9 @@ play:
     repository: play
     tag: local
     pullPolicy: Never
-  envFromSecret: web-credentials
+  envFromSecretList:
+    - email-credentials
+    - tz-config
   hostPathForData: /Users/yyy/Lab/home/data/app
   memDiskSize: 100Mi
   service:
