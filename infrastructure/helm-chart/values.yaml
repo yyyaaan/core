@@ -4,7 +4,7 @@ certManager:
   issuerName: letsencrypt-prod
 
 auth:
-  namespace: auth
+  namespace: auth  # fixed, not dynamic in templates
   replicas: 1
   enableMultiAuth: false
   image:

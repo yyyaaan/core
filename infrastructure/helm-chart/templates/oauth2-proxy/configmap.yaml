@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: oauth2-proxy-config
-  namespace: {{ .Values.auth.namespace }}
+  namespace: auth
 data:
   alpha-config.yaml: |
     server:

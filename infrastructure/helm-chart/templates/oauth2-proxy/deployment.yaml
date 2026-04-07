@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: oauth2-proxy
-  namespace: {{ .Values.auth.namespace }}
+  namespace: auth
 spec:
   replicas: 1
   selector:
@@ -21,7 +21,6 @@ spec:
           - "--upstream=file:///dev/null"
           - "--http-address=0.0.0.0:4180"
           - "--reverse-proxy=true"
-          - "--proxy-prefix=/oauth2"
           - "--redirect-url=https://{{ .Values.auth.authDomain }}/oauth2/callback" # Explicitly define your "Main" callback.
           # - "--alpha-config=/etc/oauth2-proxy/alpha-config.yaml" --- no multi-auth for now, above for single auth ---
           - "--whitelist-domain={{ .Values.auth.cookieDomain }}"
@@ -30,6 +29,7 @@ spec:
           - "--email-domain={{ .Values.auth.emailDomain }}"
           - "--skip-auth-route=^/public/.*"
           - "--skip-auth-route=^/docs/.*$"
+          - "--skip-auth-route=^/spot$"
           - "--skip-auth-route=^/favicon.ico$"
           - "--skip-auth-route=^/api/health$"
           - "--skip-auth-route=^/robots.txt$"
