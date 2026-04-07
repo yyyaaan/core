@@ -3,6 +3,22 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+mariaDB:
+  migrationPodEnabled: false
+  migrationCompleted: true
+  namespace: home-internal
+  persistentVolume:
+    storageClassName: "local-path"  # or "" if problem
+    name: mariadb-retained-pv
+    hostPath: /Users/yyy/Lab/home/data/temporary/mariadb
+    storage: 10Gi
+  envFromSecret: mariadb-credentials
+  image:
+    repository: mariadb
+    tag: "12.0.2"
+    pullPolicy: IfNotPresent
+ 
+
 auth:
   replicas: 1
   enableMultiAuth: false
@@ -26,6 +42,7 @@ auth:
 
 frigate:
   namespace: home-internal
+  replicas: 0
   image:
     repository: ghcr.io/blakeblackshear/frigate
     tag: "0.17.0"
@@ -65,7 +82,7 @@ play:
 
 stirlingPdf:
   namespace: web
-  replicas: 1
+  replicas: 0
   image:
     repository: stirlingtools/stirling-pdf
     tag: latest

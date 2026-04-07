@@ -20,15 +20,15 @@ kubectl create secret generic oauth2-proxy-credentials -n auth --from-env-file=.
 kubectl create secret generic email-credentials -n web --from-env-file=./credentials/active/email.env
 kubectl create secret generic tz-config -n web --from-env-file=./credentials/active/tz.env
 kubectl create secret generic frigate-credentials -n home-internal --from-env-file=./credentials/active/frigate.env
+kubectl create secret generic mariadb-credentials -n home-internal --from-env-file=./credentials/active/db.env
 
 
-###
 ###
 ### build images | 
 docker build -t play:local ./services/playwright # docker run --rm -p 7999:7999 play:local 
 
 # scaling down pdf
-kubectl scale deployment pdf --replicas=0
+kubectl scale deployment pdf -n web --replicas=0
 kubectl scale deployment frigate -n home-internal --replicas=0
 
 # all the rest managed with helm

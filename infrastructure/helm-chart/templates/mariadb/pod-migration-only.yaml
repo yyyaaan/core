@@ -1,0 +1,20 @@
+# only for migration
+{{- if .Values.mariaDB.migrationPodEnabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: migration-pod
+  namespace: {{ .Values.mariaDB.namespace }}
+spec:
+  containers:
+  - name: migration-container
+    image: ubuntu
+    command: ["sleep", "infinity"]
+    volumeMounts:
+    - name: target-volume
+      mountPath: /data
+  volumes:
+  - name: target-volume
+    persistentVolumeClaim:
+      claimName: mariadb-data
+{{- end }}

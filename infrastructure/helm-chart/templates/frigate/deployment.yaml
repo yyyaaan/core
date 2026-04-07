@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: frigate
 spec:
-  replicas: 1
+  replicas: {{ .Values.frigate.replicas }}
   strategy:
     type: Recreate # Prevents volume locking issues with HostPaths
   selector:

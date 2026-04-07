@@ -1,0 +1,30 @@
+# manual PV and PVC for MariaDB, using specified path (but not bind mount)
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.mariaDB.persistentVolume.name }}
+  # PV is cluster-wide resource, so no namespace
+spec:
+  capacity:
+    storage: {{ .Values.mariaDB.persistentVolume.storage }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.mariaDB.persistentVolume.storageClassName }}
+  hostPath:
+    path: {{ .Values.mariaDB.persistentVolume.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-data
+  namespace: {{ .Values.mariaDB.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mariaDB.persistentVolume.storage }}
+  storageClassName: {{ .Values.mariaDB.persistentVolume.storageClassName }}
+  volumeName: {{ .Values.mariaDB.persistentVolume.name }}
