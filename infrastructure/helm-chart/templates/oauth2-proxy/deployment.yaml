@@ -27,12 +27,9 @@ spec:
           - "--cookie-domain={{ .Values.auth.cookieDomain }}"
           - "--cookie-secure={{ .Values.auth.cookieSecure }}"
           - "--email-domain={{ .Values.auth.emailDomain }}"
-          - "--skip-auth-route=^/public/.*"
-          - "--skip-auth-route=^/docs/.*$"
-          - "--skip-auth-route=^/spot$"
-          - "--skip-auth-route=^/favicon.ico$"
-          - "--skip-auth-route=^/api/health$"
-          - "--skip-auth-route=^/robots.txt$"
+          {{- range .Values.auth.skipAuthRoutes }}
+          - "--skip-auth-route={{ . }}"
+          {{- end }}
         envFrom:
         - secretRef:
             name: {{ .Values.auth.envFromSecret }}

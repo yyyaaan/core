@@ -4,7 +4,6 @@ certManager:
   issuerName: letsencrypt-prod
 
 auth:
-  namespace: auth  # fixed, not dynamic in templates
   replicas: 1
   enableMultiAuth: false
   image:
@@ -16,6 +15,15 @@ auth:
   emailDomain: "*"
   authDomain: auth.omop.fi
   envFromSecret: oauth2-proxy-credentials
+  skipAuthRoutes:
+    - "^/$"
+    - "^/public/.*"
+    - "^/docs$"
+    - "^/openapi.json$"
+    - "^/spot$"
+    - "^/favicon.ico$"
+    - "^/api/health$"
+    - "^/robots.txt$"
 
 frigate:
   namespace: home-internal
