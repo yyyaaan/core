@@ -15,7 +15,8 @@ RUN mkdir src
 
 RUN playwright install chromium
 
-# COPY ./ /home/appuser/src
+
+COPY ./src/playwright /home/appuser/src
 EXPOSE 7999
 WORKDIR /home/appuser/src
 ENTRYPOINT [ "python", "main.py" ]

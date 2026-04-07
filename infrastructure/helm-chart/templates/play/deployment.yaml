@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: play
+  namespace: {{ .Values.play.namespace }}
+  labels:
+    app.kubernetes.io/name: play
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: play
+  template:
+    metadata:
+      labels:
+        app: play
+    spec:
+      containers:
+      - name: play
+        image: {{ .Values.play.image.repository }}:{{ .Values.play.image.tag }}
+        imagePullPolicy: {{ .Values.play.image.pullPolicy }}
+        envFrom:
+        {{- range .Values.play.envFromSecretList }}
+          - secretRef:
+              name: {{ . | quote }}
+        {{- end }}
+        volumeMounts:
+        - name: data-volume
+          mountPath: /mnt
+        - name: mem-disk-volume
+          mountPath: /tmp/cache
+      volumes:
+      - name: data-volume
+        hostPath:
+          path: {{ .Values.play.hostPathForData }}
+          type: DirectoryOrCreate
+      - name: mem-disk-volume
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.play.memDiskSize }}

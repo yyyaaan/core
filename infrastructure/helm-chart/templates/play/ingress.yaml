@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: play-ingress
+  namespace: {{ .Values.play.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+    traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - {{ .Values.play.ingress.host }}
+    secretName: play-tls-cert
+  rules:
+  - host: {{ .Values.play.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: play-svc
+            port:
+              number: 80

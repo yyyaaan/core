@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  namespace: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      containers:
+      - name: oauth2-proxy
+        image: {{ .Values.auth.image.repository }}:{{ .Values.auth.image.tag }}
+        args:
+          - "--provider=google"
+          - "--upstream=file:///dev/null"
+          - "--http-address=0.0.0.0:4180"
+          - "--reverse-proxy=true"
+          - "--redirect-url=https://{{ .Values.auth.authDomain }}/oauth2/callback" # Explicitly define your "Main" callback.
+          # - "--alpha-config=/etc/oauth2-proxy/alpha-config.yaml" --- no multi-auth for now, above for single auth ---
+          - "--whitelist-domain={{ .Values.auth.cookieDomain }}"
+          - "--cookie-domain={{ .Values.auth.cookieDomain }}"
+          - "--cookie-secure={{ .Values.auth.cookieSecure }}"
+          - "--email-domain={{ .Values.auth.emailDomain }}"
+          {{- range .Values.auth.skipAuthRoutes }}
+          - "--skip-auth-route={{ . }}"
+          {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ .Values.auth.envFromSecret }}
+        ports:
+        - containerPort: 4180
+        {{- if .Values.auth.enableMultiAuth }}
+        volumeMounts:
+        - name: config-path
+          mountPath: /etc/oauth2-proxy
+        {{- end }}
+      {{- if .Values.auth.enableMultiAuth }}
+      volumes:
+      - name: config-path
+        configMap:
+          name: oauth2-proxy-config
+      {{- end }}

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frigate-ingress
+  namespace: {{ .Values.frigate.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - frigate.{{ .Values.domain }}
+    secretName: frigate-tls-cert
+  rules:
+  - host: frigate.{{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frigate-service
+            port:
+              number: 8971

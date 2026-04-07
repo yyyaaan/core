@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: play-svc
+  namespace: {{ .Values.play.namespace }}
+  labels:
+    app: play
+spec:
+  type: ClusterIP
+  selector:
+    app: play
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ .Values.play.service.targetPort }}

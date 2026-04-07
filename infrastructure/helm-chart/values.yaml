@@ -1,0 +1,75 @@
+domain: omop.fi
+
+certManager:
+  issuerName: letsencrypt-prod
+
+auth:
+  replicas: 1
+  enableMultiAuth: false
+  image:
+    repository: quay.io/oauth2-proxy/oauth2-proxy
+    tag: "v7.15.1-alpine"
+    pullPolicy: IfNotPresent
+  cookieDomain: .omop.fi
+  cookieSecure: true
+  emailDomain: "*"
+  authDomain: auth.omop.fi
+  envFromSecret: oauth2-proxy-credentials
+  skipAuthRoutes:
+    - "^/$"
+    - "^/public/.*"
+    - "^/docs$"
+    - "^/openapi.json$"
+    - "^/spot$"
+    - "^/favicon.ico$"
+    - "^/api/health$"
+    - "^/robots.txt$"
+
+frigate:
+  namespace: home-internal
+  image:
+    repository: ghcr.io/blakeblackshear/frigate
+    tag: "0.17.0"
+    pullPolicy: IfNotPresent
+  envFromSecret: frigate-credentials
+  privileged: true
+  shmSize: 384Mi
+  cacheSize: 900Mi
+  hostPathConfig: /Users/yyy/Lab/home/config/frigate
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/frigate
+  ingress:
+    host: frigate.omop.fi
+
+mqtt:
+  namespace: home-internal
+  image:
+    repository: eclipse-mosquitto
+    tag: "2.1-alpine"
+    pullPolicy: IfNotPresent
+  hostPathData: /Users/yyy/Lab/home/config/mqtt/config # updated from previous, one level down
+
+play:
+  namespace: web
+  image:
+    repository: play
+    tag: local
+    pullPolicy: Never
+  envFromSecretList:
+    - email-credentials
+    - tz-config
+  hostPathForData: /Users/yyy/Lab/home/data/app
+  memDiskSize: 100Mi
+  service:
+    targetPort: 7999
+  ingress:
+    host: play.omop.fi
+
+stirlingPdf:
+  namespace: web
+  replicas: 1
+  image:
+    repository: stirlingtools/stirling-pdf
+    tag: latest
+    pullPolicy: IfNotPresent
+  ingress:
+    host: pdf.omop.fi

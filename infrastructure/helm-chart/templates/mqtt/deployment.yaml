@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt
+  namespace: {{ .Values.mqtt.namespace }}
+  labels:
+    app.kubernetes.io/name: mqtt
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mqtt
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mqtt
+    spec:
+      containers:
+      - name: mqtt
+        image: "{{ .Values.mqtt.image.repository }}:{{ .Values.mqtt.image.tag }}"
+        imagePullPolicy: {{ .Values.mqtt.image.pullPolicy }}
+        ports:
+        - containerPort: 1883
+          name: mqtt-tcp
+        - containerPort: 9001
+          name: mqtt-ws
+        volumeMounts:
+        - name: mqtt-data
+          mountPath: /mosquitto/config
+      volumes:
+      - name: mqtt-data
+        hostPath:
+          path: {{ .Values.mqtt.hostPathData }}
+          type: DirectoryOrCreate
