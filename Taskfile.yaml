@@ -36,10 +36,11 @@ tasks:
   headlamp:
     desc: "Install Headlamp Dashboard"
     cmds:
+      - kubectl create secret generic oidc-secret -n kube-system --from-env-file=./credentials/active/oidc.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl apply -f infrastructure/bootstrap/k8s-headlamp-https-middleware.yaml
       - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
       - helm repo update
       - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f infrastructure/bootstrap/k8s-headlamp-values.yaml
-      - echo "warning, oauth2-proxy may not be existing in bootstrap phase, double check after complete installation"
 
   # --- NAMESPACES & SECRETS ---
 

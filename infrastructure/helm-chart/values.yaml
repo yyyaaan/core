@@ -4,6 +4,7 @@ certManager:
   issuerName: letsencrypt-prod
 
 ha: # mariaDB migration flag controls resource provisioning
+  replicas: 0
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
