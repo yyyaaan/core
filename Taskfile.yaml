@@ -4,7 +4,7 @@ version: '3'
 ## task scale-down
 
 vars:
-  CERT_MANAGER_VERSION: v1.14.0 # Updated to a stable version
+  CERT_MANAGER_VERSION: v1.14.0
   DOMAIN: omop.fi
 
 tasks:
@@ -33,6 +33,14 @@ tasks:
       - kubectl create namespace cloudflared --dry-run=client -o yaml | kubectl apply -f -
       - kubectl apply -f infrastructure/bootstrap/k8s-cloudflared-tunnel-deployment.yaml
 
+  headlamp:
+    desc: "Install Headlamp Dashboard"
+    cmds:
+      - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
+      - helm repo update
+      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f infrastructure/bootstrap/k8s-headlamp-values.yaml
+      - echo "warning, oauth2-proxy may not be existing in bootstrap phase, double check after complete installation"
+
   # --- NAMESPACES & SECRETS ---
 
   setup-namespaces:
@@ -52,6 +60,7 @@ tasks:
       - kubectl create secret generic tz-config -n home-internal --from-env-file=./credentials/active/tz.env --dry-run=client -o yaml | kubectl apply -f -
       - kubectl create secret generic frigate-credentials -n home-internal --from-env-file=./credentials/active/frigate.env --dry-run=client -o yaml | kubectl apply -f -
       - kubectl create secret generic mariadb-credentials -n home-internal --from-env-file=./credentials/active/db.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic poller-credentials -n home-internal --from-env-file=./credentials/active/poll.env --dry-run=client -o yaml | kubectl apply -f -
 
   # --- DEVELOPMENT & SCALING ---
 
@@ -72,6 +81,12 @@ tasks:
       - kubectl scale deployment pdf -n web --replicas=0
       - kubectl scale deployment frigate -n home-internal --replicas=0
       - kubectl scale deployment ha -n home-internal --replicas=0
+
+  # --- MONITORING ---
+  job-logs:
+    desc: "Stream logs of all jobs in web namespace"
+    cmds:
+      - kubectl logs -l app.kubernetes.io/component=elenia
 
   # --- DEPLOYMENT ---
 

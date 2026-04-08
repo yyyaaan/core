@@ -64,7 +64,7 @@ frigate:
   privileged: true
   shmSize: 384Mi
   cacheSize: 900Mi
-  hostPathConfig: /Users/yyy/Lab/home/config/frigate
+  hostPathConfig: /Users/yyy/Lab/home/config/ha
   hostPathMedia: /Users/yyy/Lab/home/data/temporary/frigate
   ingress:
     host: frigate.omop.fi
@@ -102,3 +102,41 @@ stirlingPdf:
     pullPolicy: IfNotPresent
   ingress:
     host: pdf.omop.fi
+
+poller:
+  namespace: home-internal
+  image:
+    repository: poller
+    tag: "local"
+    pullPolicy: Never
+  timezone: "Europe/Helsinki"
+  envFromSecretList:
+    - mariadb-credentials
+    - poller-credentials
+  hostPathConfig: /Users/yyy/Lab/home/config/poller
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
+  hostPathForData: /Users/yyy/Lab/home/data/app
+  jobs:
+    - name: elenia
+      suspend: true
+      schedule: "2-59/15 * * * *"
+      command: 
+        - "/usr/local/bin/python"
+        - "/app/job_elenia.py"
+    - name: timelapse
+      suspend: true
+      schedule: "3 1 * * *"
+      command: 
+        - "/usr/local/bin/python"
+        - "/app/job_timelapse.py"
+    - name: ffmpeg
+      suspend: true
+      schedule: "55 5 * * *"
+      command: 
+        - "/bin/sh"
+        - "/app/job_ffmpeg.sh"
+    # - name: backup
+    #   schedule: "55 6 * * *"
+    #   command: 
+    #     - "/bin/sh"
+    #     - "/app/job_backup.sh"

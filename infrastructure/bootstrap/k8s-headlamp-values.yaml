@@ -1,0 +1,15 @@
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
+  ingressClassName: traefik
+  hosts:
+    - host: headlamp.omop.fi
+      paths:
+        - path: /
+          type: ImplementationSpecific
+  tls:
+    - secretName: headlamp-tls-cert
+      hosts:
+        - headlamp.omop.fi
