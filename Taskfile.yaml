@@ -56,9 +56,15 @@ tasks:
   # --- DEVELOPMENT & SCALING ---
 
   build-play:
-    desc: "Build Playwright local image"
+    desc: "Build play local image"
     cmds:
       - docker build -t play:local ./services/playwright
+
+  build-poller:
+    desc: "Build poller local image"
+    cmds:
+      - docker build -t poller:local ./services/poll
+      # - docker run -it --name poller poller:local sh -c "tail -f /dev/null"
 
   scale-down:
     desc: "Pause heavy workloads"
