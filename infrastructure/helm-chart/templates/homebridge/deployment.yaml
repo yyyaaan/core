@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homebridge
+  namespace: {{ .Values.homebridge.namespace}}
+  labels:
+    app.kubernetes.io/name: homebridge
+spec:
+  replicas: {{ .Values.homebridge.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homebridge
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homebridge
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: homebridge
+        image: "{{ .Values.homebridge.image.repository }}:{{ .Values.homebridge.image.tag }}"
+        imagePullPolicy: {{ .Values.homebridge.image.pullPolicy }}
+        ports:
+        - containerPort: 8581
+          name: http
+        volumeMounts:
+        - name: config
+          mountPath: /homebridge
+      volumes:
+      - name: config
+        hostPath:
+          path: {{ .Values.homebridge.hostPathConfig }}
+          type: DirectoryOrCreate

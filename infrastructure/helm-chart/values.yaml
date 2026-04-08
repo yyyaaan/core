@@ -3,6 +3,18 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+homebridge:
+  replicas: 0
+  namespace: home-internal
+  image:
+    repository: homebridge/homebridge
+    tag: "2026-02-25"
+    pullPolicy: IfNotPresent
+  hostPathConfig: /Users/yyy/Lab/home/config/hb
+  ingress:
+    enabled: true
+    host: homebridge.omop.fi
+
 ha: # mariaDB migration flag controls resource provisioning
   replicas: 0
   namespace: home-internal
@@ -119,7 +131,7 @@ poller:
   hostPathForData: /Users/yyy/Lab/home/data/app
   jobs:
     - name: elenia
-      suspend: true
+      suspend: false
       schedule: "2-59/15 * * * *"
       command: 
         - "/usr/local/bin/python"
