@@ -54,5 +54,8 @@ SELECT COUNT(*) FROM statistics_runs;
 copying must preserve permissions
 
 ```
+# create dump
 sudo tar --exclude "backups" -cvpzf ha_config.tar.gz -C ./config/ha .
+# unzip dump
+tar -xzpvf ha_config.tar.gz -C ./config/ha
 ```
