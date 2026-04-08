@@ -1,0 +1,62 @@
+{{- if .Values.mariaDB.migrationCompleted }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ha
+  namespace: {{ .Values.ha.namespace }}
+  labels:
+    app.kubernetes.io/name: ha
+spec:
+  replicas: {{ .Values.ha.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ha
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ha
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: ha
+        image: "{{ .Values.ha.image.repository }}:{{ .Values.ha.image.tag }}"
+        imagePullPolicy: {{ .Values.ha.image.pullPolicy }}
+        securityContext:
+          privileged: true
+        envFrom:
+        {{- range .Values.ha.envFromSecretList }}
+          - secretRef:
+              name: {{ . | quote }}
+        {{- end }}
+        ports:
+        - containerPort: 8123
+          name: http
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: media
+          mountPath: /media
+        {{- if .Values.ha.enableBluetooth }}
+        - name: dbus
+          mountPath: /run/dbus
+          readOnly: true
+        {{- end }}
+      volumes:
+      - name: config
+        hostPath:
+          path: {{ .Values.ha.hostPathConfig }}
+          type: DirectoryOrCreate
+      - name: media
+        hostPath:
+          path: {{ .Values.ha.hostPathMedia }}
+          type: DirectoryOrCreate
+      {{- if .Values.ha.enableBluetooth }}
+      - name: dbus
+        hostPath:
+          path: /run/dbus
+          type: Directory # Expects the host to already have this
+      {{- end }}
+{{- end }}

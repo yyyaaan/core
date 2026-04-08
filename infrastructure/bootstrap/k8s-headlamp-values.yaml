@@ -1,0 +1,23 @@
+config:
+  oidc:
+    secret:
+      create: false
+    externalSecret:
+      enabled: true
+      name: oidc-secret
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-headlamp-force-https@kubernetescrd
+  ingressClassName: traefik
+  hosts:
+    - host: dash.omop.fi
+      paths:
+        - path: /
+          type: ImplementationSpecific
+  tls:
+    - secretName: dash-tls-cert
+      hosts:
+        - dash.omop.fi

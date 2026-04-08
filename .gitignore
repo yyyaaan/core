@@ -19,6 +19,8 @@ credentials*
 database.yaml
 secrets.yaml
 app.yaml
+*.log.*
+
 
 # Logs
 logs

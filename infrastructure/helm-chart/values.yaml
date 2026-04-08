@@ -3,6 +3,48 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+homebridge:
+  replicas: 0
+  namespace: home-internal
+  image:
+    repository: homebridge/homebridge
+    tag: "2026-02-25"
+    pullPolicy: IfNotPresent
+  hostPathConfig: /Users/yyy/Lab/home/config/hb
+  ingress:
+    enabled: true
+    host: homebridge.omop.fi
+
+ha: # mariaDB migration flag controls resource provisioning
+  replicas: 0
+  namespace: home-internal
+  image:
+    repository: ghcr.io/home-assistant/home-assistant
+    tag: "2026.3.4"
+    pullPolicy: IfNotPresent
+  envFromSecretList:
+    - tz-config
+  hostPathConfig: /Users/yyy/Lab/home/config/ha
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
+  enableBluetooth: false
+  ingress:
+    host: h.omop.fi
+
+mariaDB:
+  migrationPodEnabled: false
+  migrationCompleted: true
+  namespace: home-internal
+  persistentVolume:
+    storageClassName: "local-path"  # or "" if problem
+    name: mariadb-retained-pv
+    hostPath: /Users/yyy/Lab/home/data/temporary/mariadb
+    storage: 10Gi
+  envFromSecret: mariadb-credentials
+  image:
+    repository: mariadb
+    tag: "12.0.2"
+    pullPolicy: IfNotPresent
+ 
 auth:
   replicas: 1
   enableMultiAuth: false
@@ -20,13 +62,13 @@ auth:
     - "^/public/.*"
     - "^/docs$"
     - "^/openapi.json$"
-    - "^/spot$"
     - "^/favicon.ico$"
     - "^/api/health$"
     - "^/robots.txt$"
 
 frigate:
   namespace: home-internal
+  replicas: 0
   image:
     repository: ghcr.io/blakeblackshear/frigate
     tag: "0.17.0"
@@ -35,7 +77,7 @@ frigate:
   privileged: true
   shmSize: 384Mi
   cacheSize: 900Mi
-  hostPathConfig: /Users/yyy/Lab/home/config/frigate
+  hostPathConfig: /Users/yyy/Lab/home/config/ha
   hostPathMedia: /Users/yyy/Lab/home/data/temporary/frigate
   ingress:
     host: frigate.omop.fi
@@ -66,10 +108,48 @@ play:
 
 stirlingPdf:
   namespace: web
-  replicas: 1
+  replicas: 0
   image:
     repository: stirlingtools/stirling-pdf
     tag: latest
     pullPolicy: IfNotPresent
   ingress:
     host: pdf.omop.fi
+
+poller:
+  namespace: home-internal
+  image:
+    repository: poller
+    tag: "local"
+    pullPolicy: Never
+  timezone: "Europe/Helsinki"
+  envFromSecretList:
+    - mariadb-credentials
+    - poller-credentials
+  hostPathConfig: /Users/yyy/Lab/home/config/poller
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
+  hostPathForData: /Users/yyy/Lab/home/data/app
+  jobs:
+    - name: elenia
+      suspend: false
+      schedule: "2-59/15 * * * *"
+      command: 
+        - "/usr/local/bin/python"
+        - "/app/job_elenia.py"
+    - name: timelapse
+      suspend: true
+      schedule: "3 1 * * *"
+      command: 
+        - "/usr/local/bin/python"
+        - "/app/job_timelapse.py"
+    - name: ffmpeg
+      suspend: true
+      schedule: "55 5 * * *"
+      command: 
+        - "/bin/sh"
+        - "/app/job_ffmpeg.sh"
+    # - name: backup
+    #   schedule: "55 6 * * *"
+    #   command: 
+    #     - "/bin/sh"
+    #     - "/app/job_backup.sh"

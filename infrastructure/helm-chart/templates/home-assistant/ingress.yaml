@@ -1,0 +1,26 @@
+{{- if .Values.mariaDB.migrationCompleted }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ha-ingress
+  namespace: {{ .Values.ha.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - {{ .Values.ha.ingress.host }}
+    secretName: ha-tls-cert
+  rules:
+  - host: {{ .Values.ha.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ha-service
+            port:
+              number: 8123
+{{- end }}

@@ -1,0 +1,41 @@
+{{- if .Values.mariaDB.migrationCompleted }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+  namespace: {{ .Values.mariaDB.namespace }}
+  labels:
+    app.kubernetes.io/name: mariadb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate 
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mariadb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: "{{ .Values.mariaDB.image.repository }}:{{ .Values.mariaDB.image.tag }}"
+        imagePullPolicy: {{ .Values.mariaDB.image.pullPolicy }}
+        ports:
+        - containerPort: 3306
+          name: mysql
+        args:
+          - "--character-set-server=utf8mb4"
+          - "--collation-server=utf8mb4_unicode_ci"
+        envFrom:
+        - secretRef:
+            name: {{ .Values.mariaDB.envFromSecret }}
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: mariadb-data
+{{- end }}
