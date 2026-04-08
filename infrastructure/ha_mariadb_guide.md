@@ -47,3 +47,12 @@ SHOW TABLES;
 SELECT COUNT(*) FROM statistics;
 SELECT COUNT(*) FROM statistics_runs;
 ```
+
+
+## Note on Home Assistant user files
+
+copying must preserve permissions
+
+```
+sudo tar --exclude "backups" -cvpzf ha_config.tar.gz -C ./config/ha .
+```

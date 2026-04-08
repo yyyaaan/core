@@ -63,8 +63,9 @@ tasks:
   scale-down:
     desc: "Pause heavy workloads"
     cmds:
-      - kubectl scale deployment pdf -n web --replicas=0 --ignore-not-found
-      - kubectl scale deployment frigate -n home-internal --replicas=0 --ignore-not-found
+      - kubectl scale deployment pdf -n web --replicas=0
+      - kubectl scale deployment frigate -n home-internal --replicas=0
+      - kubectl scale deployment ha -n home-internal --replicas=0
 
   # --- DEPLOYMENT ---
 
