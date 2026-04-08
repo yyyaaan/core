@@ -3,6 +3,19 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+ha: # mariaDB migration flag controls resource provisioning
+  namespace: home-internal
+  image:
+    repository: ghcr.io/home-assistant/home-assistant
+    tag: "2026.3"
+    pullPolicy: IfNotPresent
+  envFromSecretList:
+    - tz-config
+  hostPathConfig: /Users/yyy/Lab/home/config/ha
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
+  ingress:
+    host: h.omop.fi
+
 mariaDB:
   migrationPodEnabled: false
   migrationCompleted: true
@@ -18,7 +31,6 @@ mariaDB:
     tag: "12.0.2"
     pullPolicy: IfNotPresent
  
-
 auth:
   replicas: 1
   enableMultiAuth: false
