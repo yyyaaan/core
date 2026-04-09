@@ -5,29 +5,32 @@ uvicorn main:app --port 7999 --host 0.0.0.0 --reload
 docker build --platform=linux/amd64 -t playwright:release .
 docker tag playwright:release yyyaaan/playright:v0.5.0
 """
+
 from datetime import datetime
 from glob import glob
-from markdown import markdown
 from os import getenv
-from pytz import timezone
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from markdown import markdown
+from play.energy.Electricity import Electricity
+from play.energy.WaterMeter import WaterMeter
+from play.play.html import sports_and_bonus
+from play.utils.EmailClient import EmailClient
+from play.utils.ViewLogs import ViewLogs
+from pytz import timezone
 from uvicorn import run
-
-from play.html import sports_and_bonus
-from utils.EmailClient import EmailClient
-from utils.ViewLogs import ViewLogs
-from energy.WaterMeter import WaterMeter
-from energy.Electricity import Electricity
 
 app = FastAPI()
 
 
 @app.get("/")
 async def root():
-    return {"message": "server is up", "paths": ["/view", "/scheduled&audience=0", "now"]}
+    return {
+        "message": "server is up",
+        "paths": ["/view", "/scheduled&audience=0", "now"],
+    }
 
 
 @app.get("/logs")
@@ -43,8 +46,7 @@ async def spot():
 @app.get("/public/water.jpg", responses={200: {"content": {"image/jpeg": {}}}})
 async def water_jpg():
     return Response(
-        content=WaterMeter().get_snapshot_content(),
-        media_type="image/jpeg"
+        content=WaterMeter().get_snapshot_content(), media_type="image/jpeg"
     )
 
 
@@ -53,7 +55,7 @@ async def html_render_markdown(
     request: Request,
     title: str = "Minimal Page",
     file_name: str = "base.md",
-    style_name: str = "base.css"
+    style_name: str = "base.css",
 ):
     folder = "/mnt/md"
     try:
@@ -63,7 +65,14 @@ async def html_render_markdown(
             style_content = f.read()
     except Exception as e:
         markdown_content = f"## Error details: {e}"
-        markdown_content += "\n\n" + ", ".join(["`"+x.replace("{folder}/base_", "").replace(".md", "")+"`" for x in glob("{folder}/*.md")]) + "\n"
+        markdown_content += (
+            "\n\n"
+            + ", ".join([
+                "`" + x.replace("{folder}/base_", "").replace(".md", "") + "`"
+                for x in glob("{folder}/*.md")
+            ])
+            + "\n"
+        )
         style_content = ""
 
     return Jinja2Templates(directory="templates/").TemplateResponse(
@@ -74,7 +83,7 @@ async def html_render_markdown(
             "title": title,
             "rendered_markdown": markdown(markdown_content),
             "style_content": style_content,
-        }
+        },
     )
 
 
@@ -112,7 +121,11 @@ async def scheduled(request: Request):
     }
 
 
-if __name__ == '__main__':
+def main():
     run(app, host="0.0.0.0", port=7999)
+
+
+if __name__ == "__main__":
+    main()
 
 # curl -X POST https://pi.yan.fi/play/scheduled?audience=1&now=true
