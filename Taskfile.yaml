@@ -12,10 +12,15 @@ includes:
     dir: ./apps/py-poller
 
 tasks:
-  build-images-locally:
-    desc: "Build play and poller local images"
+  build-play-image:
+    desc: "Build play local image"
     cmds:
-      - task: play:build-local-image
+      - docker build -t py-play -f apps/py-play/Dockerfile .
+
+  build-all-images:
+    desc: "Build all local images"
+    cmds:
+      - task: build-play-image
       - task: poller:build-local-image
 
   deploy-core:

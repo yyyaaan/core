@@ -1,22 +1,44 @@
-FROM python:3.12-slim
+# Dockerfile requires context at monorepo root! See line 33, use root Taskfile.yaml.
 
-# Create a non-root user and group
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+# --- Stage 1: Builder ---
+FROM python:3.13-slim AS builder 
 
-# deps
-RUN apt update && apt install -y mosquitto-clients libsm6 libxext6
-RUN pip install fastapi jinja2 markdown opencv-python pandas plotly pytest-playwright pytz uvicorn
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+COPY apps/py-play/pyproject.toml ./apps/py-play/
+RUN uv sync --frozen --no-dev --no-install-project --package py-play
+
+# --- Stage 2: Runtime ---
+FROM python:3.13-slim AS runner
+
+RUN apt update && apt install -y --no-install-recommends \
+    mosquitto-clients \
+    libsm6 \
+    libxext6 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN playwright install-deps
 
-# Set user and folder
+WORKDIR /app
+
+COPY --from=builder /app/.venv /app/.venv
+COPY apps/py-play/src/play /app/play
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Security: Run as non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 USER appuser
-WORKDIR /home/appuser
-RUN mkdir src
 
-RUN playwright install chromium
-
-
-COPY ./src/playwright /home/appuser/src
+# Expose the port
 EXPOSE 7999
-WORKDIR /home/appuser/src
-ENTRYPOINT [ "python", "main.py" ]
+
+CMD ["fastapi", "run", "play/main.py", "--port", "7999", "--host", "0.0.0.0"]

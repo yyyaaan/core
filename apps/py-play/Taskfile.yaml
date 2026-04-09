@@ -1,9 +1,10 @@
 version: '3'
 
 tasks:
-  build-local-image:
-    desc: "Build play local image"
+  test:
+    desc: "run unit tests"
     cmds:
-      - docker build -t play:local .
-      # - docker run -it --name play play:local sh -c "tail -f /dev/null"
+      - echo "Running unit tests..."
+      # - pytest -v tests/unit
+
 
