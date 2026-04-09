@@ -1,0 +1,17 @@
+[project]
+name = "autobrowser"
+version = "0.1.0"
+description = "Scalable Agentic Browser Automation"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "browser-use>=0.12.6",
+    "pydantic-settings>=2.13.1",
+]
+
+[project.scripts]
+autobrowser = "autobrowser.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
