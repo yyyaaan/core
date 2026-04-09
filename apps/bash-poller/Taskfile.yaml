@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  build-local-image:
+    desc: "Build poller local image"
+    cmds:
+      - docker build -t poller:local .
+  
+  run-local-image:
+    desc: "Run poller local image"
+    cmds:
+      - docker run -it --name poller poller:local sh -c "tail -f /dev/null"

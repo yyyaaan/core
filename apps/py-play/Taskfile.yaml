@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  test:
+    desc: "run unit tests"
+    cmds:
+      - echo "Running unit tests..."
+      # - pytest -v tests/unit
+
+
