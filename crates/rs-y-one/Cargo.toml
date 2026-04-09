@@ -1,0 +1,13 @@
+[package]
+name = "rs-yan-one"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+anyhow.workspace = true
+
+# You can still add crate-specific dependencies here
+# itertools = "0.12.0"
