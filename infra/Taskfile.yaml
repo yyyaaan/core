@@ -1,0 +1,94 @@
+version: '3'
+
+vars:
+  CERT_MANAGER_VERSION: v1.14.0
+  DOMAIN: omop.fi
+
+tasks:
+  # --- INFRASTRUCTURE (BOOTSTRAP) ---
+
+  traefik:
+    desc: "OrbStack only: Install Traefik Ingress Controller"
+    cmds:
+      - helm repo add traefik https://traefik.github.io/charts
+      - helm repo update
+      - helm upgrade --install traefik traefik/traefik --namespace kube-system
+    status:
+      - kubectl get deployment traefik -n kube-system || kubectl get deployment traefik
+
+  cert-manager:
+    desc: "Install Cert-Manager and Cloudflare Issuer"
+    cmds:
+      - kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/{{.CERT_MANAGER_VERSION}}/cert-manager.yaml
+      - kubectl wait --for=condition=Available deployment --all -n cert-manager --timeout=60s
+      - kubectl create secret generic cloudflare-api-token --namespace cert-manager --from-env-file=./credentials/cloudflare.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl apply -f infrastructure/bootstrap/k8s-cloudflare-cert-issuer.yaml
+
+  cloudflare-tunnel:
+    desc: "Setup Cloudflare Tunnel"
+    cmds:
+      - kubectl create namespace cloudflared --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl apply -f infrastructure/bootstrap/k8s-cloudflared-tunnel-deployment.yaml
+
+  headlamp:
+    desc: "Install Headlamp Dashboard"
+    cmds:
+      - kubectl create secret generic oidc-secret -n kube-system --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl apply -f infrastructure/bootstrap/k8s-headlamp-https-middleware.yaml
+      - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
+      - helm repo update
+      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f infrastructure/bootstrap/k8s-headlamp-values.yaml
+
+  # --- NAMESPACES & SECRETS ---
+
+  setup-namespaces:
+    internal: true
+    cmds:
+      - for: [auth, home-internal, web]
+        cmd: kubectl create namespace {{.ITEM}} --dry-run=client -o yaml | kubectl apply -f -
+
+  secrets:
+    desc: "Create all secrets from env files (Idempotent)"
+    deps: [setup-namespaces]
+    cmds:
+      # Pattern: Create secret only if it changed/doesn't exist using dry-run + apply
+      - kubectl create secret generic oauth2-proxy-credentials -n auth --from-env-file=./credentials/oauth.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic email-credentials -n web --from-env-file=./credentials/email.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic tz-config -n web --from-env-file=./credentials/tz.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic tz-config -n home-internal --from-env-file=./credentials/tz.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic frigate-credentials -n home-internal --from-env-file=./credentials/frigate.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic mariadb-credentials -n home-internal --from-env-file=./credentials/db.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic poller-credentials -n home-internal --from-env-file=./credentials/poll.env --dry-run=client -o yaml | kubectl apply -f -
+
+  # --- DEVELOPMENT & SCALING ---
+
+  scale-down:
+    desc: "Pause heavy workloads"
+    cmds:
+      - kubectl scale deployment pdf -n web --replicas=0
+      - kubectl scale deployment frigate -n home-internal --replicas=0
+      - kubectl scale deployment ha -n home-internal --replicas=0
+
+  # --- MONITORING ---
+  job-logs:
+    desc: "Stream logs of all jobs in web namespace"
+    cmds:
+      - kubectl logs -l app.kubernetes.io/component=elenia
+
+  # --- DEPLOYMENT ---
+
+  deploy-core:
+    desc: "Deploy main application stack via Helm"
+    deps: [secrets]
+    cmds:
+      - helm upgrade --install omop-fi ./infrastructure/helm-chart
+
+  # --- ALL-IN-ONE ---
+
+  bootstrap:
+    desc: "Full cluster bootstrap, without MariaDB migration"
+    cmds:
+      - task: traefik
+      - task: cert-manager
+      - task: cloudflare-tunnel
+      - task: deploy-core
