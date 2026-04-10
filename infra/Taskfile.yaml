@@ -22,24 +22,45 @@ tasks:
       - kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/{{.CERT_MANAGER_VERSION}}/cert-manager.yaml
       - kubectl wait --for=condition=Available deployment --all -n cert-manager --timeout=60s
       - kubectl create secret generic cloudflare-api-token --namespace cert-manager --from-env-file=./credentials/cloudflare.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl apply -f infrastructure/bootstrap/k8s-cloudflare-cert-issuer.yaml
+      - kubectl apply -f bootstrap/k8s-cloudflare-cert-issuer.yaml
 
   cloudflare-tunnel:
     desc: "Setup Cloudflare Tunnel"
     cmds:
       - kubectl create namespace cloudflared --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl apply -f infrastructure/bootstrap/k8s-cloudflared-tunnel-deployment.yaml
+      - kubectl apply -f bootstrap/k8s-cloudflared-tunnel-deployment.yaml
+
+  https-middleware:
+    desc: "Create Traefik Middleware to force HTTPS for ArgoCD and Headlamp callback"
+    cmds:
+      - kubectl apply -f bootstrap/k8s-force-https-middleware.yaml
 
   headlamp:
     desc: "Install Headlamp Dashboard"
     cmds:
       - kubectl create secret generic oidc-secret -n kube-system --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl apply -f infrastructure/bootstrap/k8s-headlamp-https-middleware.yaml
       - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
       - helm repo update
-      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f infrastructure/bootstrap/k8s-headlamp-values.yaml
+      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f bootstrap/helm-values-headlamp.yaml
 
-  # --- NAMESPACES & SECRETS ---
+  # --- GitOps ---
+  argocd:
+    desc: "Install Argo CD"
+    cmds: 
+    - |
+      kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+      kubectl create secret generic oidc-secret --namespace argocd --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
+      kubectl label secret oidc-secret --namespace argocd "app.kubernetes.io/part-of=argocd"
+      helm repo add argo https://argoproj.github.io/argo-helm
+      helm repo update
+      helm upgrade --install argocd argo/argo-cd --namespace argocd -f bootstrap/helm-values-argocd.yaml
+
+  gitops-argocd:
+    desc: "Register Apps and Repos for ArgoCD"
+    cmds:
+      - kubectl apply -f gitops-config/
+
+  # --- NAMESPACES & SECRETS [excluding bootstrap ones] ---
 
   setup-namespaces:
     internal: true
@@ -75,13 +96,18 @@ tasks:
     cmds:
       - kubectl logs -l app.kubernetes.io/component=elenia
 
+  token:
+    desc: "Obtain cluster token for headlamp (RBAC recommended though)"
+    cmds:
+      - kubectl create token headlamp -n kube-system
+
   # --- DEPLOYMENT ---
 
   deploy-core:
     desc: "Deploy main application stack via Helm"
     deps: [secrets]
     cmds:
-      - helm upgrade --install omop-fi ./infrastructure/helm-chart
+      - helm upgrade --install omop-fi ./helm-chart
 
   # --- ALL-IN-ONE ---
 

@@ -90,22 +90,6 @@ mqtt:
     pullPolicy: IfNotPresent
   hostPathData: /Users/yyy/Lab/home/config/mqtt/config # updated from previous, one level down
 
-play:
-  namespace: web
-  image:
-    repository: play
-    tag: local
-    pullPolicy: Never
-  envFromSecretList:
-    - email-credentials
-    - tz-config
-  hostPathForData: /Users/yyy/Lab/home/data/app
-  memDiskSize: 100Mi
-  service:
-    targetPort: 7999
-  ingress:
-    host: play.omop.fi
-
 stirlingPdf:
   namespace: web
   replicas: 0
@@ -129,6 +113,10 @@ poller:
   hostPathConfig: /Users/yyy/Lab/home/config/poller
   hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
   hostPathForData: /Users/yyy/Lab/home/data/app
+  resources:
+    limits:
+      cpu: "1500m"
+      memory: "3Gi"
   jobs:
     - name: elenia
       suspend: false

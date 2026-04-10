@@ -1,0 +1,31 @@
+# https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-gitops-config
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yyyaaan/core.git
+    targetRevision: main 
+    path: infra/gitops-config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: core-infra
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yyyaaan/core.git
+    targetRevision: main 
+    path: infra/helm-chart
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default  # chart overrides namespaces as needed

@@ -8,8 +8,8 @@ includes:
     taskfile: ./apps/py-play/Taskfile.yaml
     dir: ./apps/py-play
   poller: 
-    taskfile: ./apps/py-poller/Taskfile.yaml
-    dir: ./apps/py-poller
+    taskfile: ./apps/bash-poller/Taskfile.yaml
+    dir: ./apps/bash-poller
 
 tasks:
   build-play-image:
@@ -24,6 +24,11 @@ tasks:
       - task: poller:build-local-image
 
   deploy-core:
-    desc: Deploy the core helm chart
+    desc: Deploy the core helm chart, excluding apps
     cmds:
       - task: infra:deploy-core
+
+  deploy-play:
+    desc: Deploy the play helm chart
+    cmds:
+      - task: play:deploy

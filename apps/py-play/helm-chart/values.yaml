@@ -1,0 +1,20 @@
+namespace: web
+certManager:
+  enabled: true
+  issuerName: letsencrypt-prod
+authMiddleware:
+  enabled: true
+  name: auth-oauth@kubernetescrd
+image:
+  repository: play
+  tag: local
+  pullPolicy: Never
+envFromSecretList:
+  - email-credentials
+  - tz-config
+hostPathForData: /Users/yyy/Lab/home/data/app
+memDiskSize: 100Mi
+service:
+  targetPort: 7999
+ingress:
+  host: play.omop.fi
