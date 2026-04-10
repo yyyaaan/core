@@ -1,6 +1,8 @@
 # YYYaan Core Monorepo
 
-Concept: Monorepo, GitOps, Strict Typing in Python, Rest API, MCP server
+Concept: Monorepo, GitOps, Strict Typing in Python, Rest API, MCP server.
+
+No more helm apply, use ArgoCD for kubernetes deployments: currently requires Manual Approval in addition to PR.
 
 ## Technologies
 

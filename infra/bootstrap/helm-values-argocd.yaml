@@ -12,6 +12,8 @@ configs:
     server.insecure: true
   cm:
     create: true
+    admin.enabled: false  # oidc only
+    timeout.reconciliation: 300s # less frequent than default
     oidc.config: |
       name: Google
       issuer: https://accounts.google.com

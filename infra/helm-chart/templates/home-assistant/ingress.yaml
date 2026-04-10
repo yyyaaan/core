@@ -5,7 +5,7 @@ metadata:
   name: ha-ingress
   namespace: {{ .Values.ha.namespace }}
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
 spec:
   ingressClassName: traefik
   tls:
