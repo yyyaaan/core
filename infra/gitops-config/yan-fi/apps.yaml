@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/yyyaaan/core.git
     targetRevision: main 
-    path: infra/gitops-config
+    path: infra/gitops-config/yan-fi
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

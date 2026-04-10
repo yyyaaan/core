@@ -23,12 +23,12 @@ tasks:
       - task: build-play-image
       - task: poller:build-local-image
 
-  deploy-core:
-    desc: Deploy the core helm chart, excluding apps
-    cmds:
-      - task: infra:deploy-core
-
   deploy-play:
     desc: Deploy the play helm chart
     cmds:
       - task: play:deploy
+    
+  helm-test:
+    desc: Deploy core helm chart in test env via helm install
+    cmds:
+      - task: infra:helm-deploy-core-test

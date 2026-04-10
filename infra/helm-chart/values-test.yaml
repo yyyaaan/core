@@ -1,28 +1,28 @@
-domain: yan.fi
+domain: omop.fi
 
 certManager:
   issuerName: letsencrypt-prod
 
 migrationState:
-  completed: false
-  migrationPodEnabled: true
+  completed: true
+  migrationPodEnabled: false
 
 homebridge:
-  enabled: false
-  replicas: 1
+  enabled: true
+  replicas: 0
   namespace: home-internal
   image:
     repository: homebridge/homebridge
     tag: "2026-02-25"
     pullPolicy: IfNotPresent
-  hostPathConfig: /home/ya/home/config/hb
+  hostPathConfig: /Users/yyy/Lab/home/config/hb
   ingress:
     enabled: true
-    host: homebridge.yan.fi
+    host: homebridge.omop.fi
 
 ha: # mariaDB migration flag controls resource provisioning
-  enabled: false
-  replicas: 1
+  enabled: true
+  replicas: 0
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
@@ -30,18 +30,18 @@ ha: # mariaDB migration flag controls resource provisioning
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
-  hostPathConfig: /home/ya/home/config/ha
-  hostPathMedia: /home/ya/home/data/temporary/ha-media
+  hostPathConfig: /Users/yyy/Lab/home/config/ha
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
   enableBluetooth: false
   ingress:
-    host: h.yan.fi
+    host: h.omop.fi
 
 mariaDB:
   namespace: home-internal
   persistentVolume:
     storageClassName: "local-path"  # or "" if problem
     name: mariadb-retained-pv
-    hostPath: /home/ya/home/data/temporary/mariadb
+    hostPath: /Users/yyy/Lab/home/data/temporary/mariadb
     storage: 10Gi
   envFromSecret: mariadb-credentials
   image:
@@ -56,10 +56,10 @@ auth:
     repository: quay.io/oauth2-proxy/oauth2-proxy
     tag: "v7.15.1-alpine"
     pullPolicy: IfNotPresent
-  cookieDomain: .yan.fi
+  cookieDomain: .omop.fi
   cookieSecure: true
   emailDomain: "*"
-  authDomain: auth.yan.fi
+  authDomain: auth.omop.fi
   envFromSecret: oauth2-proxy-credentials
   skipAuthRoutes:
     - "^/$"
@@ -71,8 +71,8 @@ auth:
     - "^/robots.txt$"
 
 frigate:
-  enabled: false
-  replicas: 1
+  enabled: true
+  replicas: 0
   namespace: home-internal
   image:
     repository: ghcr.io/blakeblackshear/frigate
@@ -82,19 +82,19 @@ frigate:
   privileged: true
   shmSize: 384Mi
   cacheSize: 900Mi
-  hostPathConfig: /home/ya/home/config/ha
-  hostPathMedia: /home/ya/home/data/temporary/frigate
+  hostPathConfig: /Users/yyy/Lab/home/config/ha
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/frigate
   ingress:
-    host: frigate.yan.fi
+    host: frigate.omop.fi
 
 mqtt:
-  enabled: false
+  enabled: true
   namespace: home-internal
   image:
     repository: eclipse-mosquitto
     tag: "2.1-alpine"
     pullPolicy: IfNotPresent
-  hostPathData: /home/ya/home/config/mqtt/config # updated from previous, one level down
+  hostPathData: /Users/yyy/Lab/home/config/mqtt/config # updated from previous, one level down
 
 stirlingPdf:
   namespace: web
@@ -104,7 +104,7 @@ stirlingPdf:
     tag: latest
     pullPolicy: IfNotPresent
   ingress:
-    host: pdf.yan.fi
+    host: pdf.omop.fi
 
 poller:
   namespace: home-internal
@@ -116,16 +116,16 @@ poller:
   envFromSecretList:
     - mariadb-credentials
     - poller-credentials
-  hostPathConfig: /home/ya/home/config/poller
-  hostPathMedia: /home/ya/home/data/temporary/ha-media
-  hostPathForData: /home/ya/home/data/app
+  hostPathConfig: /Users/yyy/Lab/home/config/poller
+  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
+  hostPathForData: /Users/yyy/Lab/home/data/app
   resources:
     limits:
       cpu: "1500m"
       memory: "3Gi"
   jobs:
     - name: elenia
-      suspend: true
+      suspend: false
       schedule: "2-59/15 * * * *"
       command: 
         - "/usr/local/bin/python"
