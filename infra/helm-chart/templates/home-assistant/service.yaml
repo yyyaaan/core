@@ -1,4 +1,4 @@
-{{- if .Values.mariaDB.migrationCompleted }}
+{{- if .Values.migrationState.completed }}
 apiVersion: v1
 kind: Service
 metadata:

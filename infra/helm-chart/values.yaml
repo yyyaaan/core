@@ -3,6 +3,10 @@ domain: omop.fi
 certManager:
   issuerName: letsencrypt-prod
 
+migrationState:
+  completed: false
+  migrationPodEnabled: true
+
 homebridge:
   replicas: 0
   namespace: home-internal
@@ -31,8 +35,6 @@ ha: # mariaDB migration flag controls resource provisioning
     host: h.omop.fi
 
 mariaDB:
-  migrationPodEnabled: false
-  migrationCompleted: true
   namespace: home-internal
   persistentVolume:
     storageClassName: "local-path"  # or "" if problem
