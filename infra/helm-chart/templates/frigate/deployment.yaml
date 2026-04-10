@@ -1,3 +1,4 @@
+{{- if .Values.frigate.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -65,3 +66,4 @@ spec:
         emptyDir:
           medium: Memory
           sizeLimit: {{ .Values.frigate.cacheSize }}
+{{- end }}

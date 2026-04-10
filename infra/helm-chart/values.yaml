@@ -8,6 +8,7 @@ migrationState:
   migrationPodEnabled: true
 
 homebridge:
+  enabled: true
   replicas: 0
   namespace: home-internal
   image:
@@ -20,6 +21,7 @@ homebridge:
     host: homebridge.omop.fi
 
 ha: # mariaDB migration flag controls resource provisioning
+  enabled: true
   replicas: 0
   namespace: home-internal
   image:
@@ -69,8 +71,9 @@ auth:
     - "^/robots.txt$"
 
 frigate:
-  namespace: home-internal
+  enabled: true
   replicas: 0
+  namespace: home-internal
   image:
     repository: ghcr.io/blakeblackshear/frigate
     tag: "0.17.0"
@@ -85,6 +88,7 @@ frigate:
     host: frigate.omop.fi
 
 mqtt:
+  enabled: true
   namespace: home-internal
   image:
     repository: eclipse-mosquitto

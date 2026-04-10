@@ -1,4 +1,4 @@
-{{- if .Values.migrationState.completed }}
+{{- if and .Values.ha.enabled .Values.migrationState.completed }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
