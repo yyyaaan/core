@@ -1,10 +1,12 @@
 version: '3'
 
 tasks:
+  deploy:
+    desc: Deploy the application by the helm chart
+    cmds:
+      - helm upgrade --install play helm-chart
+
   test:
     desc: "run unit tests"
     cmds:
-      - echo "Running unit tests..."
-      # - pytest -v tests/unit
-
-
+      - echo "Running unit tests pending implementation"

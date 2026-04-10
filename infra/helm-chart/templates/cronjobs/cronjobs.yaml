@@ -37,6 +37,10 @@ spec:
               - secretRef:
                   name: {{ . | quote }}
             {{- end }}
+            resources:
+              limits:
+                cpu: {{ $.Values.poller.resources.limits.cpu | default "1500m" }}
+                memory: {{ $.Values.poller.resources.limits.memory | default "1500Mi" }}
             volumeMounts:
             - name: config
               mountPath: /backup

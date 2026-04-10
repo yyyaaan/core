@@ -2,18 +2,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: play-ingress
-  namespace: {{ .Values.play.namespace }}
+  namespace: {{ .Values.namespace }}
   annotations:
+    {{- if .Values.certManager.enabled }}
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
-    traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
+    {{- end }}
+    {{- if .Values.authMiddleware.enabled }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.authMiddleware.name }}
+    {{- end }}
 spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - {{ .Values.play.ingress.host }}
+    - {{ .Values.ingress.host }}
     secretName: play-tls-cert
   rules:
-  - host: {{ .Values.play.ingress.host }}
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
       - path: /

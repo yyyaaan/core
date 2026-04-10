@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: play
-  namespace: {{ .Values.play.namespace }}
+  namespace: {{ .Values.namespace }}
   labels:
     app.kubernetes.io/name: play
 spec:
@@ -19,10 +19,10 @@ spec:
     spec:
       containers:
       - name: play
-        image: {{ .Values.play.image.repository }}:{{ .Values.play.image.tag }}
-        imagePullPolicy: {{ .Values.play.image.pullPolicy }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         envFrom:
-        {{- range .Values.play.envFromSecretList }}
+        {{- range .Values.envFromSecretList }}
           - secretRef:
               name: {{ . | quote }}
         {{- end }}
@@ -34,9 +34,9 @@ spec:
       volumes:
       - name: data-volume
         hostPath:
-          path: {{ .Values.play.hostPathForData }}
+          path: {{ .Values.hostPathForData }}
           type: DirectoryOrCreate
       - name: mem-disk-volume
         emptyDir:
           medium: Memory
-          sizeLimit: {{ .Values.play.memDiskSize }}
+          sizeLimit: {{ .Values.memDiskSize }}
