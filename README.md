@@ -4,6 +4,8 @@ Concept: Monorepo, GitOps, Strict Typing in Python, Rest API, MCP server.
 
 No more helm apply, use ArgoCD for kubernetes deployments: currently requires Manual Approval in addition to PR.
 
+Home Automation with Home Assistant, HomeBridge, Frigate and more are only available under /infra/helm-charts, and they are part of core infra
+
 ## Technologies
 
 - __Kubernetes__, helm charts, networking, oauth2-proxy and more 

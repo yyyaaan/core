@@ -1,3 +1,4 @@
+{{- if .Values.frigate.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -30,3 +31,4 @@ spec:
     port: 8555
     targetPort: 8555
     protocol: UDP
+{{- end }}

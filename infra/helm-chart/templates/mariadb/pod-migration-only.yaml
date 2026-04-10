@@ -1,5 +1,5 @@
 # only for migration
-{{- if .Values.mariaDB.migrationPodEnabled }}
+{{- if .Values.migrationState.migrationPodEnabled }}
 apiVersion: v1
 kind: Pod
 metadata:

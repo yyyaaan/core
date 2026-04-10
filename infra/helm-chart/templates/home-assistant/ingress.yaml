@@ -1,4 +1,4 @@
-{{- if .Values.mariaDB.migrationCompleted }}
+{{- if and .Values.ha.enabled .Values.migrationState.completed }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
