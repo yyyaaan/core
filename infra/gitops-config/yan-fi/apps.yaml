@@ -33,7 +33,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: core-infra
+  name: app-play
   namespace: argocd
 spec:
   project: default

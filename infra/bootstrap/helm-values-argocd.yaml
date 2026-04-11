@@ -12,17 +12,14 @@ configs:
     server.insecure: true
   cm:
     create: true
-    admin.enabled: false  # oidc only
+    admin.enabled: "false"  # oidc only
     timeout.reconciliation: 300s # less frequent than default
     oidc.config: |
       name: Google
       issuer: https://accounts.google.com
       clientID: 719690536564-hrk09vm3gjkqnpr2873q7mnff0qdcv4c.apps.googleusercontent.com
       clientSecret: $oidc-secret:OIDC_CLIENT_SECRET
-      requestedScopes:
-        - openid
-        - profile
-        - email
+      requestedScopes: ["openid", "profile", "email"]
   rbac:
     create: true
     scopes: '[email]'

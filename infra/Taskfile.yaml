@@ -10,6 +10,7 @@ tasks:
   traefik:
     desc: "OrbStack only: Install Traefik Ingress Controller on different ports"
     cmds:
+      - kubectl create namespace traefik --dry-run=client -o yaml | kubectl apply -f - 
       - helm repo add traefik https://traefik.github.io/charts
       - helm repo update
       - helm upgrade --install traefik traefik/traefik --namespace traefik --set ports.web.exposedPort=8080 --set ports.websecure.exposedPort=8443
@@ -49,6 +50,7 @@ tasks:
     desc: "Install Headlamp Dashboard"
     deps: [https-middleware]
     cmds:
+      - kubectl create namespace headlamp --dry-run=client -o yaml | kubectl apply -f -
       - kubectl create secret generic oidc-secret -n headlamp --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
       - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
       - helm repo update
