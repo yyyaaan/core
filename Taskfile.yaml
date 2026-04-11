@@ -16,14 +16,16 @@ tasks:
     desc: "Build play local image"
     cmds:
       - docker build -t play:local -f apps/py-play/Dockerfile .
-      - docker tag play:local yyyaaan/play:alpha0
-      - docker push yyyaaan/play:alpha0
 
   build-all-images:
     desc: "Build all local images"
     cmds:
       - task: build-play-image
       - task: poller:build-local-image
+      - docker tag play:local yyyaaan/play:alpha0
+      - docker push yyyaaan/play:alpha0
+      - docker tag poller:local yyyaaan/poller:alpha0
+      - docker push yyyaaan/poller:alpha0
 
   deploy-play:
     desc: Deploy the play helm chart - use gitops instead

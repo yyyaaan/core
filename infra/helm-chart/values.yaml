@@ -109,9 +109,9 @@ stirlingPdf:
 poller:
   namespace: home-internal
   image:
-    repository: poller
-    tag: "local"
-    pullPolicy: Never
+    repository: yyyaaan/poller
+    tag: "alpha0"
+    pullPolicy: IfNotPresent
   timezone: "Europe/Helsinki"
   envFromSecretList:
     - mariadb-credentials
