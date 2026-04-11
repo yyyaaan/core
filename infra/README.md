@@ -2,6 +2,8 @@
 
 If GitOps is used, be refrained from `helm install`. That is, choose either "gitops-config" or "helm-chart".
 
+## Port configured in traefik (8080 8443 in current taskfile)
+
 ## Memo
 
 - Namespaces required
@@ -16,12 +18,12 @@ Callback URL: /auth/callback for `ArgoCD`, /oidc-callback for `headlamp`
 
 Cloudflare setups:
 - Enable Cloudflare tunnel
-- Zero Trust - Tunnel: Published application routes, add HTTP [traefik.kube-system.svc.cluster.local:80](http://traefik.default.svc.cluster.local:80), note for possible different namespace (can be default if on OrbStack)
+- Zero Trust - Tunnel: Published application routes, add HTTP `traefik.traefik.svc.cluster.local:8080`, note for possible different namespace
 - DNS: [should be auto created by step above] CNAME * tunnel_id.cfargotunnel.com (proxied)
 
 ## Install `k3s` on Raspberry Pi and API Server with OIDC
 
-Raspberry Pi OS Lite is recommended for resource conservation.
+Raspberry Pi OS Lite is recommended for resource conservation. __DISABLE k3s default traefik__ to keep 80/443 port untouched.
 
 Official docs at https://docs.k3s.io/installation/requirements?os=pi, and at a glance:
 - check: /boot/firmware/cmdline.txt to have additional `cgroup_memory=1 cgroup_enable=memory` , and it may already exists

@@ -8,11 +8,11 @@ tasks:
   # --- INFRASTRUCTURE (BOOTSTRAP) ---
 
   traefik:
-    desc: "OrbStack only: Install Traefik Ingress Controller"
+    desc: "OrbStack only: Install Traefik Ingress Controller on different ports"
     cmds:
       - helm repo add traefik https://traefik.github.io/charts
       - helm repo update
-      - helm upgrade --install traefik traefik/traefik --namespace kube-system
+      - helm upgrade --install traefik traefik/traefik --namespace traefik --set ports.web.exposedPort=8080 --set ports.websecure.exposedPort=8443
 
   cert-manager:
     desc: "Install Cert-Manager and Cloudflare Issuer"
@@ -49,10 +49,10 @@ tasks:
     desc: "Install Headlamp Dashboard"
     deps: [https-middleware]
     cmds:
-      - kubectl create secret generic oidc-secret -n kube-system --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
+      - kubectl create secret generic oidc-secret -n headlamp --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
       - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
       - helm repo update
-      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f bootstrap/helm-values-headlamp.yaml
+      - helm upgrade --install headlamp headlamp/headlamp --namespace headlamp -f bootstrap/helm-values-headlamp.yaml
       - kubectl apply -f bootstrap/k8s-rbac-oidc-admin.yaml
 
   # --- NAMESPACES & SECRETS [excluding bootstrap ones] ---
@@ -85,7 +85,7 @@ tasks:
   token:
     desc: "Obtain cluster token for headlamp (RBAC recommended though)"
     cmds:
-      - kubectl create token headlamp -n kube-system
+      - kubectl create token headlamp -n headlamp
 
   # --- DEPLOYMENT: choose only one! either helm or gitops ---
 
