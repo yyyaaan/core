@@ -5,7 +5,7 @@ nameOverride: argocd
 namespaceOverride: argocd
 
 global:
-  domain: cd.omop.fi
+  domain: cd.yan.fi
 
 configs:
   params:  # traefik manages TLS
@@ -45,5 +45,5 @@ server:
       traefik.ingress.kubernetes.io/router.middlewares: kube-system-force-https@kubernetescrd
     extraTls:
       - hosts:
-        - cd.omop.fi
+        - cd.yan.fi
         secretName: cd-tls-cert

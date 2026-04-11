@@ -13,8 +13,6 @@ tasks:
       - helm repo add traefik https://traefik.github.io/charts
       - helm repo update
       - helm upgrade --install traefik traefik/traefik --namespace kube-system
-    status:
-      - kubectl get deployment traefik -n kube-system || kubectl get deployment traefik
 
   cert-manager:
     desc: "Install Cert-Manager and Cloudflare Issuer"
@@ -31,20 +29,13 @@ tasks:
       - kubectl apply -f bootstrap/k8s-cloudflared-tunnel-deployment.yaml
 
   https-middleware:
-    desc: "Create Traefik Middleware to force HTTPS for ArgoCD and Headlamp callback"
+    desc: "[dependency] Create Traefik Middleware to force HTTPS for ArgoCD and Headlamp callback"
     cmds:
       - kubectl apply -f bootstrap/k8s-force-https-middleware.yaml
 
-  headlamp:
-    desc: "Install Headlamp Dashboard"
-    cmds:
-      - kubectl create secret generic oidc-secret -n kube-system --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
-      - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
-      - helm repo update
-      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f bootstrap/helm-values-headlamp.yaml
-
   argocd:
     desc: "Install Argo CD"
+    deps: [https-middleware]
     cmds: 
     - |
       kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
@@ -54,6 +45,15 @@ tasks:
       helm repo update
       helm upgrade --install argocd argo/argo-cd --namespace argocd -f bootstrap/helm-values-argocd.yaml
 
+  headlamp:
+    desc: "Install Headlamp Dashboard"
+    deps: [https-middleware]
+    cmds:
+      - kubectl create secret generic oidc-secret -n kube-system --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
+      - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
+      - helm repo update
+      - helm upgrade --install headlamp headlamp/headlamp --namespace kube-system -f bootstrap/helm-values-headlamp.yaml
+      - kubectl apply -f bootstrap/k8s-rbac-oidc-admin.yaml
 
   # --- NAMESPACES & SECRETS [excluding bootstrap ones] ---
 
@@ -116,5 +116,7 @@ tasks:
       - task: traefik
       - task: cert-manager
       - task: cloudflare-tunnel
+      - task: argocd
+      - task: headlamp
       - task: secrets
       - task: gitops

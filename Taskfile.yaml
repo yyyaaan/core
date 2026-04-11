@@ -24,10 +24,15 @@ tasks:
       - task: poller:build-local-image
 
   deploy-play:
-    desc: Deploy the play helm chart
+    desc: Deploy the play helm chart - use gitops instead
     cmds:
       - task: play:deploy
     
+  bootstrap-gitops:
+    desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
+    cmds:
+      - task: infra:bootstrap
+
   helm-test:
     desc: Deploy core helm chart in test env via helm install
     cmds:

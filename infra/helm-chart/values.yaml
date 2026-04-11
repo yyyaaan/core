@@ -15,7 +15,7 @@ homebridge:
     repository: homebridge/homebridge
     tag: "2026-02-25"
     pullPolicy: IfNotPresent
-  hostPathConfig: /home/ya/home/config/hb
+  hostPathConfig: /media/ya/kingston/home/config/hb
   ingress:
     enabled: true
     host: homebridge.yan.fi
@@ -30,8 +30,8 @@ ha: # mariaDB migration flag controls resource provisioning
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
-  hostPathConfig: /home/ya/home/config/ha
-  hostPathMedia: /home/ya/home/data/temporary/ha-media
+  hostPathConfig: /media/ya/kingston/home/config/ha
+  hostPathMedia: /media/ya/kingston/share/media
   enableBluetooth: false
   ingress:
     host: h.yan.fi
@@ -41,7 +41,7 @@ mariaDB:
   persistentVolume:
     storageClassName: "local-path"  # or "" if problem
     name: mariadb-retained-pv
-    hostPath: /home/ya/home/data/temporary/mariadb
+    hostPath: /media/ya/kingston/home/data/volume/mariadb
     storage: 10Gi
   envFromSecret: mariadb-credentials
   image:
@@ -82,8 +82,8 @@ frigate:
   privileged: true
   shmSize: 384Mi
   cacheSize: 900Mi
-  hostPathConfig: /home/ya/home/config/ha
-  hostPathMedia: /home/ya/home/data/temporary/frigate
+  hostPathConfig: /media/ya/kingston/home/config/ha
+  hostPathMedia: /media/ya/kingston/share/media/frigate
   ingress:
     host: frigate.yan.fi
 
@@ -94,7 +94,7 @@ mqtt:
     repository: eclipse-mosquitto
     tag: "2.1-alpine"
     pullPolicy: IfNotPresent
-  hostPathData: /home/ya/home/config/mqtt/config # updated from previous, one level down
+  hostPathData: /media/ya/kingston/home/config/mqtt/config # updated from previous, one level down
 
 stirlingPdf:
   namespace: web
@@ -116,9 +116,9 @@ poller:
   envFromSecretList:
     - mariadb-credentials
     - poller-credentials
-  hostPathConfig: /home/ya/home/config/poller
-  hostPathMedia: /home/ya/home/data/temporary/ha-media
-  hostPathForData: /home/ya/home/data/app
+  hostPathConfig: /media/ya/kingston/home/config/poller
+  hostPathMedia: /media/ya/kingston/share/media
+  hostPathForData: /media/ya/kingston/home/data/app
   resources:
     limits:
       cpu: "1500m"

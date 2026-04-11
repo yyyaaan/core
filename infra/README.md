@@ -12,12 +12,76 @@ If GitOps is used, be refrained from `helm install`. That is, choose either "git
 
 Callback URL: /auth/callback for `ArgoCD`, /oidc-callback for `headlamp`
 
+## Networking with Cloudflare
 
-## Cloudflare
+Cloudflare setups:
+- Enable Cloudflare tunnel
+- Zero Trust - Tunnel: Published application routes, add HTTP [traefik.kube-system.svc.cluster.local:80](http://traefik.default.svc.cluster.local:80), note for possible different namespace (can be default if on OrbStack)
+- DNS: [should be auto created by step above] CNAME * tunnel_id.cfargotunnel.com (proxied)
 
-Tunnel -> Published Application Routers. Remember DNS config
+## Install `k3s` on Raspberry Pi and API Server with OIDC
 
-Bypass cache for argocd in cache bypass
+Raspberry Pi OS Lite is recommended for resource conservation.
+
+Official docs at https://docs.k3s.io/installation/requirements?os=pi, and at a glance:
+- check: /boot/firmware/cmdline.txt to have additional `cgroup_memory=1 cgroup_enable=memory` , and it may already exists
+- check: `sudo modprobe vxlan`, if only on ERROR `sudo modprobe vxlan`
+- install `curl -sfL https://get.k3s.io | sh -s - --disable traefik`
+
+### Config API Server to trust OIDC
+K3s is easy to configure. You edit the server config file on your Pi:
+`sudo nano /etc/rancher/k3s/config.yaml`, and add these flags:
+
+```yaml
+kube-apiserver-arg:
+  - "oidc-issuer-url=https://accounts.google.com"
+  - "oidc-client-id=719690536564-hrk09vm3gjkqnpr2873q7mnff0qdcv4c.apps.googleusercontent.com"
+  - "oidc-username-claim=email"
+  - "oidc-required-claim=hd=yan.fi" 
+```
+
+*Restart K3s: `sudo systemctl restart k3s`.*
+
+### Connecting to K3s remotely
+
+```
+sudo cat /etc/rancher/k3s/k3s.yaml
+# copy as pi-config, update IP adress
+```
+
+registered to mac profile
+
+```
+nano ~/.zshrc
+export KUBECONFIG=~/.kube/config:~/.kube/pi-config
+
+# use context!
+kubectl config get-contexts
+kubectl config use-context pi-cluster
+```
+
+## Additional Manual Checks for Infra Upgrade
+
+Manual update non-git:
+- storageClassName for mariadb persistent volume
+- http://traefik.default.svc.cluster.local:80 can be different! check name space, even kube-system
+- mqtt-service or mqtt-service.home-internal or mqtt-service.home-internal.svc.cluster.local (mqtt://...:1883)
+- play/public/spot & water.jpg update path in HA
+- start?rd=https:// for all login button
+- Cloudflared pod needs API Key explicitly
+- login page customization https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#page-template-options
+
+Gitignored
+- credentials/active
+- config/ha/secrets.yaml updated mariadb address
+- config/frigate/config.yaml updated mqtt address
+
+HA tasks
+- change MQTT address
+- possible path /play
+
+
+
 
 ## MariaDB migration with existing data
 
@@ -143,7 +207,7 @@ See `config/scripts/ha_db_migration.py`. At the moment of migrations:
 ---------------------------------------------
 ```
 
-## Configurations
+### Configurations
 
 ```python
 import pandas as pd
@@ -173,7 +237,7 @@ TABLES_TO_MIGRATE = [
 ```
 
 
-## Script
+### Script
 
 ```python
 def get_db_engines():

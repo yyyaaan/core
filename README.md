@@ -33,3 +33,7 @@ Home Internal: Home Assistant, MariaDB, Homebridge, Frigate
 General Web: Play FastAPI App, Stirling PDF (on-demand)
 
 Supporting service: OAuth2 Proxy, headlamp; Cloudflare tunnel and Cert Issuers
+
+## Remember to confirm Kube Context
+
+`export KUBECONFIG=~/.kube/pi-config` (default is config)
