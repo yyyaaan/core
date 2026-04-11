@@ -1,4 +1,4 @@
-{{- if and  .Values.homebridge.enabled .Values.homebridge.ingress.enabled }}
+{{- if .Values.homebridge.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
