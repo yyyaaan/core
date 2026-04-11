@@ -15,7 +15,9 @@ tasks:
   build-play-image:
     desc: "Build play local image"
     cmds:
-      - docker build -t py-play -f apps/py-play/Dockerfile .
+      - docker build -t play:local -f apps/py-play/Dockerfile .
+      - docker tag play:local yyyaaan/play:alpha0
+      - docker push yyyaaan/play:alpha0
 
   build-all-images:
     desc: "Build all local images"

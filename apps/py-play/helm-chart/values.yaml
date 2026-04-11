@@ -6,9 +6,9 @@ authMiddleware:
   enabled: true
   name: auth-oauth@kubernetescrd
 image:
-  repository: play
-  tag: local
-  pullPolicy: Never
+  repository: yyyaaan/play
+  tag: alpha0
+  pullPolicy: IfNotPresent
 envFromSecretList:
   - email-credentials
   - tz-config
@@ -17,4 +17,4 @@ memDiskSize: 100Mi
 service:
   targetPort: 7999
 ingress:
-  host: play.omop.fi
+  host: play.yan.fi

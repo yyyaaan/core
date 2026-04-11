@@ -29,3 +29,18 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: default  # chart overrides namespaces as needed
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: core-infra
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yyyaaan/core.git
+    targetRevision: ops/rollout
+    path: apps/py-play/helm-chart
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: web
