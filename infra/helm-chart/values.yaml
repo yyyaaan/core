@@ -98,7 +98,7 @@ mqtt:
 
 stirlingPdf:
   namespace: web
-  replicas: 1
+  replicas: 0
   image:
     repository: stirlingtools/stirling-pdf
     tag: latest
