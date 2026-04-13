@@ -1,6 +1,8 @@
 # Core Infrastructure - Kubernetes
 
-If GitOps is used, be refrained from `helm install`. That is, choose either "gitops-config" or "helm-chart".
+Recommended to use git ops only! That is:
+- Only install ArgoCD with `kubectl` commandline, plus the known name spaces and secrets injection
+- Everything else via ArgoCD
 
 ## Port configured in traefik (8080 8443 in current taskfile)
 

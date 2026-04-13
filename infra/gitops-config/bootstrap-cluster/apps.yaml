@@ -1,0 +1,98 @@
+# this are the dependencies that are always needed for cluster!
+---
+# 1. Traefik (Remote Helm Chart)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sys-traefik
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: HEAD
+    helm:
+      parameters:
+        - name: ports.web.exposedPort
+          value: "8080"
+        - name: ports.websecure.exposedPort
+          value: "8443"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# 2. Cert-Manager (Remote Helm Chart)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sys-cert-manager
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.20.2
+    helm:
+      parameters:
+        - name: installCRDs
+          value: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# 3. Headlamp (Multiple Sources: Remote Chart + Local Git Values)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sys-headlamp
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/headlamp/
+      chart: headlamp
+      targetRevision: HEAD
+      helm:
+        valueFiles:
+          - $values/infra/bootstrap/values/headlamp.yaml
+    - repoURL: https://github.com/yyyaaan/core.git
+      targetRevision: ops/rollout
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: headlamp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# 4. Cluster Bootstrap 
+# This will handle your Cloudflare Tunnel, Cert Issuer, Traefik Middleware, and Headlamp RBAC
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sys-cert-cloudflare-and-more
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yyyaaan/core.git
+    path: bootstrap
+    targetRevision: ops/rollout
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default # Ensure your individual YAMLs have `namespace:` defined explicitly in their metadata
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

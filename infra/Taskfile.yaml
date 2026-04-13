@@ -1,82 +1,71 @@
 version: '3'
 
-vars:
-  CERT_MANAGER_VERSION: v1.14.0
-  DOMAIN: omop.fi
-
 tasks:
-  # --- INFRASTRUCTURE (BOOTSTRAP) ---
+  # --- INFRASTRUCTURE of ARGOCD, GITOPS ONLY ---
 
-  traefik:
-    desc: "OrbStack only: Install Traefik Ingress Controller on different ports"
+  _apply-secret:  # internal helper only
+    internal: true
+    label: "Applying secret: {{.NAME}} in {{.NS}}"
     cmds:
-      - kubectl create namespace traefik --dry-run=client -o yaml | kubectl apply -f - 
-      - helm repo add traefik https://traefik.github.io/charts
-      - helm repo update
-      - helm upgrade --install traefik traefik/traefik --namespace traefik --set ports.web.exposedPort=8080 --set ports.websecure.exposedPort=8443
-
-  cert-manager:
-    desc: "Install Cert-Manager and Cloudflare Issuer"
-    cmds:
-      - kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/{{.CERT_MANAGER_VERSION}}/cert-manager.yaml
-      - kubectl wait --for=condition=Available deployment --all -n cert-manager --timeout=60s
-      - kubectl create secret generic cloudflare-api-token --namespace cert-manager --from-env-file=./credentials/cloudflare.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl apply -f bootstrap/k8s-cloudflare-cert-issuer.yaml
-
-  cloudflare-tunnel:
-    desc: "Setup Cloudflare Tunnel"
-    cmds:
-      - kubectl create namespace cloudflared --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl apply -f bootstrap/k8s-cloudflared-tunnel-deployment.yaml
-
-  https-middleware:
-    desc: "[dependency] Create Traefik Middleware to force HTTPS for ArgoCD and Headlamp callback"
-    cmds:
-      - kubectl apply -f bootstrap/k8s-force-https-middleware.yaml
-
-  argocd:
-    desc: "Install Argo CD"
-    deps: [https-middleware]
-    cmds: 
-    - |
-      kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-      kubectl create secret generic oidc-secret --namespace argocd --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
-      kubectl label secret oidc-secret --namespace argocd "app.kubernetes.io/part-of=argocd"
-      helm repo add argo https://argoproj.github.io/argo-helm
-      helm repo update
-      helm upgrade --install argocd argo/argo-cd --namespace argocd -f bootstrap/helm-values-argocd.yaml
-
-  headlamp:
-    desc: "Install Headlamp Dashboard"
-    deps: [https-middleware]
-    cmds:
-      - kubectl create namespace headlamp --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic oidc-secret -n headlamp --from-env-file=./credentials/oidc.env --dry-run=client -o yaml | kubectl apply -f -
-      - helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
-      - helm repo update
-      - helm upgrade --install headlamp headlamp/headlamp --namespace headlamp -f bootstrap/helm-values-headlamp.yaml
-      - kubectl apply -f bootstrap/k8s-rbac-oidc-admin.yaml
-
-  # --- NAMESPACES & SECRETS [excluding bootstrap ones] ---
-
-  setup-namespaces:
+      - kubectl create secret generic {{.NAME}} -n {{.NS}} --from-env-file={{.FILE}} --dry-run=client -o yaml | kubectl apply -f -
+    status:
+      - test ! -f {{.FILE}}
+  
+  setup-namespaces:  # deps to secrets
     internal: true
     cmds:
-      - for: [auth, home-internal, web]
+      - for: [argocd, auth, cert-manager, cloudflared, headlamp, home-internal, traefik, web]
         cmd: kubectl create namespace {{.ITEM}} --dry-run=client -o yaml | kubectl apply -f -
 
   secrets:
     desc: "Create all secrets from env files (Idempotent)"
     deps: [setup-namespaces]
+    vars:
+      ITEMS:
+        - { NAME: oidc-secret,              NS: argocd,        FILE: ./credentials/oidc.env }
+        - { NAME: cloudflare-api-token,     NS: cert-manager,  FILE: ./credentials/cloudflare.env }
+        - { NAME: oidc-secret,              NS: headlamp,      FILE: ./credentials/oidc.env }
+        - { NAME: oauth2-proxy-credentials, NS: auth,          FILE: ./credentials/oauth.env }
+        - { NAME: email-credentials,        NS: web,           FILE: ./credentials/email.env }
+        - { NAME: tz-config,                NS: web,           FILE: ./credentials/tz.env }
+        - { NAME: tz-config,                NS: home-internal, FILE: ./credentials/tz.env }
+        - { NAME: frigate-credentials,      NS: home-internal, FILE: ./credentials/frigate.env }
+        - { NAME: mariadb-credentials,      NS: home-internal, FILE: ./credentials/db.env }
+        - { NAME: poller-credentials,       NS: home-internal, FILE: ./credentials/poll.env }
     cmds:
-      # Pattern: Create secret only if it changed/doesn't exist using dry-run + apply
-      - kubectl create secret generic oauth2-proxy-credentials -n auth --from-env-file=./credentials/oauth.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic email-credentials -n web --from-env-file=./credentials/email.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic tz-config -n web --from-env-file=./credentials/tz.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic tz-config -n home-internal --from-env-file=./credentials/tz.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic frigate-credentials -n home-internal --from-env-file=./credentials/frigate.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic mariadb-credentials -n home-internal --from-env-file=./credentials/db.env --dry-run=client -o yaml | kubectl apply -f -
-      - kubectl create secret generic poller-credentials -n home-internal --from-env-file=./credentials/poll.env --dry-run=client -o yaml | kubectl apply -f -
+      - for: { var: ITEMS }
+        task: _apply-secret
+        vars:
+          NAME: '{{.ITEM.NAME}}'
+          NS: '{{.ITEM.NS}}'
+          FILE: '{{.ITEM.FILE}}'
+
+  argocd:
+    desc: "Install Argo CD"
+    deps: [https-middleware]
+    cmds: 
+      - helm repo add argo https://argoproj.github.io/argo-helm
+      - helm repo update
+      - helm upgrade --install argocd argo/argo-cd --namespace argocd -f infra/bootstrap/values/argocd.yaml
+
+  argocd:login:
+    desc: "Open ArgoCD UI, port-forward, and print credentials"
+    cmds:
+      - |
+        echo "🔑 Fetching ArgoCD initial admin password..."
+        PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+        
+        echo "----------------------------------------"
+        echo "👤 Username: admin"
+        echo "🔐 Password: $PASSWORD"
+        echo "----------------------------------------"
+        
+        echo "🌐 Opening browser to https://localhost:8080..."
+        # OS-agnostic browser open (runs in background so it doesn't block the port-forward)
+        (sleep 2 && (open https://localhost:8080 || xdg-open https://localhost:8080 || start https://localhost:8080) &> /dev/null) &
+        
+        echo "🚀 Starting port-forward (Press Ctrl+C to stop)..."
+        kubectl port-forward svc/argocd-server -n argocd 8080:443
 
   # --- MONITORING ---
   job-logs:
@@ -108,17 +97,3 @@ tasks:
     desc: "Register Apps and Repos for ArgoCD"
     cmds:
       - kubectl apply -f gitops-config/yan-fi
-
-
-  # --- ALL-IN-ONE ---
-
-  bootstrap:
-    desc: "Full cluster bootstrap, without MariaDB migration"
-    cmds:
-      - task: traefik
-      - task: cert-manager
-      - task: cloudflare-tunnel
-      - task: argocd
-      - task: headlamp
-      - task: secrets
-      - task: gitops

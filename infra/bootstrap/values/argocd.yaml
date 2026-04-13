@@ -26,6 +26,7 @@ configs:
     policy.default: "" # set to nothing, instead of "role:readonly"
     policy.csv: |
       g, yan@yan.fi, role:admin
+      g, nocturn21st@gmail.com, role:admin
   secret:
     createSecret: true
 
