@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/yyyaaan/core.git
-    targetRevision: main 
+    targetRevision: ops/rollout
     path: infra/gitops-config/test-domain
   destination:
     server: https://kubernetes.default.svc
@@ -24,7 +24,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/yyyaaan/core.git
-    targetRevision: main 
+    targetRevision: ops/rollout 
     path: infra/helm-chart
     helm:
       valueFiles:

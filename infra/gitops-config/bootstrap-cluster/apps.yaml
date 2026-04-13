@@ -4,7 +4,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-traefik
+  name: sys-1-traefik
   namespace: argocd
 spec:
   project: default
@@ -30,7 +30,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-cert-manager
+  name: sys-2-cert-manager
   namespace: argocd
 spec:
   project: default
@@ -54,7 +54,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-headlamp
+  name: sys-4-headlamp
   namespace: argocd
 spec:
   project: default
@@ -81,7 +81,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-cert-cloudflare-and-more
+  name: sys-3-cert-cloudflare-etc
   namespace: argocd
 spec:
   project: default

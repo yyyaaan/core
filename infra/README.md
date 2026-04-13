@@ -4,6 +4,13 @@ Recommended to use git ops only! That is:
 - Only install ArgoCD with `kubectl` commandline, plus the known name spaces and secrets injection
 - Everything else via ArgoCD
 
+
+1. Check domain is correct under infra/bootstrap
+2. run `task bootstrap(-test)`
+3. visit argocd `task infra:argocd:login`
+3. after approving envs, disable configs.cm.admin.enabled in argocd.yaml
+
+
 ## Port configured in traefik (8080 8443 in current taskfile)
 
 ## Memo
