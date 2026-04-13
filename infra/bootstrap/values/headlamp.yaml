@@ -13,13 +13,13 @@ ingress:
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-force-https@kubernetescrd
   ingressClassName: traefik
   hosts:
-    - host: dash.yan.fi
+    - host: dash.omop.fi
       paths:
         - path: /
           type: ImplementationSpecific
   tls:
     - secretName: dash-tls-cert
       hosts:
-        - dash.yan.fi
+        - dash.omop.fi
 
 # oidc callback url host.com/oidc-callback

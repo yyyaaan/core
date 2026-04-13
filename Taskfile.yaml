@@ -32,12 +32,14 @@ tasks:
     cmds:
       - task: play:deploy
     
-  bootstrap-gitops:
+  bootstrap-test:
     desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
     cmds:
       - task: infra:bootstrap
+        vars: { ENV: "test" }
 
-  helm-test:
-    desc: Deploy core helm chart in test env via helm install
+  bootstrap:
+    desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
     cmds:
-      - task: infra:helm-deploy-core-test
+      - task: infra:bootstrap
+        vars: { ENV: "prod" }

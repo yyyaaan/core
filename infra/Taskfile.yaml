@@ -1,5 +1,8 @@
 version: '3'
 
+vars:
+  ENV: '{{.ENV | default "prod"}}'
+
 tasks:
   # --- INFRASTRUCTURE of ARGOCD, GITOPS ONLY ---
 
@@ -21,9 +24,11 @@ tasks:
     desc: "Create all secrets from env files (Idempotent)"
     deps: [setup-namespaces]
     vars:
+      SUFFIX: '{{if eq .ENV "test"}}.test{{else}}{{end}}'
       ITEMS:
         - { NAME: oidc-secret,              NS: argocd,        FILE: ./credentials/oidc.env }
         - { NAME: cloudflare-api-token,     NS: cert-manager,  FILE: ./credentials/cloudflare.env }
+        - { NAME: cloudflare-api-token,     NS: cloudflared,   FILE: "./credentials/cloudflare{{.SUFFIX}}.env" }
         - { NAME: oidc-secret,              NS: headlamp,      FILE: ./credentials/oidc.env }
         - { NAME: oauth2-proxy-credentials, NS: auth,          FILE: ./credentials/oauth.env }
         - { NAME: email-credentials,        NS: web,           FILE: ./credentials/email.env }
@@ -42,11 +47,10 @@ tasks:
 
   argocd:
     desc: "Install Argo CD"
-    deps: [https-middleware]
     cmds: 
       - helm repo add argo https://argoproj.github.io/argo-helm
       - helm repo update
-      - helm upgrade --install argocd argo/argo-cd --namespace argocd -f infra/bootstrap/values/argocd.yaml
+      - helm upgrade --install argocd argo/argo-cd --namespace argocd -f bootstrap/values/argocd.yaml
 
   argocd:login:
     desc: "Open ArgoCD UI, port-forward, and print credentials"
@@ -80,7 +84,7 @@ tasks:
 
   # --- DEPLOYMENT: choose only one! either helm or gitops ---
 
-  helm-deploy-core-test:
+  deprecated-helm-deploy-core-test:
     desc: "Deploy main application stack via Helm"
     deps: [secrets]
     cmds:
@@ -88,12 +92,17 @@ tasks:
   
   # --- GitOps ---
 
-  gitops-test:
-    desc: "Register Apps and Repos for ArgoCD"
+  bootstrap:
+    desc: "Bootstrap Cluster and ArgoCD GitOps Stack"
+    vars:
+      FOLDER: '{{if eq .ENV "test"}}test-domain{{else}}yan-fi{{end}}'
     cmds:
-      - kubectl apply -f gitops-config/test-domain
+      - task: secrets
+        vars:
+            ENV: '{{.ENV}}'
+      - echo "target folder gitops-config/{{.FOLDER}}"
+      # - task: argocd
+      # - kubectl apply -f gitops-config/bootstrap-cluster
+      # - kubectl apply -f gitops-config/{{.FOLDER}}
 
-  gitops:
-    desc: "Register Apps and Repos for ArgoCD"
-    cmds:
-      - kubectl apply -f gitops-config/yan-fi
+# task infra:gitops ENV=test

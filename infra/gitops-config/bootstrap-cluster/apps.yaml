@@ -21,10 +21,10 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  # syncPolicy:
+  #   automated:
+  #     prune: true
+  #     selfHeal: true
 ---
 # 2. Cert-Manager (Remote Helm Chart)
 apiVersion: argoproj.io/v1alpha1
@@ -45,10 +45,10 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  # syncPolicy:
+  #   automated:
+  #     prune: true
+  #     selfHeal: true
 ---
 # 3. Headlamp (Multiple Sources: Remote Chart + Local Git Values)
 apiVersion: argoproj.io/v1alpha1
@@ -71,10 +71,10 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: headlamp
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  # syncPolicy:
+  #   automated:
+  #     prune: true
+  #     selfHeal: true
 ---
 # 4. Cluster Bootstrap 
 # This will handle your Cloudflare Tunnel, Cert Issuer, Traefik Middleware, and Headlamp RBAC
@@ -87,12 +87,12 @@ spec:
   project: default
   source:
     repoURL: https://github.com/yyyaaan/core.git
-    path: bootstrap
+    path: bootstrap/manifests
     targetRevision: ops/rollout
   destination:
     server: https://kubernetes.default.svc
-    namespace: default # Ensure your individual YAMLs have `namespace:` defined explicitly in their metadata
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    namespace: default
+  # syncPolicy:
+  #   automated:
+  #     prune: true
+  #     selfHeal: true
