@@ -87,7 +87,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/yyyaaan/core.git
-    path: bootstrap/manifests
+    path: infra/bootstrap/manifests
     targetRevision: ops/rollout
   destination:
     server: https://kubernetes.default.svc
