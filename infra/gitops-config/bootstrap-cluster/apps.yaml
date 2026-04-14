@@ -1,4 +1,5 @@
 # this are the dependencies that are always needed for cluster!
+# gitops for the below are registered in domain level gitops
 ---
 # 1. Traefik (Remote Helm Chart)
 apiVersion: argoproj.io/v1alpha1
@@ -7,11 +8,11 @@ metadata:
   name: sys-1-traefik
   namespace: argocd
 spec:
-  project: default
+  project: bootstrap
   source:
     repoURL: https://traefik.github.io/charts
-    chart: traefik
-    targetRevision: HEAD
+    chart: traefik/traefik
+    targetRevision: 39.0.7
     helm:
       parameters:
         - name: ports.web.exposedPort
@@ -33,7 +34,7 @@ metadata:
   name: sys-2-cert-manager
   namespace: argocd
 spec:
-  project: default
+  project: bootstrap
   source:
     repoURL: https://charts.jetstack.io
     chart: cert-manager
@@ -55,9 +56,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: sys-4-headlamp
-  namespace: argocd
+  namespace: bootstrap
 spec:
-  project: default
+  project: bootstrap
   sources:
     - repoURL: https://kubernetes-sigs.github.io/headlamp/
       chart: headlamp
@@ -84,7 +85,7 @@ metadata:
   name: sys-3-cert-cloudflare-etc
   namespace: argocd
 spec:
-  project: default
+  project: gitops
   source:
     repoURL: https://github.com/yyyaaan/core.git
     path: infra/bootstrap/manifests

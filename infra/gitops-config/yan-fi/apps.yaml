@@ -21,7 +21,7 @@ metadata:
   name: core-infra
   namespace: argocd
 spec:
-  project: default
+  project: lab
   source:
     repoURL: https://github.com/yyyaaan/core.git
     targetRevision: ops/rollout 
@@ -36,7 +36,7 @@ metadata:
   name: app-play
   namespace: argocd
 spec:
-  project: default
+  project: lab
   source:
     repoURL: https://github.com/yyyaaan/core.git
     targetRevision: ops/rollout
