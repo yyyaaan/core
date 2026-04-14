@@ -4,8 +4,8 @@ metadata:
   name: restic
   namespace: {{ $.Values.restic.namespace }}
   labels:
-    app.kubernetes.io/name: poller
-    app.kubernetes.io/component: {{ .name }}
+    app.kubernetes.io/name: restic
+    app.kubernetes.io/component: backup
 spec:
   schedule: {{ $.Values.restic.schedule | quote }}
   timeZone: {{ $.Values.restic.timezone | quote }}
