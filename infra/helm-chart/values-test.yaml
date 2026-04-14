@@ -57,7 +57,7 @@ stirlingPdf:
 
 restic:
   namespace: home-internal
-  schedule: "39 13 * * *"
+  schedule: "15 17 * * *"
   timezone: "Europe/Helsinki"
   image:
     repository: restic/restic

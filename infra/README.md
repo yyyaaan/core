@@ -12,8 +12,6 @@ Recommended to use git ops only! That is:
 3. after approving envs, disable configs.cm.admin.enabled in argocd.yaml
 
 
-## Port configured in traefik (8080 8443 in current taskfile)
-
 ## Memo
 
 - Namespaces required
@@ -23,6 +21,15 @@ Recommended to use git ops only! That is:
 > Argo CD using community managed helm chart, which is arguably anti-pattern.
 
 Callback URL: /auth/callback for `ArgoCD`, /oidc-callback for `headlamp`
+
+## Restic Backup Repository
+
+The backup is organized in repo on Backblaze storage bucket (S3 compatible). The backup repo must be manually setup beforehand.
+
+```
+# restic repo one time setup, providing all necessary evn vars
+restic -r s3:s3.eu-central-003.backblazeb2.com/BucketNameHere init
+```
 
 ## Networking with Cloudflare
 
@@ -39,6 +46,8 @@ Official docs at https://docs.k3s.io/installation/requirements?os=pi, and at a g
 - check: /boot/firmware/cmdline.txt to have additional `cgroup_memory=1 cgroup_enable=memory` , and it may already exists
 - check: `sudo modprobe vxlan`, if only on ERROR `sudo modprobe vxlan`
 - install `curl -sfL https://get.k3s.io | sh -s - --disable traefik`
+
+### Port configured in traefik (8080 8443 in current taskfile)
 
 ### Config API Server to trust OIDC
 K3s is easy to configure. You edit the server config file on your Pi:

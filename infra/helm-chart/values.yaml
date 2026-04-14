@@ -96,6 +96,16 @@ mqtt:
     pullPolicy: IfNotPresent
   hostPathData: /media/ya/kingston/home/config/mqtt/config # updated from previous, one level down
 
+restic:
+  namespace: home-internal
+  schedule: "15 17 * * *"
+  timezone: "Europe/Helsinki"
+  image:
+    repository: restic/restic
+    tag: latest
+  resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
+  hostPathConfig: /media/ya/kingston/home/config
+
 stirlingPdf:
   namespace: web
   replicas: 0
