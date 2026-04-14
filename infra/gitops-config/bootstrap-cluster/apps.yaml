@@ -67,7 +67,7 @@ spec:
         valueFiles:
           - $values/infra/bootstrap/values/headlamp.yaml
     - repoURL: https://github.com/yyyaaan/core.git
-      targetRevision: ops/rollout
+      targetRevision: main
       ref: values
   destination:
     server: https://kubernetes.default.svc
@@ -89,7 +89,7 @@ spec:
   source:
     repoURL: https://github.com/yyyaaan/core.git
     path: infra/bootstrap/manifests
-    targetRevision: ops/rollout
+    targetRevision: main
   destination:
     server: https://kubernetes.default.svc
     namespace: default
