@@ -24,4 +24,3 @@ spec:
         env:
           - name: SECURITY_ENABLELOGIN
             value: "false"    # middleware handles authentication
-        

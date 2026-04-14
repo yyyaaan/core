@@ -5,30 +5,28 @@ nameOverride: argocd
 namespaceOverride: argocd
 
 global:
-  domain: cd.yan.fi
+  domain: cd.omop.fi
 
 configs:
   params:  # traefik manages TLS
     server.insecure: true
   cm:
     create: true
-    admin.enabled: false  # oidc only
+    admin.enabled: "true"  # oidc only
     timeout.reconciliation: 300s # less frequent than default
     oidc.config: |
       name: Google
       issuer: https://accounts.google.com
       clientID: 719690536564-hrk09vm3gjkqnpr2873q7mnff0qdcv4c.apps.googleusercontent.com
       clientSecret: $oidc-secret:OIDC_CLIENT_SECRET
-      requestedScopes:
-        - openid
-        - profile
-        - email
+      requestedScopes: ["openid", "profile", "email"]
   rbac:
     create: true
     scopes: '[email]'
     policy.default: "" # set to nothing, instead of "role:readonly"
     policy.csv: |
       g, yan@yan.fi, role:admin
+      g, nocturn21st@gmail.com, role:admin
   secret:
     createSecret: true
 
@@ -45,5 +43,5 @@ server:
       traefik.ingress.kubernetes.io/router.middlewares: kube-system-force-https@kubernetescrd
     extraTls:
       - hosts:
-        - cd.yan.fi
+        - cd.omop.fi
         secretName: cd-tls-cert

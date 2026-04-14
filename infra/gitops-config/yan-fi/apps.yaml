@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/yyyaaan/core.git
-    targetRevision: main 
+    targetRevision: main
     path: infra/gitops-config/yan-fi
   destination:
     server: https://kubernetes.default.svc
@@ -21,7 +21,7 @@ metadata:
   name: core-infra
   namespace: argocd
 spec:
-  project: default
+  project: lab
   source:
     repoURL: https://github.com/yyyaaan/core.git
     targetRevision: main 
@@ -29,3 +29,18 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: default  # chart overrides namespaces as needed
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-play
+  namespace: argocd
+spec:
+  project: lab
+  source:
+    repoURL: https://github.com/yyyaaan/core.git
+    targetRevision: main
+    path: apps/py-play/helm-chart
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: web

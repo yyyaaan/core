@@ -34,6 +34,23 @@ General Web: Play FastAPI App, Stirling PDF (on-demand)
 
 Supporting service: OAuth2 Proxy, headlamp; Cloudflare tunnel and Cert Issuers
 
+## Restic Backups
+
+A Cronjob is registered to backup the MariaDB and config folders.
+
+```
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export RESTIC_PASSWORD=
+
+restic -r s3:s3.eu-central-003.backblazeb2.com/yyyRestic forget --keep-daily 7 --keep-weekly 8 --dry-run [--prune to run]
+
+restic -r s3:s3.eu-central-003.backblazeb2.com/yyyRestic snapshots
+restic -r s3:s3.eu-central-003.backblazeb2.com/yyyRestic ls -l latest
+
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY RESTIC_PASSWORD
+```
+
 ## Remember to confirm Kube Context
 
 `export KUBECONFIG=~/.kube/pi-config` (default is config)

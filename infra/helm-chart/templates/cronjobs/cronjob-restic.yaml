@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restic
+  namespace: {{ .Values.restic.namespace }}
+  labels:
+    app.kubernetes.io/name: restic
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.restic.schedule | quote }}
+  timeZone: {{ .Values.restic.timezone | quote }}
+  concurrencyPolicy: Forbid 
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          initContainers:
+          - name: mariadb-dump
+            image: {{ .Values.mariaDB.image.repository }}:{{ .Values.mariaDB.image.tag }}
+            imagePullPolicy: {{ .Values.mariaDB.image.pullPolicy }}
+            command: ["/bin/sh", "-c"]
+            args: 
+            - "mariadb-dump -h mariadb-service -u root -p$DB_PASSWORD --all-databases > /db-dump/dump.sql"
+            env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-credentials
+                  key: MARIADB_ROOT_PASSWORD
+            volumeMounts:
+            - name: dump-volume
+              mountPath: /db-dump
+          containers:
+          - name: restic
+            image: {{ $.Values.restic.image.repository }}:{{ $.Values.restic.image.tag }}
+            args:
+            - -r
+            - {{ $.Values.restic.resticRepository | quote }}
+            - backup
+            - /home-configs
+            - /db-dump
+            - --exclude="backup"
+            - --exclude="backups"
+            securityContext:
+              runAsUser: 0 
+            envFrom:
+            - secretRef:
+                name: restic-credentials
+            volumeMounts:
+            - name: config-folder
+              mountPath: /home-configs
+              readOnly: true
+            - name: dump-volume
+              mountPath: /db-dump
+              readOnly: true
+          volumes:
+          - name: config-folder
+            hostPath:
+              path: {{ $.Values.restic.hostPathConfig }}
+              type: Directory
+          - name: dump-volume
+            emptyDir: {}

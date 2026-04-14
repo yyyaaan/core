@@ -19,6 +19,17 @@ spec:
         args:
         - tunnel
         - --no-autoupdate
-        - run
-        - --token
-        - YOUR_TUNNEL_TOKEN_FROM_DASHBOARD
+        - run        
+        env:
+        - name: TUNNEL_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cloudflared-token
+              key: tunnel-token
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi   
+          limits:
+            cpu: 250m
+            memory: 128Mi

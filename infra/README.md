@@ -1,6 +1,16 @@
 # Core Infrastructure - Kubernetes
 
-If GitOps is used, be refrained from `helm install`. That is, choose either "gitops-config" or "helm-chart".
+Recommended to use git ops only! That is:
+- Only install ArgoCD with `kubectl` commandline, plus the known name spaces and secrets injection
+- Everything else via ArgoCD
+
+
+1. Check domain is correct under infra/bootstrap
+2. run `task bootstrap(-test)`
+3. visit argocd `task infra:argocd:login`
+4. sync in order: traefik, cert-manager, cert-cloudflare-etc, headlamp ...
+3. after approving envs, disable configs.cm.admin.enabled in argocd.yaml
+
 
 ## Memo
 
@@ -12,21 +22,32 @@ If GitOps is used, be refrained from `helm install`. That is, choose either "git
 
 Callback URL: /auth/callback for `ArgoCD`, /oidc-callback for `headlamp`
 
+## Restic Backup Repository
+
+The backup is organized in repo on Backblaze storage bucket (S3 compatible). The backup repo must be manually setup beforehand.
+
+```
+# restic repo one time setup, providing all necessary evn vars
+restic -r s3:s3.eu-central-003.backblazeb2.com/BucketNameHere init
+```
+
 ## Networking with Cloudflare
 
 Cloudflare setups:
 - Enable Cloudflare tunnel
-- Zero Trust - Tunnel: Published application routes, add HTTP [traefik.kube-system.svc.cluster.local:80](http://traefik.default.svc.cluster.local:80), note for possible different namespace (can be default if on OrbStack)
+- Zero Trust - Tunnel: Published application routes, add HTTP `traefik.traefik.svc.cluster.local:8080`, note for possible different namespace
 - DNS: [should be auto created by step above] CNAME * tunnel_id.cfargotunnel.com (proxied)
 
 ## Install `k3s` on Raspberry Pi and API Server with OIDC
 
-Raspberry Pi OS Lite is recommended for resource conservation.
+Raspberry Pi OS Lite is recommended for resource conservation. __DISABLE k3s default traefik__ to keep 80/443 port untouched.
 
 Official docs at https://docs.k3s.io/installation/requirements?os=pi, and at a glance:
 - check: /boot/firmware/cmdline.txt to have additional `cgroup_memory=1 cgroup_enable=memory` , and it may already exists
 - check: `sudo modprobe vxlan`, if only on ERROR `sudo modprobe vxlan`
 - install `curl -sfL https://get.k3s.io | sh -s - --disable traefik`
+
+### Port configured in traefik (8080 8443 in current taskfile)
 
 ### Config API Server to trust OIDC
 K3s is easy to configure. You edit the server config file on your Pi:

@@ -15,25 +15,31 @@ tasks:
   build-play-image:
     desc: "Build play local image"
     cmds:
-      - docker build -t py-play -f apps/py-play/Dockerfile .
+      - docker build -t play:local -f apps/py-play/Dockerfile .
 
   build-all-images:
     desc: "Build all local images"
     cmds:
       - task: build-play-image
       - task: poller:build-local-image
+      - docker tag play:local yyyaaan/play:alpha0
+      - docker push yyyaaan/play:alpha0
+      - docker tag poller:local yyyaaan/poller:alpha1
+      - docker push yyyaaan/poller:alpha1
 
   deploy-play:
     desc: Deploy the play helm chart - use gitops instead
     cmds:
       - task: play:deploy
     
-  bootstrap-gitops:
+  bootstrap-test:
     desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
     cmds:
       - task: infra:bootstrap
+        vars: { ENV: "test" }
 
-  helm-test:
-    desc: Deploy core helm chart in test env via helm install
+  bootstrap:
+    desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
     cmds:
-      - task: infra:helm-deploy-core-test
+      - task: infra:bootstrap
+        vars: { ENV: "prod" }
