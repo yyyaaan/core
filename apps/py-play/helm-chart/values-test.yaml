@@ -17,4 +17,4 @@ memDiskSize: 100Mi
 service:
   targetPort: 7999
 ingress:
-  host: play.yan.fi
+  host: play.omop.fi
