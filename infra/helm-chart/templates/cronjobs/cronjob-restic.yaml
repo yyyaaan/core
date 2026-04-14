@@ -38,11 +38,10 @@ spec:
             - -r
             - {{ $.Values.restic.resticRepository | quote }}
             - backup
-            - /mnt/host-configs
-            - --exclude
-            - "backup"
-            - --exclude
-            - "backups"
+            - /home-configs
+            - /db-dump
+            - --exclude="backup"
+            - --exclude="backups"
             securityContext:
               runAsUser: 0 
             envFrom:
@@ -50,7 +49,10 @@ spec:
                 name: restic-credentials
             volumeMounts:
             - name: config-folder
-              mountPath: /mnt/host-configs
+              mountPath: /home-configs
+              readOnly: true
+            - name: dump-volume
+              mountPath: /db-dump
               readOnly: true
           volumes:
           - name: config-folder
