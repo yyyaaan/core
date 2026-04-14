@@ -20,6 +20,7 @@ tasks:
       - for: [argocd, auth, cert-manager, cloudflared, headlamp, home-internal, traefik, web]
         cmd: kubectl create namespace {{.ITEM}} --dry-run=client -o yaml | kubectl apply -f -
 
+  # task infra:secrets ENV=test
   secrets:
     desc: "Create all secrets from env files (Idempotent)"
     deps: [setup-namespaces]
@@ -37,6 +38,7 @@ tasks:
         - { NAME: frigate-credentials,      NS: home-internal, FILE: ./credentials/frigate.env }
         - { NAME: mariadb-credentials,      NS: home-internal, FILE: ./credentials/db.env }
         - { NAME: poller-credentials,       NS: home-internal, FILE: ./credentials/poll.env }
+        - { NAME: restic-credentials,       NS: home-internal, FILE: ./credentials/restic.env }
     cmds:
       - for: { var: ITEMS }
         task: _apply-secret

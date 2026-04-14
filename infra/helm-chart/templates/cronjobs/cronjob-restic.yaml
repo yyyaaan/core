@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restic
+  namespace: {{ $.Values.restic.namespace }}
+  labels:
+    app.kubernetes.io/name: poller
+    app.kubernetes.io/component: {{ .name }}
+spec:
+  schedule: {{ $.Values.restic.schedule | quote }}
+  timeZone: {{ $.Values.restic.timezone | quote }}
+  concurrencyPolicy: Forbid 
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: restic
+            image: {{ $.Values.restic.image.repository }}:{{ $.Values.restic.image.tag }}
+            args:
+            - -r
+            - {{ $.Values.restic.resticRepository | quote }}
+            - backup
+            - /mnt/host-configs
+            - exclude
+            - "**/backups/**"
+            securityContext:
+              runAsUser: 0 
+            envFrom:
+            - secretRef:
+                name: restic-credentials
+            volumeMounts:
+            - name: config-folder
+              mountPath: /mnt/host-configs
+              readOnly: true
+          volumes:
+          - name: config-folder
+            hostPath:
+              path: {{ $.Values.restic.hostPathConfig }}
+              type: Directory

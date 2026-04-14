@@ -55,6 +55,16 @@ stirlingPdf:
   ingress:
     host: pdf.omop.fi
 
+restic:
+  namespace: home-internal
+  schedule: "55 12 * * *"
+  timezone: "Europe/Helsinki"
+  image:
+    repository: restic/restic
+    tag: latest
+  resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
+  hostPathConfig: /Users/yyy/Lab/home/config
+
 poller:
   namespace: home-internal
   image:
@@ -65,7 +75,7 @@ poller:
   envFromSecretList:
     - mariadb-credentials
     - poller-credentials
-  hostPathConfig: /Users/yyy/Lab/home/config/poller
+  hostPathConfig: /Users/yyy/Lab/home/config
   hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
   hostPathForData: /Users/yyy/Lab/home/data/app
   resources:
