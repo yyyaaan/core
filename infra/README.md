@@ -8,6 +8,7 @@ Recommended to use git ops only! That is:
 1. Check domain is correct under infra/bootstrap
 2. run `task bootstrap(-test)`
 3. visit argocd `task infra:argocd:login`
+4. sync in order: traefik, cert-manager, cert-cloudflare-etc, headlamp ...
 3. after approving envs, disable configs.cm.admin.enabled in argocd.yaml
 
 

@@ -28,7 +28,7 @@ tasks:
       ITEMS:
         - { NAME: oidc-secret,              NS: argocd,        FILE: ./credentials/oidc.env }
         - { NAME: cloudflare-api-token,     NS: cert-manager,  FILE: ./credentials/cloudflare.env }
-        - { NAME: cloudflare-api-token,     NS: cloudflared,   FILE: "./credentials/cloudflare{{.SUFFIX}}.env" }
+        - { NAME: cloudflared-token,        NS: cloudflared,   FILE: "./credentials/cloudflare{{.SUFFIX}}.env" }
         - { NAME: oidc-secret,              NS: headlamp,      FILE: ./credentials/oidc.env }
         - { NAME: oauth2-proxy-credentials, NS: auth,          FILE: ./credentials/oauth.env }
         - { NAME: email-credentials,        NS: web,           FILE: ./credentials/email.env }

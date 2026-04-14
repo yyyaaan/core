@@ -5,13 +5,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-1-traefik
+  name: traefik
   namespace: argocd
 spec:
   project: bootstrap
   source:
     repoURL: https://traefik.github.io/charts
-    chart: traefik/traefik
+    chart: traefik
     targetRevision: 39.0.7
     helm:
       parameters:
@@ -31,7 +31,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-2-cert-manager
+  name: cert-manager
   namespace: argocd
 spec:
   project: bootstrap
@@ -55,14 +55,14 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-4-headlamp
-  namespace: bootstrap
+  name: headlamp
+  namespace: argocd
 spec:
   project: bootstrap
   sources:
     - repoURL: https://kubernetes-sigs.github.io/headlamp/
       chart: headlamp
-      targetRevision: HEAD
+      targetRevision: 0.41.0
       helm:
         valueFiles:
           - $values/infra/bootstrap/values/headlamp.yaml
@@ -82,7 +82,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sys-3-cert-cloudflare-etc
+  name: cert-cloudflare-etc
   namespace: argocd
 spec:
   project: gitops
