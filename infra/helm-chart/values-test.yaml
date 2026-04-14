@@ -82,4 +82,10 @@ poller:
     limits:
       cpu: "1500m"
       memory: "3Gi"
-  jobs: []
+  jobs:
+    - name: elenia
+      suspend: true
+      schedule: "9-59/30 * * * *"
+      command: 
+        - "/usr/local/bin/python"
+        - "/app/job_elenia.py"

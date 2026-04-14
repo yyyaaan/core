@@ -124,7 +124,6 @@ poller:
     pullPolicy: IfNotPresent
   timezone: "Europe/Helsinki"
   envFromSecretList:
-    - mariadb-credentials
     - poller-credentials
   hostPathConfig: /media/ya/kingston/home/config/poller
   hostPathMedia: /media/ya/kingston/share/media
@@ -152,8 +151,3 @@ poller:
       command: 
         - "/bin/sh"
         - "/app/job_ffmpeg.sh"
-    # - name: backup
-    #   schedule: "55 6 * * *"
-    #   command: 
-    #     - "/bin/sh"
-    #     - "/app/job_backup.sh"

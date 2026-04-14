@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from datetime import datetime, timedelta
+from datetime import datetime
 from requests import post
 
 parser = ArgumentParser(prog="Timelapse Preparation")
