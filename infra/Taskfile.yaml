@@ -56,9 +56,8 @@ tasks:
     desc: "Open ArgoCD UI, port-forward, and print credentials"
     cmds:
       - |
-        echo "Waiting for ArgoCD server to be ready..."
+        echo "🔑 Waiting for ArgoCD server to be ready, and fetching admin password for local login"
         kubectl wait --for=condition=Available deployment/argocd-server -n argocd --timeout=300s
-        echo "🔑 Fetching ArgoCD initial admin password..."
         PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
         
         echo "----------------------------------------"
@@ -67,7 +66,6 @@ tasks:
         echo "----------------------------------------"
         
         echo "🌐 Opening browser to https://localhost:9080..."
-        # OS-agnostic browser open (runs in background so it doesn't block the port-forward)
         (sleep 2 && (open http://localhost:9080 || xdg-open http://localhost:9080 || start https://localhost:9080) &> /dev/null) &
         
         echo "🚀 Starting port-forward (Press Ctrl+C to stop)..."
@@ -90,12 +88,12 @@ tasks:
     desc: "Deploy main application stack via Helm"
     deps: [secrets]
     cmds:
-      - helm upgrade --install omop-fi ./helm-chart -f ./helm-chart/values-test.yaml
+      - helm upgrade --install core-infra ./helm-chart -f ./helm-chart/values-test.yaml
   
   # --- GitOps ---
 
   bootstrap:
-    desc: "Bootstrap Cluster and ArgoCD GitOps Stack"
+    desc: "Bootstrap Cluster and ArgoCD GitOps Stack - continue with ArgoCD"
     vars:
       FOLDER: '{{if eq .ENV "test"}}test-domain{{else}}yan-fi{{end}}'
     cmds:

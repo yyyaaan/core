@@ -7,34 +7,9 @@ migrationState:
   completed: true
   migrationPodEnabled: false
 
-homebridge:
-  enabled: true
-  replicas: 0
-  namespace: home-internal
-  image:
-    repository: homebridge/homebridge
-    tag: "2026-02-25"
-    pullPolicy: IfNotPresent
-  hostPathConfig: /Users/yyy/Lab/home/config/hb
-  ingress:
-    enabled: true
-    host: homebridge.omop.fi
-
-ha: # mariaDB migration flag controls resource provisioning
-  enabled: true
-  replicas: 0
-  namespace: home-internal
-  image:
-    repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.3.4"
-    pullPolicy: IfNotPresent
-  envFromSecretList:
-    - tz-config
-  hostPathConfig: /Users/yyy/Lab/home/config/ha
-  hostPathMedia: /Users/yyy/Lab/home/data/temporary/ha-media
-  enableBluetooth: false
-  ingress:
-    host: h.omop.fi
+homebridge.enabled: false
+ha.enabled: false
+frigate.enabled: false
 
 mariaDB:
   namespace: home-internal
@@ -70,35 +45,9 @@ auth:
     - "^/api/health$"
     - "^/robots.txt$"
 
-frigate:
-  enabled: true
-  replicas: 0
-  namespace: home-internal
-  image:
-    repository: ghcr.io/blakeblackshear/frigate
-    tag: "0.17.0"
-    pullPolicy: IfNotPresent
-  envFromSecret: frigate-credentials
-  privileged: true
-  shmSize: 384Mi
-  cacheSize: 900Mi
-  hostPathConfig: /Users/yyy/Lab/home/config/ha
-  hostPathMedia: /Users/yyy/Lab/home/data/temporary/frigate
-  ingress:
-    host: frigate.omop.fi
-
-mqtt:
-  enabled: true
-  namespace: home-internal
-  image:
-    repository: eclipse-mosquitto
-    tag: "2.1-alpine"
-    pullPolicy: IfNotPresent
-  hostPathData: /Users/yyy/Lab/home/config/mqtt/config # updated from previous, one level down
-
 stirlingPdf:
   namespace: web
-  replicas: 0
+  replicas: 1
   image:
     repository: stirlingtools/stirling-pdf
     tag: latest
@@ -123,27 +72,4 @@ poller:
     limits:
       cpu: "1500m"
       memory: "3Gi"
-  jobs:
-    - name: elenia
-      suspend: false
-      schedule: "2-59/15 * * * *"
-      command: 
-        - "/usr/local/bin/python"
-        - "/app/job_elenia.py"
-    - name: timelapse
-      suspend: true
-      schedule: "3 1 * * *"
-      command: 
-        - "/usr/local/bin/python"
-        - "/app/job_timelapse.py"
-    - name: ffmpeg
-      suspend: true
-      schedule: "55 5 * * *"
-      command: 
-        - "/bin/sh"
-        - "/app/job_ffmpeg.sh"
-    # - name: backup
-    #   schedule: "55 6 * * *"
-    #   command: 
-    #     - "/bin/sh"
-    #     - "/app/job_backup.sh"
+  jobs: []
