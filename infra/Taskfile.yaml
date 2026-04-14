@@ -48,9 +48,12 @@ tasks:
   argocd:
     desc: "Install Argo CD"
     cmds: 
+      - kubectl label secret oidc-secret --namespace argocd "app.kubernetes.io/part-of=argocd"
       - helm repo add argo https://argoproj.github.io/argo-helm
       - helm repo update
       - helm upgrade --install argocd argo/argo-cd --namespace argocd -f bootstrap/values/argocd.yaml
+
+  # --- MONITORING OPS ---
 
   argocd:login:
     desc: "Open ArgoCD UI, port-forward, and print credentials"
@@ -71,18 +74,17 @@ tasks:
         echo "🚀 Starting port-forward (Press Ctrl+C to stop)..."
         kubectl port-forward svc/argocd-server -n argocd 9080:80
 
-  # --- MONITORING ---
-  job-logs:
-    desc: "Stream logs of all jobs in web namespace"
+  headlamp:login:
+    desc: "Open headlamp and obtain token]"
     cmds:
-      - kubectl logs -l app.kubernetes.io/component=elenia
+      - |
+        echo "🔑 Fetching cluster token for headlamp"
+        TOKEN=$(kubectl create token headlamp -n headlamp)
+        HOST=$(kubectl get ingress headlamp -n headlamp -o jsonpath='{.spec.rules[0].host}')
+        echo "🔐 Token: $TOKEN"
+        open https://$HOST
 
-  token:
-    desc: "Obtain cluster token for headlamp (RBAC recommended though)"
-    cmds:
-      - kubectl create token headlamp -n headlamp
-
-  # --- DEPLOYMENT: choose only one! either helm or gitops ---
+  # --- DEPLOYMENT / GitOps with ArgoCD recommended ---
 
   deprecated-helm-deploy-core-test:
     desc: "Deploy main application stack via Helm"
