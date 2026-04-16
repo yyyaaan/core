@@ -85,24 +85,17 @@ kubectl config use-context pi-cluster
 
 Manual update non-git:
 - storageClassName for mariadb persistent volume
-- http://traefik.default.svc.cluster.local:80 can be different! check name space, even kube-system
 - mqtt-service or mqtt-service.home-internal or mqtt-service.home-internal.svc.cluster.local (mqtt://...:1883)
 - play/public/spot & water.jpg update path in HA
 - start?rd=https:// for all login button
-- Cloudflared pod needs API Key explicitly
 - login page customization https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#page-template-options
 
 Gitignored
-- credentials/active
 - config/ha/secrets.yaml updated mariadb address
 - config/frigate/config.yaml updated mqtt address
 
 HA tasks
 - change MQTT address
-- possible path /play
-
-
-
 
 ## MariaDB migration with existing data
 
