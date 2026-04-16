@@ -5,7 +5,7 @@ description = "Play App with Playwright and FastAPI"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi",
+    "fastapi[standard]",
     "jinja2",
     "markdown",
     "opencv-python",

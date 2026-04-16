@@ -23,7 +23,7 @@ ts = int(yesterday_end.timestamp()) - args.offset * 3600
 ts0 = ts - args.hours * 3600
 
 r = post(
-    url=f"http://192.168.4.81:5000/api/export/yard/start/{ts0}/end/{ts}",
+    url=f"http://frigate-service.home-internal.svc.cluster.local:5000/api/export/yard/start/{ts0}/end/{ts}",
     json={
         "playback": "timelapse_25x",  # actual speed set in frigate config
         "name": f"day90sec_{datetime.fromtimestamp(ts0):%Y%m%d}.mp4",
@@ -43,7 +43,7 @@ export_id = r.json()["export_id"]
 
 def check_completion(export_id: str) -> bool:
     """poll for completion (the opposite of in progress)"""
-    r_status = get(url="http://192.168.4.81:5000/api/exports")
+    r_status = get(url="http://frigate-service.home-internal.svc.cluster.local:5000/api/exports")
     for item in r_status.json():
         if item["id"] == export_id:
             return not item["in_progress"]

@@ -1,6 +1,6 @@
 from asyncio import gather
 
-from play.play.PlayPage import PlayPage
+from play.PlayPage import PlayPage
 
 
 async def play_hok_elanto():

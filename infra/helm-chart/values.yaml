@@ -120,7 +120,7 @@ poller:
   namespace: home-internal
   image:
     repository: yyyaaan/poller
-    tag: "alpha0"
+    tag: "alpha1"
     pullPolicy: IfNotPresent
   timezone: "Europe/Helsinki"
   envFromSecretList:

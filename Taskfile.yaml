@@ -22,8 +22,8 @@ tasks:
     cmds:
       - task: build-play-image
       - task: poller:build-local-image
-      - docker tag play:local yyyaaan/play:alpha0
-      - docker push yyyaaan/play:alpha0
+      - docker tag play:local yyyaaan/play:alpha1
+      - docker push yyyaaan/play:alpha1
       - docker tag poller:local yyyaaan/poller:alpha1
       - docker push yyyaaan/poller:alpha1
 
