@@ -15,7 +15,7 @@ homebridge:
     repository: homebridge/homebridge
     tag: "2026-02-25"
     pullPolicy: IfNotPresent
-  hostPathConfig: /media/ya/kingston/home/config/hb
+  hostPathConfig: /mnt/kingston/home/config/hb
   ingress:
     enabled: true
     host: homebridge.yan.fi
@@ -30,8 +30,8 @@ ha: # mariaDB migration flag controls resource provisioning
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
-  hostPathConfig: /media/ya/kingston/home/config/ha
-  hostPathMedia: /media/ya/kingston/share/media
+  hostPathConfig: /mnt/kingston/home/config/ha
+  hostPathMedia: /mnt/kingston/share/media
   enableBluetooth: false
   ingress:
     host: h.yan.fi
@@ -41,7 +41,7 @@ mariaDB:
   persistentVolume:
     storageClassName: "local-path"  # or "" if problem
     name: mariadb-retained-pv
-    hostPath: /media/ya/kingston/home/data/volume/mariadb
+    hostPath: /mnt/kingston/home/data/volume/mariadb
     storage: 10Gi
   envFromSecret: mariadb-credentials
   image:
@@ -82,8 +82,8 @@ frigate:
   privileged: true
   shmSize: 384Mi
   cacheSize: 900Mi
-  hostPathConfig: /media/ya/kingston/home/config/ha
-  hostPathMedia: /media/ya/kingston/share/media/frigate
+  hostPathConfig: /mnt/kingston/home/config/ha
+  hostPathMedia: /mnt/kingston/share/media/frigate
   ingress:
     host: frigate.yan.fi
 
@@ -94,7 +94,7 @@ mqtt:
     repository: eclipse-mosquitto
     tag: "2.1-alpine"
     pullPolicy: IfNotPresent
-  hostPathData: /media/ya/kingston/home/config/mqtt/config # updated from previous, one level down
+  hostPathData: /mnt/kingston/home/config/mqtt/config # updated from previous, one level down
 
 restic:
   namespace: home-internal
@@ -104,7 +104,7 @@ restic:
     repository: restic/restic
     tag: latest
   resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
-  hostPathConfig: /media/ya/kingston/home/config
+  hostPathConfig: /mnt/kingston/home/config
 
 stirlingPdf:
   namespace: web
@@ -125,9 +125,9 @@ poller:
   timezone: "Europe/Helsinki"
   envFromSecretList:
     - poller-credentials
-  hostPathConfig: /media/ya/kingston/home/config/poller
-  hostPathMedia: /media/ya/kingston/share/media
-  hostPathForData: /media/ya/kingston/home/data/app
+  hostPathConfig: /mnt/kingston/home/config/poller
+  hostPathMedia: /mnt/kingston/share/media
+  hostPathForData: /mnt/kingston/home/data/app
   resources:
     limits:
       cpu: "1500m"
