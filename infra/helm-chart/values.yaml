@@ -134,7 +134,7 @@ poller:
       memory: "3Gi"
   jobs:
     - name: elenia
-      suspend: true
+      suspend: false
       schedule: "2-59/15 * * * *"
       command: 
         - "/usr/local/bin/python"
