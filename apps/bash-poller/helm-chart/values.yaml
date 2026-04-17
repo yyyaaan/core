@@ -37,9 +37,6 @@ elenia:
     repository: yyyaaan/poller
     tag: "alpha1"
     pullPolicy: IfNotPresent
-  command: 
-    - "/usr/local/bin/python"
-    - "/app/job_elenia.py"
   envFromSecretList:
     - poller-credentials
   hostPathMedia: /mnt/kingston/share/media

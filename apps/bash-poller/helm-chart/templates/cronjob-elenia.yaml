@@ -26,8 +26,7 @@ spec:
           - name: elenia
             image: "{{ .Values.elenia.image.repository }}:{{ .Values.elenia.image.tag }}"
             imagePullPolicy: {{ .Values.elenia.image.pullPolicy }}
-            command:
-              {{ toYaml .command | indent 14 }}
+            command: ["/usr/local/bin/python", "/app/job_elenia.py"]
             envFrom:
             {{- range .Values.elenia.envFromSecretList }}
               - secretRef:
