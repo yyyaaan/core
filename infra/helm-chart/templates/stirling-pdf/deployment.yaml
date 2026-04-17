@@ -24,3 +24,11 @@ spec:
         env:
           - name: SECURITY_ENABLELOGIN
             value: "false"    # middleware handles authentication
+        resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+            limits:
+              cpu: "2000m"
+              memory: "3Gi"
+

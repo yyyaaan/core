@@ -31,6 +31,13 @@ spec:
           - secretRef:
               name: {{ . | quote }}
         {{- end }}
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+          limits:
+            cpu: "1500m"
+            memory: "2000Mi"
         ports:
         - containerPort: 8123
           name: http
