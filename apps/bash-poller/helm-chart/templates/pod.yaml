@@ -31,9 +31,9 @@ spec:
     - name: media
       hostPath:
         path: {{ .Values.elenia.hostPathMedia }}
-        type: DirectoryOrCreate
+        type: Directory
     - name: data-volume
       hostPath:
         path: {{ .Values.elenia.hostPathForData }}
-        type: DirectoryOrCreate
+        type: Directory
 {{- end }}
