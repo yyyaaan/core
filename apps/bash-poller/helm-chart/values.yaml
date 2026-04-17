@@ -1,3 +1,6 @@
+debugPod:
+  enabled: false
+# debugPod use ffmpeg configs and all jobs' volumes
 
 # ffmpeg has init container, see manifest directly
 ffmpeg:

@@ -1,0 +1,39 @@
+{{- if .Values.debugPod.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-pod
+  labels:
+    app.kubernetes.io/name: debug-pod
+    app.kubernetes.io/component: scheduled
+spec:
+  containers:
+    - name: debug-pod
+      image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
+      imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy }}
+      command: ["/bin/sh", "-c", "sleep infinity"]
+      env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+      envFrom:
+      {{- range $.Values.ffmpeg.envFromSecretList }}
+        - secretRef:
+            name: {{ . | quote }}
+      {{- end }}
+      resources:
+        {{- toYaml .Values.ffmpeg.resources | nindent 8 }}
+      volumeMounts:
+      - name: media
+        mountPath: /media
+      - name: data-volume
+        mountPath: /mnt
+    volumes:
+    - name: media
+      hostPath:
+        path: {{ .Values.elenia.hostPathMedia }}
+        type: DirectoryOrCreate
+    - name: data-volume
+      hostPath:
+        path: {{ .Values.elenia.hostPathForData }}
+        type: DirectoryOrCreate
+{{- end }}
