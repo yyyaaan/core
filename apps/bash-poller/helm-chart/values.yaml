@@ -13,21 +13,15 @@ ffmpeg:
     pullPolicy: IfNotPresent
   envFromSecretList:
     - poller-credentials
+    - tz-config
   hostPathMedia: /mnt/kingston/share/media
   resources:
     requests:
       cpu: "1000m"
-      memory: "2Gi"
+      memory: "500Mi"
     limits:
       cpu: "2000m"
-      memory: "4Gi"
-  jobs:
-    - name: elenia
-      suspend: false
-      schedule: "2-59/15 * * * *"
-      command: 
-        - "/usr/local/bin/python"
-        - "/app/job_elenia.py"
+      memory: "3072Mi"
 
 elenia:
   namespace: home-internal
@@ -39,6 +33,7 @@ elenia:
     pullPolicy: IfNotPresent
   envFromSecretList:
     - poller-credentials
+    - tz-config
   hostPathMedia: /mnt/kingston/share/media
   hostPathForData: /mnt/kingston/home/data/app
   resources:

@@ -12,6 +12,7 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 COPY apps/py-play/pyproject.toml ./apps/py-play/
+COPY packages/py-autobrowser/pyproject.toml ./packages/py-autobrowser/
 
 RUN uv sync --frozen --no-dev --no-install-project --package play
 
@@ -29,12 +30,18 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
-RUN playwright install-deps
+# Install OS dependencies for Chromium
+RUN playwright install-deps chromium
 
-COPY apps/py-play/src/play /app/play
+# Create user with home directory so playwright can store browsers
+RUN groupadd -r appuser && useradd -r -m -g appuser appuser
 
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+COPY --chown=appuser:appuser apps/py-play/src/play /app/play
+
 USER appuser
+
+# Install Chromium browser binary as the user
+RUN playwright install chromium
 
 EXPOSE 7999
 
