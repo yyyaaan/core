@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: video
-  namespace: home-internal
+  name: cronjob-video
+  namespace: {{ .Values.ffmpeg.namespace }}
   labels:
     app.kubernetes.io/name: video
-    app.kubernetes.io/component: backup
+    app.kubernetes.io/component: scheduled
 spec:
-  schedule: "3 1 * * *"
-  timeZone: "Europe/Helsinki"
+  schedule: {{ .Values.ffmpeg.schedule | quote }}
+  timeZone: {{ .Values.ffmpeg.timezone | quote}}
   concurrencyPolicy: Forbid 
   jobTemplate:
     spec:
@@ -18,8 +18,8 @@ spec:
           restartPolicy: Never
           initContainers:
           - name: frigate-export
-            image: yyyaaan/poller:alpha1
-            imagePullPolicy: IfNotPresent
+            image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
+            imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy }}
             command: ["/bin/bash", "-c"]
             args:  # -u make sure print out not buffered
               - |
@@ -28,8 +28,8 @@ spec:
                 from time import sleep
                 from requests import get, post
 
-                offset = 0 # yesterday
-                hours = 24 # a whole day
+                offset = 0                  # yesterday
+                hours = 24                  # a whole day
                 name_prefix = "day90sec"
                 max_polling_hours = 8
                 polling_interval_seconds = 300
@@ -51,13 +51,8 @@ spec:
                     },
                 )
 
-                print(
-                    r.status_code,
-                    f"{datetime.fromtimestamp(ts0):%b%dT%H:%M:%S}--{datetime.fromtimestamp(ts):%b%dT%H:%M:%S}",
-                    r.text,
-                    flush=True,
-                )
-
+                print(f"{datetime.fromtimestamp(ts0):%b%dT%H:%M:%S}--{datetime.fromtimestamp(ts):%b%dT%H:%M:%S}")
+                print(r.text, r.status_code, flush=True)
 
                 # polling for completion
                 export_id = r.json()["export_id"]
@@ -87,32 +82,28 @@ spec:
               value: "1"
             resources:
               requests:
-                cpu: "20m"
-                memory: "50Mi"
+                cpu: "10m"
+                memory: "10Mi"
               limits:
-                cpu: "200m"
-                memory: "500Mi"
+                cpu: "100m"
+                memory: "100Mi"
           containers:
           - name: ffmpeg-encoding
             image: yyyaaan/poller:alpha1
             imagePullPolicy: IfNotPresent
-            command: ["/bin/sh", "/app/sh_ffmpeg.sh"]
+            command: ["/bin/sh", "/app/job_ffmpeg.sh"]
             envFrom:
-            - secretRef:
-                name: poller-credentials
+            {{- range $.Values.ffmpeg.envFromSecretList }}
+              - secretRef:
+                  name: {{ . | quote }}
+            {{- end }}
             resources:
-              requests:
-                cpu: "1000m"
-                memory: "2Gi"
-              limits:
-                cpu: "2000m"
-                memory: "4Gi"
+              {{- toYaml .Values.resources | nindent 14 }}
             volumeMounts:
-            - name: config-folder
+            - name: media-folder
               mountPath: /media
-              readOnly: true
           volumes:
-          - name: config-folder
+          - name: media-folder
             hostPath:
-              path: /mnt/kingston/share/media
+              path: {{ .Values.ffmpeg.hostPathMedia }}
               type: Directory

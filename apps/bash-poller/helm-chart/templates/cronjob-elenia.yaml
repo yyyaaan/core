@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-elenia
+  namespace: {{ .Values.elenia.namespace }}
+  labels:
+    app.kubernetes.io/name: elenia
+    app.kubernetes.io/component: scheduled
+spec:
+  schedule: {{ .Values.elenia.schedule | quote }}
+  timeZone: {{ .Values.elenia.timezone | quote }}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300 # Only try to "catch up" if missed by < 5 minutes
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: elenia
+            app.kubernetes.io/component: scheduled
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ .name }}
+            image: "{{ .Values.elenia.image.repository }}:{{ .Values.elenia.image.tag }}"
+            imagePullPolicy: {{ .Values.elenia.image.pullPolicy }}
+            command:
+              {{ toYaml .command | indent 14 }}
+            envFrom:
+            {{- range .Values.elenia.envFromSecretList }}
+              - secretRef:
+                  name: {{ . | quote }}
+            {{- end }}
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+            volumeMounts:
+            - name: media
+              mountPath: /media
+            - name: data-volume
+              mountPath: /mnt
+          volumes:
+          - name: media
+            hostPath:
+              path: {{ .Values.elenia.hostPathMedia }}
+              type: DirectoryOrCreate          
+          - name: data-volume
+            hostPath:
+              path: {{ .Values.elenia.hostPathForData }}
+              type: DirectoryOrCreate

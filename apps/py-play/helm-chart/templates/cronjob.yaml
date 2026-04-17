@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: play-mailing
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: play-mailing
+    app.kubernetes.io/component: scheduled
+spec:
+  schedule: {{ .Values.mailing.schedule  }}
+  timeZone: {{ .Values.mailing.timezone  }}
+  concurrencyPolicy: Forbid 
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: post-scheduler
+            image: curlimages/curl:latest
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                curl -sSf -X POST "http://play-svc/scheduled?audience=2"
+            resources:
+              requests:
+                cpu: "10m"
+                memory: "10Mi"
+              limits:
+                cpu: "50m"
+                memory: "50Mi"
