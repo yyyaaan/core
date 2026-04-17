@@ -48,11 +48,11 @@ spec:
       - name: config
         hostPath:
           path: {{ .Values.ha.hostPathConfig }}
-          type: DirectoryOrCreate
+          type: Directory
       - name: media
         hostPath:
           path: {{ .Values.ha.hostPathMedia }}
-          type: DirectoryOrCreate
+          type: Directory
       {{- if .Values.ha.enableBluetooth }}
       - name: dbus
         hostPath:
