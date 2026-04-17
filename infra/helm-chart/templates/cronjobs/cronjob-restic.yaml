@@ -15,6 +15,7 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          hostname: scheduled-backup
           initContainers:
           - name: mariadb-dump
             image: {{ .Values.mariaDB.image.repository }}:{{ .Values.mariaDB.image.tag }}
