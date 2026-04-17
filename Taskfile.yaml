@@ -22,10 +22,6 @@ tasks:
     cmds:
       - task: build-play-image
       - task: poller:build-local-image
-      - docker tag play:local yyyaaan/play:alpha1
-      - docker push yyyaaan/play:alpha1
-      - docker tag poller:local yyyaaan/poller:alpha1
-      - docker push yyyaaan/poller:alpha1
 
   deploy-play:
     desc: Deploy the play helm chart - use gitops instead
@@ -40,6 +36,11 @@ tasks:
       - helm lint ./infra/helm-chart
       - helm install test-only ./infra/helm-chart --dry-run=client --debug > zzz.yaml
   
+  run-docker:
+    desc: pre-prod verification of docker container
+    cmds:
+      - docker run -i -p 7999:7999 --rm ghcr.io/yyyaaan/core/play:sha-58018b2
+
   bootstrap-test:
     desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
     cmds:

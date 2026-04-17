@@ -6,8 +6,8 @@ authMiddleware:
   enabled: true
   name: auth-oauth@kubernetescrd
 image:
-  repository: yyyaaan/play
-  tag: alpha1
+  repository: ghcr.io/yyyaaan/core/play
+  tag: sha-8c1ae7b
   pullPolicy: IfNotPresent
 envFromSecretList:
   - email-credentials

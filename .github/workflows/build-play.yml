@@ -2,7 +2,7 @@ name: Build and Push Play App
 
 on:
   push:
-    branches: [ "main", "feature/CICD-and-refinements" ]
+    branches: [ "main" ]
     paths:
       - 'apps/py-play/**'
       - 'packages/**'

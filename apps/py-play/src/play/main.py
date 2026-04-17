@@ -2,8 +2,6 @@
 docker build -t playwright:macos .
 docker run -it --rm -v ./:/home/appuser/src -p 7999:7999 --entrypoint bash playwright:macos
 uvicorn main:app --port 7999 --host 0.0.0.0 --reload
-docker build --platform=linux/amd64 -t playwright:release .
-docker tag playwright:release yyyaaan/playright:v0.5.0
 """
 
 from datetime import datetime
