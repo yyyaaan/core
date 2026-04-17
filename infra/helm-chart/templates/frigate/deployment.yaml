@@ -27,6 +27,13 @@ spec:
         envFrom:
         - secretRef:
             name: {{ .Values.frigate.envFromSecret }}
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2500m"
+            memory: "5Gi"
         ports:
         - containerPort: 8971
           name: web-ui

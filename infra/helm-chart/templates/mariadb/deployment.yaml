@@ -31,6 +31,13 @@ spec:
         envFrom:
         - secretRef:
             name: {{ .Values.mariaDB.envFromSecret }}
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "500Mi"
+          limits:
+            cpu: "900m"
+            memory: "2000Mi"
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql

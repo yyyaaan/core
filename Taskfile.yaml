@@ -38,7 +38,7 @@ tasks:
       - helm lint ./apps/bash-poller/helm-chart
       - helm lint ./apps/py-play/helm-chart
       - helm lint ./infra/helm-chart
-      - helm install test-only ./apps/py-play/helm-chart --dry-run --debug > zzz.yaml
+      - helm install test-only ./infra/helm-chart --dry-run=client --debug > zzz.yaml
   
   bootstrap-test:
     desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
