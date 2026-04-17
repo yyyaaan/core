@@ -33,6 +33,9 @@ spec:
               - secretRef:
                   name: {{ . | quote }}
             {{- end }}
+            env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
             resources:
               {{- toYaml .Values.resources | nindent 14 }}
             volumeMounts:
