@@ -34,5 +34,5 @@ spec:
       - name: config
         hostPath:
           path: {{ .Values.homebridge.hostPathConfig }}
-          type: DirectoryOrCreate
+          type: Directory
 {{- end }}

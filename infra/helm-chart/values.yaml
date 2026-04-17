@@ -115,35 +115,3 @@ stirlingPdf:
     pullPolicy: IfNotPresent
   ingress:
     host: pdf.yan.fi
-
-poller:
-  namespace: home-internal
-  image:
-    repository: yyyaaan/poller
-    tag: "alpha1"
-    pullPolicy: IfNotPresent
-  timezone: "Europe/Helsinki"
-  envFromSecretList:
-    - poller-credentials
-  hostPathConfig: /mnt/kingston/home/config/poller
-  hostPathMedia: /mnt/kingston/share/media
-  hostPathForData: /mnt/kingston/home/data/app
-  resources:
-    limits:
-      cpu: "200m"
-      memory: "500Mi"
-  jobs:
-    - name: elenia
-      suspend: false
-      schedule: "2-59/15 * * * *"
-      command: 
-        - "/usr/local/bin/python"
-        - "/app/job_elenia.py"
-    - name: mailing
-      suspend: false
-      schedule: "39 9 * * *"
-      command: 
-        - "/bin/sh"
-        - "-c"
-        - "echo \"$(curl -s -X POST \"http:/play.web.svc.cluster.local:7999/scheduled?audience=2\")\""
-

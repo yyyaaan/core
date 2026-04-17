@@ -34,5 +34,5 @@ spec:
       - name: mqtt-data
         hostPath:
           path: {{ .Values.mqtt.hostPathData }}
-          type: DirectoryOrCreate
+          type: Directory
 {{- end }}
