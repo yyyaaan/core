@@ -23,7 +23,7 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: {{ .name }}
+          - name: elenia
             image: "{{ .Values.elenia.image.repository }}:{{ .Values.elenia.image.tag }}"
             imagePullPolicy: {{ .Values.elenia.image.pullPolicy }}
             command:
