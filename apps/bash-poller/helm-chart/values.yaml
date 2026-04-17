@@ -13,6 +13,7 @@ ffmpeg:
     pullPolicy: IfNotPresent
   envFromSecretList:
     - poller-credentials
+    - tz-config
   hostPathMedia: /mnt/kingston/share/media
   resources:
     requests:
@@ -32,6 +33,7 @@ elenia:
     pullPolicy: IfNotPresent
   envFromSecretList:
     - poller-credentials
+    - tz-config
   hostPathMedia: /mnt/kingston/share/media
   hostPathForData: /mnt/kingston/home/data/app
   resources:
