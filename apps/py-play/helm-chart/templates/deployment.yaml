@@ -31,8 +31,8 @@ spec:
             cpu: "50m"
             memory: "50Mi"
           limits:
-            cpu: "500m"
-            memory: "800Mi"
+            cpu: "1500m"
+            memory: "2500Mi"
         volumeMounts:
         - name: data-volume
           mountPath: /mnt
