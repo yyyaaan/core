@@ -35,9 +35,9 @@ spec:
                 polling_interval_seconds = 300
                 frigate_url = "http://frigate-service.home-internal.svc.cluster.local:5000"
 
-                print("Started")
                 now = datetime.now()
                 end_polling_time = now + timedelta(hours=max_polling_hours)
+                print("Started", now)
 
                 yesterday_end = datetime(now.year, now.month, now.day)
                 ts = int(yesterday_end.timestamp()) - offset * 3600
@@ -77,6 +77,11 @@ spec:
 
                 print("Ready!")
                 EOF
+            envFrom:
+            {{- range .Values.ffmpeg.envFromSecretList }}
+              - secretRef:
+                  name: {{ . | quote }}
+            {{- end }}
             env:
             - name: PYTHONUNBUFFERED
               value: "1"
