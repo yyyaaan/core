@@ -13,7 +13,7 @@ homebridge:
   namespace: home-internal
   image:
     repository: homebridge/homebridge
-    tag: "2026-02-25"
+    tag: "2026-04-17"
     pullPolicy: IfNotPresent
   hostPathConfig: /mnt/kingston/home/config/hb
   ingress:
@@ -26,7 +26,7 @@ ha: # mariaDB migration flag controls resource provisioning
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.3.4"
+    tag: "2026.4.3"
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
@@ -46,7 +46,7 @@ mariaDB:
   envFromSecret: mariadb-credentials
   image:
     repository: mariadb
-    tag: "12.0.2"
+    tag: "12.2.2"
     pullPolicy: IfNotPresent
  
 auth:
@@ -54,7 +54,7 @@ auth:
   enableMultiAuth: false
   image:
     repository: quay.io/oauth2-proxy/oauth2-proxy
-    tag: "v7.15.1-alpine"
+    tag: "v7.15.2-alpine"
     pullPolicy: IfNotPresent
   cookieDomain: .yan.fi
   cookieSecure: true
@@ -76,7 +76,7 @@ frigate:
   namespace: home-internal
   image:
     repository: ghcr.io/blakeblackshear/frigate
-    tag: "0.17.0"
+    tag: "0.17.1"
     pullPolicy: IfNotPresent
   envFromSecret: frigate-credentials
   privileged: true
@@ -102,7 +102,7 @@ restic:
   timezone: "Europe/Helsinki"
   image:
     repository: restic/restic
-    tag: latest
+    tag: "0.18.1"
   resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
   hostPathConfig: /mnt/kingston/home/config
 
