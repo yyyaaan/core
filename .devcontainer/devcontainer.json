@@ -3,14 +3,9 @@
     "build": { 
         "dockerfile": "Dockerfile" 
     },
-    "runArgs": ["--name", "devcontainer-${localWorkspaceFolderBasename}"],  // containerName is not supported without docker compose
+    "runArgs": ["--name", "devcontainer-${localWorkspaceFolderBasename}"],
     "workspaceFolder": "/workspace",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-    // "features": { set in dockerfile
-        // "ghcr.io/devcontainers/features/git:1": {},
-        // "ghcr.io/devcontainers/features/azure-cli:1": {},
-        // "ghcr.io/devcontainers-extra/features/uv:1": {}
-    // },
     "customizations": {
         "vscode": {
             "settings": {
@@ -61,17 +56,15 @@
         }
     },
     "remoteUser": "vscode",
-    "updateRemoteUserUID": true, // match the vscode user in container with the host user to avoid permission issues on mounted volumes
+    "updateRemoteUserUID": true,
     "mounts": [
-        // local named volumes
         "source=venv-${localWorkspaceFolderBasename},target=/workspace/.venv,type=volume",
         "source=sisyphus-${localWorkspaceFolderBasename},target=/workspace/.sisyphus,type=volume",
-        // shared configs: windows user: change ${localEnv:HOME} to %USERPROFILE% if troubles
         "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/vscode/.local/share/opencode/auth.json,type=bind",
         "source=${localEnv:HOME}/.config/opencode,target=/home/vscode/.config/opencode,type=bind",
-        // global cache
         "source=uv-shared-cache-py314,target=/home/vscode/.cache/uv,type=volume",
-        "source=opencode-global-cache,target=/home/vscode/.cache/opencode,type=volume"
+        "source=opencode-global-cache,target=/home/vscode/.cache/opencode,type=volume",
+        "source=playwright-shared-cache,target=/ms-playwright,type=volume"
     ],
     "containerEnv": {
         "OLLAMA_HOST": "http://host.orb.internal:11434",
@@ -80,5 +73,5 @@
         "UV_LINK_MODE": "copy"
     },
     "forwardPorts": [],
-    "postCreateCommand": "sudo chown -R vscode:vscode /workspace/.venv /home/vscode/.local /home/vscode && uv sync --all-packages --all-extras"
+    "postCreateCommand": "sudo chown -R vscode:vscode /workspace/.venv /home/vscode/.local /home/vscode && uv sync --all-packages --all-extras && uv run playwright install chromium"
 }

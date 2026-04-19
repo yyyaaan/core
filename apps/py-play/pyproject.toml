@@ -8,7 +8,7 @@ dependencies = [
     "fastapi[standard]",
     "jinja2",
     "markdown",
-    "opencv-python",
+    "opencv-python-headless",
     "pandas",
     "plotly",
     "pytest-playwright",
