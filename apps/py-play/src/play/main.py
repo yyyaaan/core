@@ -105,19 +105,14 @@ async def scheduled(request: Request):
     except Exception:
         n_audience = 1
 
-    if str(the_hour) == str(hour_bbc):
+    if True:  # condition check skipped, was str(the_hour) == str(hour_bbc)
         payload = await sports_and_bonus(refresh=True)
         EmailClient().send_email(
             subject=payload["title"],
             content=payload["html"],
             audience_length=abs(n_audience),
         )
-
-    print(f"the_hour: {the_hour}, hour_bbc: {hour_bbc}, params: {params}")
-    return {
-        "hour": the_hour,
-        "bbc": hour_bbc,
-    }
+    return {"hour": the_hour, "bbc": hour_bbc}
 
 
 def main():
