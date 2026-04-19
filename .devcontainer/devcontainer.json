@@ -74,9 +74,10 @@
         "source=opencode-global-cache,target=/home/vscode/.cache/opencode,type=volume"
     ],
     "containerEnv": {
-        "UV_LINK_MODE": "copy",
+        "OLLAMA_HOST": "http://host.orb.internal:11434",
         "OMO_AUTO_RECOVERY": "true",
-        "OLLAMA_HOST": "http://host.orb.internal:11434"
+        "PLAYWRIGHT_BROWSERS_PATH": "/ms-playwright",
+        "UV_LINK_MODE": "copy"
     },
     "forwardPorts": [],
     "postCreateCommand": "sudo chown -R vscode:vscode /workspace/.venv /home/vscode/.local /home/vscode && uv sync --all-packages --all-extras"
