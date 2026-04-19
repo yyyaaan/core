@@ -56,30 +56,34 @@ async def bonus_doubled():
     text_vbo, text_hameenmaa, text_hok_elanto = "", "", ""
 
     results = await gather(
-        play_vbo(),
-        play_hameenmaa(),
         play_hok_elanto(),
+        # play_hameenmaa(),
+        # play_vbo(),
         return_exceptions=True,
     )
 
+    print(len(results))
+
+    if len(results) > 2:
+        if isinstance(results[2], Exception):
+            print("Error VBO", results[2])
+        else:
+            text_vbo = results[0]
+
+    if len(results) > 1:
+        if isinstance(results[1], Exception):
+            print("Error Hameenmaa", results[1])
+        else:
+            text_hameenmaa = results[1]
+
     if isinstance(results[0], Exception):
-        print("Error VBO", results[0])
-    else:
-        text_vbo = results[0]
-
-    if isinstance(results[1], Exception):
-        print("Error Hameenmaa", results[1])
-    else:
-        text_hameenmaa = results[1]
-
-    if isinstance(results[2], Exception):
-        print("Error Hok Elanto", results[2])
+        print("Error Hok Elanto", results[0])
         return {
             "flag": False,
-            "text": f"failed to load content: {results[2]}",
+            "text": f"failed to load content: {results[0]}",
         }
     else:
-        text_hok_elanto = results[2]
+        text_hok_elanto = results[0]
 
     shops = [
         x

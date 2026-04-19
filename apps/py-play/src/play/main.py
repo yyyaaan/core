@@ -6,19 +6,20 @@ uvicorn main:app --port 7999 --host 0.0.0.0 --reload
 
 from datetime import datetime
 from glob import glob
-from os import getenv
+from os import getenv, makedirs
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from markdown import markdown
+from pytz import timezone
+from uvicorn import run
+
 from play.energy.Electricity import Electricity
 from play.energy.WaterMeter import WaterMeter
 from play.html import sports_and_bonus
 from play.utils.EmailClient import EmailClient
 from play.utils.ViewLogs import ViewLogs
-from pytz import timezone
-from uvicorn import run
 
 app = FastAPI()
 
@@ -104,26 +105,20 @@ async def scheduled(request: Request):
     except Exception:
         n_audience = 1
 
-    if str(the_hour) == str(hour_bbc):
+    if True:  # condition check skipped, was str(the_hour) == str(hour_bbc)
         payload = await sports_and_bonus(refresh=True)
         EmailClient().send_email(
             subject=payload["title"],
             content=payload["html"],
             audience_length=abs(n_audience),
         )
-
-    print(f"the_hour: {the_hour}, hour_bbc: {hour_bbc}, params: {params}")
-    return {
-        "hour": the_hour,
-        "bbc": hour_bbc,
-    }
+    return {"hour": the_hour, "bbc": hour_bbc}
 
 
 def main():
+    makedirs("/tmp/cache", exist_ok=True)
     run(app, host="0.0.0.0", port=7999)
 
 
 if __name__ == "__main__":
     main()
-
-# curl -X POST https://pi.yan.fi/play/scheduled?audience=1&now=true
