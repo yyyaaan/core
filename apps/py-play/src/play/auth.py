@@ -22,7 +22,7 @@ async def require_user(
     FastAPI dependency: verifies X-Forwarded-Email (set by oauth2-proxy)
     is in the allowed list. Returns the verified email.
     """
-    auth_url = f"{get_settings().auth_url}?{urlencode({'rd': str(request.url)})}"
+    auth_url = f"{settings.auth_url}?{urlencode({'rd': str(request.url)})}"
 
     email = x_forwarded_email or x_auth_request_email
     if email:
@@ -30,7 +30,9 @@ async def require_user(
     elif settings.allow_local_auth and settings.local_auth_email:
         normalized_email = settings.local_auth_email.lower().strip()
     else:
-        raise HTTPException(status_code=401, detail="Authentication required", headers={"Location": auth_url})
+        raise HTTPException(
+            status_code=401, detail=f"Authentication required, visit {auth_url}"
+        )
         # raise HTTPException(
         #     status_code=307,
         #     detail="Redirecting to authentication",
@@ -38,6 +40,9 @@ async def require_user(
         # )
 
     if normalized_email not in settings.allowed_emails:
+        print(
+            f"Unauthorized email: {normalized_email} | Allowed: {settings.allowed_emails} | Headers: {request.headers}"
+        )
         raise HTTPException(status_code=403, detail="User not authorized")
 
     return normalized_email
