@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     hour_bbc: str = "9"
     allow_local_auth: bool = False
     local_auth_email: str | None = None
+    auth_url: str = "https://auth.yan.fi/start"
 
 
 @lru_cache

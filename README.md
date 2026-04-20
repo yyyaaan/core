@@ -22,8 +22,10 @@ Home Automation with Home Assistant, HomeBridge, Frigate and more are only avail
 For `python` and `Rust` projects, please use devcontainer. Infra relies on GitOps, and shall be tested on host.
 
 ```
-uv run play
 uv run autobrowser
+uv run play
+# with header for dev
+ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play
 ```
 
 ## Services

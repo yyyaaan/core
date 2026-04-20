@@ -1,7 +1,6 @@
 """
-docker build -t playwright:macos .
-docker run -it --rm -v ./:/home/appuser/src -p 7999:7999 --entrypoint bash playwright:macos
 uvicorn main:app --port 7999 --host 0.0.0.0 --reload
+ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.xdev"]' uv run play
 """
 
 from datetime import datetime
@@ -19,9 +18,9 @@ from play.auth import require_user
 from play.config import get_settings
 from play.energy.Electricity import Electricity
 from play.energy.WaterMeter import WaterMeter
-from play.web.html import sports_and_bonus
 from play.utils.EmailClient import EmailClient
 from play.utils.ViewLogs import ViewLogs
+from play.web.html import sports_and_bonus
 
 app = FastAPI()
 
