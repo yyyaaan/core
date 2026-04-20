@@ -30,14 +30,11 @@ async def require_user(
     elif settings.allow_local_auth and settings.local_auth_email:
         normalized_email = settings.local_auth_email.lower().strip()
     else:
+        print(f"Authentication missing. Headers: {request.headers}")
         raise HTTPException(
-            status_code=401, detail=f"Authentication required, visit {auth_url}"
+            status_code=401,
+            detail=f"Authentication required. Please authenticate at {auth_url}.",
         )
-        # raise HTTPException(
-        #     status_code=307,
-        #     detail="Redirecting to authentication",
-        #     headers={"Location": auth_url},
-        # )
 
     if normalized_email not in settings.allowed_emails:
         print(
