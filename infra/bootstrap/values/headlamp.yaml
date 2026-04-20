@@ -9,7 +9,7 @@ config:
 ingress:
   enabled: true
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # cert-manager.io/cluster-issuer: letsencrypt-prod  # cloudflare provides
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-force-https@kubernetescrd
   ingressClassName: traefik
   hosts:
