@@ -4,18 +4,11 @@ metadata:
   name: play-ingress
   namespace: {{ .Values.namespace }}
   annotations:
-    {{- if .Values.certManager.enabled }}
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
-    {{- end }}
     {{- if .Values.authMiddleware.enabled }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.authMiddleware.name }}
     {{- end }}
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - {{ .Values.ingress.host }}
-    secretName: play-tls-cert
   rules:
   - host: {{ .Values.ingress.host }}
     http:

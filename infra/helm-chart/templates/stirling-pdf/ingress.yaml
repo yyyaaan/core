@@ -4,14 +4,9 @@ metadata:
   name: pdf-ingress
   namespace: {{ .Values.stirlingPdf.namespace }}
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
     traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - {{ .Values.stirlingPdf.ingress.host }}
-    secretName: pdf-tls-cert
   rules:
   - host: {{ .Values.stirlingPdf.ingress.host }}
     http:

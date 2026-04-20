@@ -3,14 +3,8 @@ kind: Ingress
 metadata:
   name: oauth2-proxy-ingress
   namespace: auth
-  annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - {{ .Values.auth.authDomain }}
-    secretName: auth-tls-cert
   rules:
   - host: {{ .Values.auth.authDomain }}
     http:

@@ -45,15 +45,13 @@ All services use `strategy: { type: Recreate }` — hostPath volumes prevent rol
 
 ```yaml
 annotations:
-  cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
+  # protected services add auth middleware annotation here
+  traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts: [{{ .Values.<svc>.ingress.host }}]
-    secretName: <svc>-tls-cert
 ```
 
-Protected services add: `traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd`
+tls and cert issuer annotation are not necessary. Cloudflare handles TLS termination and certificate management at the edge, so internal services can use plain HTTP without certs. This simplifies configuration and avoids cert management overhead for internal services.
 
 ## Namespaces
 

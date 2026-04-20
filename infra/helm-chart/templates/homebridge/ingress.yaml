@@ -4,14 +4,8 @@ kind: Ingress
 metadata:
   name: homebridge-ingress
   namespace: {{ .Values.homebridge.namespace}}
-  annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - {{ .Values.homebridge.ingress.host }}
-    secretName: homebridge-tls-cert
   rules:
   - host: {{ .Values.homebridge.ingress.host }}
     http:
