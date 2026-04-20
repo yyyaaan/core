@@ -8,16 +8,18 @@ from datetime import datetime
 from glob import glob
 from os import getenv, makedirs
 
-from fastapi import FastAPI, Request, Response
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from markdown import markdown
 from pytz import timezone
 from uvicorn import run
 
+from play.auth import require_user
+from play.config import get_settings
 from play.energy.Electricity import Electricity
 from play.energy.WaterMeter import WaterMeter
-from play.html import sports_and_bonus
+from play.web.html import sports_and_bonus
 from play.utils.EmailClient import EmailClient
 from play.utils.ViewLogs import ViewLogs
 
@@ -87,13 +89,13 @@ async def html_render_markdown(
 
 
 @app.get("/view")
-async def view():
+async def view(email: str = Depends(require_user)):
     content = await sports_and_bonus(refresh=False)
     return HTMLResponse(content=content["html"])
 
 
 @app.post("/scheduled")
-async def scheduled(request: Request):
+async def scheduled(request: Request, email: str = Depends(require_user)):
     """
     Scheduled tasks. Optional query parameter: now, audience
     """
@@ -105,7 +107,7 @@ async def scheduled(request: Request):
     except Exception:
         n_audience = 1
 
-    if True:  # condition check skipped, was str(the_hour) == str(hour_bbc)
+    if str(the_hour) == str(get_settings().hour_bbc) or "now" in params:
         payload = await sports_and_bonus(refresh=True)
         EmailClient().send_email(
             subject=payload["title"],

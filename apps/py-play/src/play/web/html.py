@@ -2,8 +2,8 @@ import asyncio
 from datetime import datetime
 from json import dumps, loads
 
-from play.bbcsports import bbc_sports
-from play.sryhma import bonus_doubled
+from play.web.bbcsports import bbc_sports
+from play.web.sryhma import bonus_doubled
 
 
 async def sports_and_bonus(refresh=False):
