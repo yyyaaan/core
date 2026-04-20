@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from re import IGNORECASE, compile
 
-from play.PlayPage import PlayPage, random_color
+from play.web.PlayPage import PlayPage, random_color
 
 
 def u_time_cleaner(text):

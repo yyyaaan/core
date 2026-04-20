@@ -11,6 +11,7 @@ dependencies = [
     "opencv-python-headless",
     "pandas",
     "plotly",
+    "pydantic-settings",
     "pytest-playwright",
     "pytz",
     "uvicorn"

@@ -1,21 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   
-  // Required by the schema
   "git_master": {
     "commit_footer": true,
     "include_co_authored_by": true,
     "git_env_prefix": "GIT_MASTER=1"
   },
 
-  // Enables the fallback logic globally
   "model_fallback": true,
   "default_run_agent": "sisyphus",
 
   "agents": {
-    // SISYPHUS (The Boss): Upgraded to Pro. The smartest model orchestrates. google/gemini-3.1-pro-preview for best result
     "sisyphus": {
-      "model": "google/gemini-3-flash-preview",
+      "model": "google/gemini-3-flash-preview", // Excellent choice for fast, cheap orchestration
       "temperature": 0.2,
       "prompt": "You are the orchestrator. Always read .opencode/context-map.md before delegating tasks.",
       "fallback_models": [
@@ -24,7 +21,6 @@
       ]
     },
 
-    // PROMETHEUS (The Architect): Handles heavy thinking.
     "prometheus": {
       "model": "deepseek/deepseek-reasoner",
       "temperature": 0.6,
@@ -34,20 +30,19 @@
       ]
     },
 
-    // HEPHAESTUS (The Coder): DeepSeek is primary, Nvidia 405B is the free backup.
     "hephaestus": {
       "model": "deepseek/deepseek-chat",
       "temperature": 0.1,
+      // Updated to Option B (Flat structure)
       "skills": [
-        "./.opencode/skills/backend-logic.md", 
-        "./.opencode/skills/frontend-rules.md"
+        "./.opencode/skills/backend-logic/SKILL.md", 
+        "./.opencode/skills/infra-helm/SKILL.md"
       ],
       "fallback_models": [
         { "model": "nvidia/meta/llama-3.1-405b-instruct" }
       ]
     },
 
-    // LIBRARIAN (The Searcher): Gemini Flash for fast, cheap monorepo scanning.
     "librarian": {
       "model": "google/gemini-3.1-flash-lite",
       "temperature": 0.0,
