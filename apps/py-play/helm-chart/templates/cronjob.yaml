@@ -19,10 +19,11 @@ spec:
           containers:
           - name: post-scheduler
             image: curlimages/curl:latest
+            # internal calls will have the header preserved.
             command: ["/bin/sh", "-c"]
             args:
               - |
-                curl -sSf -X POST "http://play-svc/scheduled?audience=2"
+                curl -sSf -H 'X-Forwarded-Email: "internal@kube.system"' -X POST "http://play-svc/scheduled?audience=2"
             resources:
               requests:
                 cpu: "10m"

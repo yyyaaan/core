@@ -106,7 +106,7 @@ async def scheduled(request: Request, email: str = Depends(require_user)):
     except Exception:
         n_audience = 1
 
-    if str(the_hour) == str(get_settings().hour_bbc) or "now" in params:
+    if the_hour == get_settings().hour_bbc or "now" in params:
         payload = await sports_and_bonus(refresh=True)
         EmailClient().send_email(
             subject=payload["title"],
