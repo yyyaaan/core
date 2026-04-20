@@ -24,6 +24,7 @@ spec:
           - "--upstream=file:///dev/null"
           - "--http-address=0.0.0.0:4180"
           - "--reverse-proxy=true"
+          - "--set-xauthrequest=true"
           - "--redirect-url=https://{{ .Values.auth.authDomain }}/oauth2/callback"
           {{- end }}
           - "--whitelist-domain={{ .Values.auth.cookieDomain }}"
