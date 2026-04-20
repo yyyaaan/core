@@ -1,7 +1,4 @@
 namespace: web
-certManager:
-  enabled: true
-  issuerName: letsencrypt-prod
 authMiddleware:
   enabled: true
   name: auth-oauth@kubernetescrd

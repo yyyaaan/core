@@ -9,7 +9,7 @@ config:
 ingress:
   enabled: true
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # cert-manager.io/cluster-issuer: letsencrypt-prod  # cloudflare provides
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-force-https@kubernetescrd
   ingressClassName: traefik
   hosts:
@@ -17,9 +17,4 @@ ingress:
       paths:
         - path: /
           type: ImplementationSpecific
-  tls:
-    - secretName: dash-tls-cert
-      hosts:
-        - dash.yan.fi
-
 # oidc callback url host.com/oidc-callback

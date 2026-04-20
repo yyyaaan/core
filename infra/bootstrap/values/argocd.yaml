@@ -39,9 +39,4 @@ server:
     controller: generic
     ingressClassName: traefik
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
       traefik.ingress.kubernetes.io/router.middlewares: kube-system-force-https@kubernetescrd
-    extraTls:
-      - hosts:
-        - cd.yan.fi
-        secretName: cd-tls-cert

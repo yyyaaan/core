@@ -4,14 +4,8 @@ kind: Ingress
 metadata:
   name: ha-ingress
   namespace: {{ .Values.ha.namespace }}
-  annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName }}
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - {{ .Values.ha.ingress.host }}
-    secretName: ha-tls-cert
   rules:
   - host: {{ .Values.ha.ingress.host }}
     http:

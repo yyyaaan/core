@@ -1,8 +1,5 @@
 domain: yan.fi
 
-certManager:
-  issuerName: letsencrypt-prod
-
 migrationState:
   completed: true
   migrationPodEnabled: false

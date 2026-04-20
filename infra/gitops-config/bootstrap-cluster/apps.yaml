@@ -26,30 +26,7 @@ spec:
   #   automated:
   #     prune: true
   #     selfHeal: true
----
-# 2. Cert-Manager (Remote Helm Chart)
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: cert-manager
-  namespace: argocd
-spec:
-  project: bootstrap
-  source:
-    repoURL: https://charts.jetstack.io
-    chart: cert-manager
-    targetRevision: v1.20.2
-    helm:
-      parameters:
-        - name: installCRDs
-          value: "true"
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: cert-manager
-  # syncPolicy:
-  #   automated:
-  #     prune: true
-  #     selfHeal: true
+# 2. cert-manager (Remote Helm Chart), not necessary - cloudflare proxied edge certificates are used for now, but this is for future use when we want to issue internal certificates for intra-cluster communication
 ---
 # 3. Headlamp (Multiple Sources: Remote Chart + Local Git Values)
 apiVersion: argoproj.io/v1alpha1
