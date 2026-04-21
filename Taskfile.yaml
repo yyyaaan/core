@@ -7,21 +7,12 @@ includes:
   play: 
     taskfile: ./apps/py-play/Taskfile.yaml
     dir: ./apps/py-play
-  poller: 
-    taskfile: ./apps/bash-poller/Taskfile.yaml
-    dir: ./apps/bash-poller
 
 tasks:
   build-play-image:
     desc: "Build play local image"
     cmds:
       - docker build -t play:local -f apps/py-play/Dockerfile .
-
-  build-all-images:
-    desc: "Build all local images"
-    cmds:
-      - task: build-play-image
-      - task: poller:build-local-image
 
   deploy-play:
     desc: Deploy the play helm chart - use gitops instead
@@ -39,7 +30,7 @@ tasks:
   run-docker:
     desc: pre-prod verification of docker container
     cmds:
-      - docker run -i -p 7999:7999 --rm ghcr.io/yyyaaan/core/play:sha-58018b2
+      - docker run -i -p 7998:7998 --rm ghcr.io/yyyaaan/core/web:latest
 
   bootstrap-test:
     desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)

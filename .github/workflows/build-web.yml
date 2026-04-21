@@ -2,7 +2,7 @@ name: Build and Push Web App
 
 on:
   push:
-    branches: [ "main", "feature/new-web-py-project" ]
+    branches: [ "main" ]
     paths:
       - 'apps/py-web/**'
       - 'pyproject.toml'
