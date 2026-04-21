@@ -7,9 +7,16 @@ authors = ["Yan Pan <yan@yan.fi>"]
 [tool.uv.workspace]
 members = ["apps/py-*", "packages/py-*"]
 
-# shared dev tools
+# global python test configurations
 [dependency-groups]
 dev = [
-    "httpx",
     "pytest"
+]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+
+testpaths = [
+    "apps",
+    "packages"
 ]

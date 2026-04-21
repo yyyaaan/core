@@ -24,6 +24,8 @@ For `python` and `Rust` projects, please use devcontainer. Infra relies on GitOp
 ```
 uv run autobrowser
 uv run play
+# unit tests
+uv run pytest -v 
 # with header for dev
 ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play
 ```

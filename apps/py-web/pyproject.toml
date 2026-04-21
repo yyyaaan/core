@@ -18,7 +18,6 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 web = "web.main:main_dev"
-test-web = "pytest"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/web"]
