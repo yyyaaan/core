@@ -51,6 +51,15 @@
             max-width: 800px;
             max-height: 800px;
             z-index: 0;
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .wheel-container.pushed {
+            top: 10%;
+            left: 10%;
+            transform: translate(-40%, -40%) scale(0.65);
+            opacity: 0.2;
+            pointer-events: none;
         }
         
         .wheel {
@@ -109,7 +118,7 @@
         }
         
         .nav-link:hover {
-            text-decoration: line-through;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -126,13 +135,40 @@
     <script>
         document.body.addEventListener('htmx:afterOnLoad', function(evt) {
             if (evt.detail.target.id === 'project-modal') {
-                evt.detail.target.classList.add('show');
+                const modal = evt.detail.target;
+                modal.classList.add('show');
+                
+                // Push wheel to corner
+                const wheelContainer = document.querySelector('.wheel-container');
+                if (wheelContainer) wheelContainer.classList.add('pushed');
             }
         });
 
         function closeProject() {
-            document.getElementById('project-modal').classList.remove('show');
+            const modal = document.getElementById('project-modal');
+            modal.classList.remove('show');
+            
+            // Restore wheel to center
+            const wheelContainer = document.querySelector('.wheel-container');
+            if (wheelContainer) {
+                wheelContainer.classList.remove('pushed');
+                // Also trigger a rotation reset
+                const wheel = document.getElementById('main-wheel');
+                if (wheel) {
+                    window.dispatchEvent(new CustomEvent('wheel:reset'));
+                }
+            }
         }
+
+        // Click outside to close
+        window.addEventListener('mousedown', function(e) {
+            const modal = document.getElementById('project-modal');
+            if (modal.classList.contains('show') && !modal.contains(e.target)) {
+                if (!e.target.closest('[hx-get]')) {
+                    closeProject();
+                }
+            }
+        });
     </script>
 </body>
 </html>

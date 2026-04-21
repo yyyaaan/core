@@ -9,7 +9,11 @@
 <nav class="fixed top-8 right-8 z-10 flex gap-8">
     <a href="#" class="nav-link">Work</a>
     <a href="#" class="nav-link">Studio</a>
-    <a href="#" class="nav-link">Contact</a>
+    <a href="#" 
+       class="nav-link"
+       hx-get="/api/contact"
+       hx-target="#project-modal"
+       hx-swap="innerHTML">Contact</a>
 </nav>
 
 <div class="wheel-container">
@@ -18,7 +22,7 @@
             {% set index = loop.index0 %}
             <div 
                 class="wheel-item"
-                style="transform: rotate({{ (360 / projects|length) * index }}deg) translate(35vw, -50%);"
+                style="transform: rotate({{ (360 / projects|length) * index }}deg) translate(18vw, -50%);"
                 hx-get="/api/project/{{ project.id }}"
                 hx-target="#project-modal"
                 hx-swap="innerHTML"
@@ -48,21 +52,44 @@
 
 <script>
     let rotation = 0;
+    let idleTimer = null;
     const wheel = document.getElementById('main-wheel');
     
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            rotation = 0;
+            wheel.style.transform = `rotate(${rotation}deg)`;
+            closeProject(); 
+        }, 7000);
+    }
+
+    resetIdleTimer();
+    
+    // Listen for global reset event from base layout
+    window.addEventListener('wheel:reset', () => {
+        rotation = 0;
+        wheel.style.transform = `rotate(${rotation}deg)`;
+    });
+
     window.addEventListener('wheel', (e) => {
         rotation += e.deltaY * 0.1;
-        wheel.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+        wheel.style.transform = `rotate(${rotation}deg)`;
+        resetIdleTimer();
     });
 
     // Touch support basic
     let startY = 0;
-    window.addEventListener('touchstart', (e) => startY = e.touches[0].pageY);
+    window.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].pageY;
+        resetIdleTimer();
+    });
     window.addEventListener('touchmove', (e) => {
         const deltaY = e.touches[0].pageY - startY;
         rotation += deltaY * 0.1;
-        wheel.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+        wheel.style.transform = `rotate(${rotation}deg)`;
         startY = e.touches[0].pageY;
+        resetIdleTimer();
     });
 </script>
 {% endblock %}

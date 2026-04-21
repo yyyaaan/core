@@ -57,9 +57,14 @@ projects = [
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"request": request, "projects": projects},
+        request, "index.html", {"request": request, "projects": projects}
+    )
+
+
+@app.get("/api/contact", response_class=HTMLResponse)
+async def get_contact(request: Request):
+    return templates.TemplateResponse(
+        request, "partials/contact.html", {"request": request}
     )
 
 
@@ -71,9 +76,9 @@ async def get_project(request: Request, project_id: str):
 
     # Return the HTML fragment for HTMX
     return templates.TemplateResponse(
-        request=request,
-        name="partials/project_detail.html",
-        context={"project": project},
+        request,
+        "partials/project_detail.html",
+        {"request": request, "project": project},
     )
 
 
