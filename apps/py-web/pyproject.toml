@@ -21,7 +21,3 @@ web = "web.main:main_dev"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/web"]
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
