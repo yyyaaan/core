@@ -5,7 +5,7 @@ description: Python and Rust coding conventions for the core monorepo — FastAP
 
 ## Python Stack
 
-- Runtime: Python ≥3.14, managed by `uv` workspace
+- Runtime: Python 3.14.x only, managed by `uv` workspace
 - Web: FastAPI + Uvicorn, Jinja2 templates
 - Scraping: Playwright (Chromium, server-side) — this is backend, not frontend
 - Data: Pandas, Plotly, OpenCV (headless)
@@ -66,6 +66,7 @@ packages/py-*/
 | Command | What |
 |---------|------|
 | `uv run play` | Run py-play locally |
+| `uv run web` | Run py-web locally |
 | `uv run autobrowser` | Run autobrowser |
 | `cargo run -p rs-y-one` | Run Rust project |
 | `task build-all-images` | Build all Docker images |
