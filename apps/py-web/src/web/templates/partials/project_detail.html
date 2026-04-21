@@ -10,7 +10,7 @@
     <div class="w-full h-40 border border-black overflow-hidden bg-[#FDFCF8] relative mb-6">
         <div class="absolute inset-0 opacity-10 filter blur-xl" style="background-color: {{ project.color }}"></div>
         <div class="absolute inset-0 flex items-center justify-center">
-             <span class="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30 italic">{{ project.title }}</span>
+             <span class="text-[12px] uppercase tracking-[0.1em] font-bold opacity-60">{{ project.summary|safe or project.title|safe }}</span>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
             <span class="text-[10px] font-mono bg-black text-white px-2 py-0.5 uppercase">{{ project.title }}</span>
         </div>
         
-        <p class="text-[11px] text-black/70 leading-relaxed italic border-l-2 border-black pl-4">
+        <p class="text-[12px] text-black/70 leading-relaxed italic border-l-2 border-black pl-4">
             "{{ project.desc }}"
         </p>
 

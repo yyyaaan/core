@@ -16,40 +16,45 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # Mock data
 projects = [
     {
-        "id": "resonant",
-        "title": "Resonant",
-        "desc": "AI-native exploration interface.",
-        "color": "#F27D26",
-    },
-    {
-        "id": "ditto",
-        "title": "Ditto",
-        "desc": "Collaborative design workspace.",
-        "color": "#00FF00",
-    },
-    {
-        "id": "utility",
-        "title": "Utility",
+        "id": "kubernetes",
+        "title": "Kubernetes Cluster",
+        "summary": "Technical Instrumentation Suite<br/>ArgoCD for GitOpsContinuous Delivery<br/>Headlamp for Observability<br/>Prometheus + Grafana for Metrics",
         "desc": "Technical instrumentation suite.",
         "color": "#3B82F6",
     },
     {
-        "id": "flex",
-        "title": "Flex",
-        "desc": "Dynamic branding system.",
-        "color": "#EF4444",
+        "id": "omop",
+        "title": "OMOP",
+        "summary": "OHDSI/OMOP CDM ETL pipelines.<br/>OMOP Ecosystem Cloud Engineering.",
+        "desc": "Individual contributor to the OHDSI/OMOP CDM ETL pipelines. Developed and maintained robust ETL pipelines to transform healthcare data into the OMOP Common Data Model (CDM) format, ensuring data consistency and quality for research and analysis.",
+        "color": "#00FF00",
     },
     {
-        "id": "ditto-2",
-        "title": "Ditto",
-        "desc": "Collaborative design workspace.",
-        "color": "#8B5CF6",
+        "id": "resonant",
+        "title": "Resonant",
+        "summary": "Resonant Archives<br/>Web Scrapping<br/>R, Shiny, Data Visualization<br/>R & SAS in clinical research",
+        "desc": "Clinical Research Data Analysis and Visualization. Utilized R and SAS for data analysis in clinical research projects, including data cleaning, statistical analysis, and visualization. Developed interactive dashboards using Shiny to present research findings effectively.",
+        "color": "#F27D26",
+    },
+    {
+        "id": "flex",
+        "title": "Flex",
+        "summary": "Dynamic branding system.<br/>Flexible design components.",
+        "desc": "Dynamic branding system.",
+        "color": "#EF4444",
     },
     {
         "id": "utility-2",
         "title": "Utility",
         "desc": "Technical instrumentation suite.",
         "color": "#EC4899",
+    },
+    {
+        "id": "home",
+        "title": "Smart Home",
+        "summary": "Home Automation & Integration<br/>Reliable services on Kubernetes",
+        "desc": "Bring Home Assistant, Frigate, HomeBridge, and more to the smart home. Enables seamless integration and control of various smart devices, creating a unified and efficient smart home ecosystem. Apple HomeKit, Google Home, Amazon Alexa, and more.",
+        "color": "#8B5CF6",
     },
 ]
 
