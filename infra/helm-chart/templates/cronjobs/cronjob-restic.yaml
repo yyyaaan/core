@@ -18,7 +18,7 @@ spec:
           hostname: scheduled-backup
           initContainers:
           - name: mariadb-dump
-            image: {{ .Values.mariaDB.image.repository }}:{{ .Values.mariaDB.image.tag }}
+            image: "{{ .Values.mariaDB.image.repository }}:{{ .Values.mariaDB.image.tag }}"
             imagePullPolicy: {{ .Values.mariaDB.image.pullPolicy }}
             command: ["/bin/sh", "-c"]
             args: 
@@ -34,15 +34,20 @@ spec:
               mountPath: /db-dump
           containers:
           - name: restic
-            image: {{ $.Values.restic.image.repository }}:{{ $.Values.restic.image.tag }}
+            image: "{{ $.Values.restic.image.repository }}:{{ $.Values.restic.image.tag }}"
             args:
             - -r
             - {{ $.Values.restic.resticRepository | quote }}
             - backup
             - /home-configs
             - /db-dump
-            - --exclude="backup"
-            - --exclude="backups"
+            - "--exclude=*backup*"
+            - "--exclude=*Backup*"
+            - "--exclude=*.tar"
+            - "--exclude=*.tar.gz"
+            - "--exclude=*.zip"
+            - "--exclude=node_modules"
+            - "--exclude=.npm"
             securityContext:
               runAsUser: 0 
             envFrom:
