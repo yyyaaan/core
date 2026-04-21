@@ -7,48 +7,28 @@ includes:
   play: 
     taskfile: ./apps/py-play/Taskfile.yaml
     dir: ./apps/py-play
-  poller: 
-    taskfile: ./apps/bash-poller/Taskfile.yaml
-    dir: ./apps/bash-poller
+  web:
+    taskfile: ./apps/py-web/Taskfile.yaml
+    dir: ./apps/py-web
 
 tasks:
-  build-play-image:
-    desc: "Build play local image"
-    cmds:
-      - docker build -t play:local -f apps/py-play/Dockerfile .
-
-  build-all-images:
-    desc: "Build all local images"
-    cmds:
-      - task: build-play-image
-      - task: poller:build-local-image
-
-  deploy-play:
-    desc: Deploy the play helm chart - use gitops instead
-    cmds:
-      - task: play:deploy
-
   lint-helm:
     desc: lint and check helm charts across projects
     cmds:
       - helm lint ./apps/bash-poller/helm-chart
       - helm lint ./apps/py-play/helm-chart
+      - helm lint ./apps/py-web/helm-chart
       - helm lint ./infra/helm-chart
       - helm install test-only ./infra/helm-chart --dry-run=client --debug > zzz.yaml
   
-  run-docker:
-    desc: pre-prod verification of docker container
-    cmds:
-      - docker run -i -p 7999:7999 --rm ghcr.io/yyyaaan/core/play:sha-58018b2
-
   bootstrap-test:
-    desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
+    desc: bootstrap test Gitops stacks (infra to be installed with ArgoCD)
     cmds:
       - task: infra:bootstrap
         vars: { ENV: "test" }
 
   bootstrap:
-    desc: bootstrap production gitops stacks (infra to be installed with ArgoCD)
+    desc: bootstrap production Gitops stacks (infra to be installed with ArgoCD)
     cmds:
       - task: infra:bootstrap
         vars: { ENV: "prod" }

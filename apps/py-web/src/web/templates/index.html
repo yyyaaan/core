@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="fixed top-8 left-8 z-10 flex flex-col gap-2">
+    <h1 class="text-xs tracking-[0.2em] font-bold uppercase">Personal Archive 2024</h1>
+    <p class="text-[10px] uppercase tracking-[0.2em] opacity-40">Design x Code (FastAPI Stack)</p>
+</div>
+
+<nav class="fixed top-8 right-8 z-10 flex gap-8">
+    <a href="#" class="nav-link">Work</a>
+    <a href="#" class="nav-link">Studio</a>
+    <a href="#" 
+       class="nav-link"
+       hx-get="/api/contact"
+       hx-target="#project-modal"
+       hx-swap="innerHTML">Contact</a>
+</nav>
+
+<div class="wheel-container">
+    <div id="main-wheel" class="wheel">
+        {% for project in projects %}
+            {% set index = loop.index0 %}
+            <div 
+                class="wheel-item"
+                style="transform: rotate({{ (360 / projects|length) * index }}deg) translate(18vw, -50%);"
+                hx-get="/api/project/{{ project.id }}"
+                hx-target="#project-modal"
+                hx-swap="innerHTML"
+            >
+                <div class="flex flex-col items-center group">
+                    <span class="text-[10px] font-mono mb-2 opacity-0 group-hover:opacity-100 transition-opacity">[0{{ index + 1 }}]</span>
+                    <div class="w-25 h-25 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm group-hover:bg-black group-hover:text-white transition-all overflow-hidden relative">
+                       <div class="absolute inset-0 opacity-10 group-hover:opacity-100 transition-opacity" style="background-color: {{ project.color }}"></div>
+                       <span class="text-[12px] tracking-wider z-10 uppercase">{{ project.title }}</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="fixed bottom-12 left-12 z-10 max-w-sm">
+    <h1 class="text-[80px] font-light leading-none tracking-tighter italic mb-6">Y...<br/></h1>
+    <h2 class="text-xl font-light tracking-tight leading-[1.1] mb-4 opacity-80">
+        Bridging AI/ML and DevOps into meaningful daily life — powering smart homes, healthcare, and the ecosystems that matter.
+    </h2>
+    <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+        <span class="text-[10px] uppercase tracking-widest font-bold opacity-40">Status: Optimal (FastAPI) (K3s)</span>
+    </div>
+</div>
+
+<script>
+    let rotation = 0;
+    const wheel = document.getElementById('main-wheel');
+    
+    // Listen for global reset event from base layout
+    window.addEventListener('wheel:reset', () => {
+        rotation = 0;
+        wheel.style.transform = `rotate(${rotation}deg)`;
+    });
+
+    window.addEventListener('wheel', (e) => {
+        rotation += e.deltaY * 0.1;
+        wheel.style.transform = `rotate(${rotation}deg)`;
+    });
+
+    // Touch support basic
+    let startY = 0;
+    window.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].pageY;
+    });
+    window.addEventListener('touchmove', (e) => {
+        const deltaY = e.touches[0].pageY - startY;
+        rotation += deltaY * 0.1;
+        wheel.style.transform = `rotate(${rotation}deg)`;
+        startY = e.touches[0].pageY;
+    });
+</script>
+{% endblock %}

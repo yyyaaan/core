@@ -5,7 +5,7 @@ description: Python and Rust coding conventions for the core monorepo — FastAP
 
 ## Python Stack
 
-- Runtime: Python ≥3.14, managed by `uv` workspace
+- Runtime: Python 3.14.x only, managed by `uv` workspace
 - Web: FastAPI + Uvicorn, Jinja2 templates
 - Scraping: Playwright (Chromium, server-side) — this is backend, not frontend
 - Data: Pandas, Plotly, OpenCV (headless)
@@ -19,6 +19,7 @@ description: Python and Rust coding conventions for the core monorepo — FastAP
 - Templates loaded from `templates/` via Jinja2Templates
 - No auth in app code — OAuth2-Proxy handles it at ingress level
 - Health endpoint: `GET /api/health`
+- `apps/py-web` uses HTMX + Tailwind CSS 4 (Browser CDN) — Zero-Node, no build step. See `py-web-design` skill for design system and agent protocol.
 
 ## Playwright Conventions
 
@@ -66,6 +67,7 @@ packages/py-*/
 | Command | What |
 |---------|------|
 | `uv run play` | Run py-play locally |
+| `uv run web` | Run py-web locally |
 | `uv run autobrowser` | Run autobrowser |
 | `cargo run -p rs-y-one` | Run Rust project |
 | `task build-all-images` | Build all Docker images |

@@ -1,0 +1,23 @@
+[project]
+name = "web"
+version = "0.1.0"
+description = "Web app with FastAPI and Jinja2"
+readme = "README.md"
+requires-python = "==3.14.*"
+dependencies = [
+    "fastapi[standard]",
+    "uvicorn",
+    "jinja2",
+    "python-multipart",
+    "pydantic-settings"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+web = "web.main:main_dev"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/web"]

@@ -9,6 +9,7 @@ description: Architecture reference for the core monorepo — workspace layout, 
 core/
 ├── apps/           # Deployable applications (each has own helm-chart/)
 │   ├── py-play/    # FastAPI web app (Playwright, OpenCV, Plotly, Pandas)
+│   ├── py-web/     # FastAPI web scaffold (Jinja2, multipart forms)
 │   └── bash-poller/# CronJob workloads (Elenia, FFmpeg, timelapse)
 ├── packages/       # Shared Python libraries
 │   └── py-autobrowser/  # browser-use agentic automation
@@ -32,6 +33,7 @@ core/
 | Action | Command |
 |--------|---------|
 | Run play locally | `uv run play` |
+| Run web locally | `uv run web` |
 | Run autobrowser | `uv run autobrowser` |
 | Build all images | `task build-all-images` |
 | Lint helm charts | `task lint-helm` |

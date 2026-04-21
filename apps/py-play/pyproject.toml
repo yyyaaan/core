@@ -3,7 +3,7 @@ name = "play"
 version = "1.0.0"
 description = "Play App with Playwright and FastAPI"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "==3.14.*"
 dependencies = [
     "fastapi[standard]",
     "jinja2",
