@@ -4,12 +4,7 @@ tasks:
   deploy:
     desc: Deploy the application by the helm chart
     cmds:
-      - helm upgrade --install play helm-chart
-
-  test:
-    desc: "run unit tests"
-    cmds:
-      - echo "Running unit tests pending implementation"
+      - helm upgrade --install web helm-chart
 
   run:
     desc: Run the application from published image (for local testing)
@@ -17,4 +12,9 @@ tasks:
       - |
         read -r -p "Docker image tag [latest/main/sha-]: " IMAGE_TAG
         IMAGE_TAG=${IMAGE_TAG:-main}
-        docker run -i -p 7999:7999 --rm ghcr.io/yyyaaan/core/web:${IMAGE_TAG}
+        docker run -i -p 8001:8001 --rm ghcr.io/yyyaaan/core/web:${IMAGE_TAG}
+
+  test:
+    desc: "run unit tests"
+    cmds:
+      - echo "Running unit tests pending implementation"

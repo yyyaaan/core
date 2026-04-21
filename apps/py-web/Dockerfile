@@ -29,6 +29,6 @@ COPY --chown=appuser:appuser apps/py-web/src/web /app/web
 
 USER appuser
 
-EXPOSE 7998
+EXPOSE 8001
 
-CMD ["fastapi", "run", "web/main.py", "--port", "7998", "--host", "0.0.0.0"]
+CMD ["fastapi", "run", "web/main.py", "--port", "8001", "--host", "0.0.0.0"]

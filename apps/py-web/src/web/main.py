@@ -77,11 +77,11 @@ async def get_project(request: Request, project_id: str):
 
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=7998)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
 
 
 def main_dev():
-    uvicorn.run("web.main:app", host="0.0.0.0", port=7998, reload=True)
+    uvicorn.run("web.main:app", host="0.0.0.0", port=8001, reload=True)
 
 
 if __name__ == "__main__":

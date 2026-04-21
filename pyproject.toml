@@ -2,7 +2,14 @@
 name = "yan-core"
 version = "0.1.0"
 requires-python = "==3.14.*"
-authors = ["Yan Pan<yan@yan.fi>"]
+authors = ["Yan Pan <yan@yan.fi>"]
 
 [tool.uv.workspace]
 members = ["apps/py-*", "packages/py-*"]
+
+# shared dev tools
+[dependency-groups]
+dev = [
+    "httpx",
+    "pytest"
+]

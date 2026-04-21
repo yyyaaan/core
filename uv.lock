@@ -4769,6 +4769,20 @@ name = "yan-core"
 version = "0.1.0"
 source = { virtual = "." }
 
+[package.dev-dependencies]
+dev = [
+    { name = "httpx" },
+    { name = "pytest" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "httpx" },
+    { name = "pytest" },
+]
+
 [[package]]
 name = "yarl"
 version = "1.23.0"
