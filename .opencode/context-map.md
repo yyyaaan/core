@@ -7,7 +7,7 @@
 | Path | Type | Purpose |
 |------|------|---------|
 | `apps/py-play/` | Python (FastAPI) | Web app — Playwright scraping, OpenCV, data viz |
-| `apps/py-web/` | Python (FastAPI) | Web app scaffold — FastAPI, Jinja2 templates, multipart forms |
+| `apps/py-web/` | Python (FastAPI) | Web app — "Artistic Flair" editorial design, FastAPI, Jinja2, HTMX, Tailwind CSS 4 (CDN), Zero-Node |
 | `apps/bash-poller/` | Shell/Python | CronJobs — Elenia energy, FFmpeg, timelapse |
 | `packages/py-autobrowser/` | Python | Agentic browser automation via `browser-use` |
 | `crates/rs-y-one/` | Rust | Rust learning project |
@@ -33,6 +33,7 @@
 | Architecture / planning | **Prometheus** | `monorepo-arch` |
 | Python / Rust / backend code | **Hephaestus** | `backend-logic` |
 | Helm / K8s / GitOps | **Hephaestus** | `infra-helm` |
+| py-web UI / design / HTMX | **Hephaestus** | `py-web-design` |
 | Code search / file lookup | **Librarian** | — |
 
 ### By app
@@ -40,7 +41,7 @@
 | App path | Stack | Notes |
 |----------|-------|-------|
 | `apps/py-play/` | FastAPI, Jinja2, Playwright, OpenCV, Pandas, Plotly | Web scraper + data viz. Has own helm-chart, deploys to `web` ns |
-| `apps/py-web/` | FastAPI, Jinja2, python-multipart, Uvicorn | New web app scaffold under `src/web` with tests in `tests/` |
+| `apps/py-web/` | FastAPI, Jinja2, HTMX, Tailwind CSS 4 (CDN), Uvicorn | "Artistic Flair" editorial UI. Zero-Node. See `py-web-design` skill for design system and agent protocol |
 | `apps/bash-poller/` | Shell, Python helpers | CronJob workloads (Elenia, FFmpeg, timelapse). Deploys to `home-internal` ns |
 | `packages/py-autobrowser/` | browser-use, Pydantic Settings, multi-LLM | Agentic browser automation. Library, not deployed standalone |
 | `crates/rs-y-one/` | Tokio, Serde, Anyhow | Rust learning project |

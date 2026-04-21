@@ -19,6 +19,7 @@ description: Python and Rust coding conventions for the core monorepo — FastAP
 - Templates loaded from `templates/` via Jinja2Templates
 - No auth in app code — OAuth2-Proxy handles it at ingress level
 - Health endpoint: `GET /api/health`
+- `apps/py-web` uses HTMX + Tailwind CSS 4 (Browser CDN) — Zero-Node, no build step. See `py-web-design` skill for design system and agent protocol.
 
 ## Playwright Conventions
 
