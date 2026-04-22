@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    {{- if .Values.authMiddleware.enabled }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.authMiddleware.name }}
+    {{- end }}
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-svc
+            port:
+              number: 80

@@ -1,47 +1,77 @@
 # YYYaan Core Monorepo
 
-Concept: Monorepo, GitOps, Strict Typing in Python, Rest API, MCP server.
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Cluster-326CE5?logo=kubernetes&logoColor=white)
+![Argo CD](https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?logo=argo&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?logo=githubactions&logoColor=white)
 
-No more helm apply, use ArgoCD for kubernetes deployments: currently requires Manual Approval in addition to PR.
+## Overview 🧭
 
-Home Automation with Home Assistant, HomeBridge, Frigate and more are only available under /infra/helm-charts, and they are part of core infra
+Monorepo for Python and Rust services with a GitOps-first deployment model.
+
+- Monorepo structure for apps, packages, and crates
+- Python services (FastAPI), REST APIs, and MCP-related tooling
+- Kubernetes + Helm for runtime infrastructure
+- Argo CD for in-cluster deployment and reconciliation
+
+Manual `helm apply` is intentionally avoided. Deployments are managed through Argo CD and currently require manual approval in addition to pull requests.
+
+Home automation components (Home Assistant, Homebridge, Frigate, etc.) are maintained under `infra/helm-chart` as part of core infrastructure.
+
+## CI/CD ⚙️
+
+- GitHub Actions: build, test, lint, and image workflows
+- In-cluster Argo CD: Helm/Kubernetes deployment execution
 
 ## Technologies
 
-- __Kubernetes__, helm charts, networking, oauth2-proxy and more 
-- __Python__, FastAPI and a lot more
-- __CI/CD__, go-task + github actions
-- __Public Networking__, cloudflare DNS tunnel (in-cluster only)
+- Kubernetes, Helm, networking, oauth2-proxy
+- Python, FastAPI, uv, pytest, ruff
+- GitHub Actions and go-task (`Taskfile`)
+- Cloudflare tunnel for public ingress (in-cluster)
 
-`Taskfile` is used to manage local and cloud workflow. See [taskfile.dev](https://taskfile.dev) and [go-task/task](https://github.com/go-task/task).
+`Taskfile` manages local and cloud workflows. See [taskfile.dev](https://taskfile.dev) and [go-task/task](https://github.com/go-task/task).
 
-> All projects suffixed with `py` (`python`) or `rs` (`Rust`)<br/> __apps/__ contains the main projects<br/> __Crates/__ for `Rust` only<br/> __packages/__ for `python` only<br/> 
+## Repository Layout
 
-## Quick Start Dev
+- `apps/`: main applications
+- `packages/`: shared Python packages
+- `crates/`: Rust crates
 
-For `python` and `Rust` projects, please use devcontainer. Infra relies on GitOps, and shall be tested on host.
+Naming convention:
+- `py-*` for Python projects
+- `rs-*` for Rust projects
 
-```
+## Quick Start (Dev) 🚀
+
+Use the devcontainer for Python and Rust development. Infrastructure flows are GitOps-based and should be validated from host/cluster context.
+
+```bash
 uv run autobrowser
 uv run play
-# unit tests
-uv run pytest -v 
-# with header for dev
+
+# Unit tests (workspace)
+uv run pytest -v
+
+# Local auth example for play
 ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play
 ```
 
-## Services
+## Services 🏠
 
-Home Internal: Home Assistant, MariaDB, Homebridge, Frigate
+- Home internal: Home Assistant, MariaDB, Homebridge, Frigate
+- General web: Play (FastAPI), Stirling PDF (on-demand)
+- Supporting: OAuth2 Proxy, Headlamp, Cloudflare tunnel, cert issuers
 
-General Web: Play FastAPI App, Stirling PDF (on-demand)
+## Restic Backups 💾
 
-Supporting service: OAuth2 Proxy, headlamp; Cloudflare tunnel and Cert Issuers
+A Kubernetes CronJob backs up MariaDB and configuration folders.
 
-## Restic Backups
+## Kubernetes Context Reminder
 
-A Cronjob is registered to backup the MariaDB and config folders.
+```bash
+export KUBECONFIG=~/.kube/pi-config
+```
 
-## Remember to confirm Kube Context
-
-`export KUBECONFIG=~/.kube/pi-config` (default is config)
+Default kube context is `config` if not overridden.

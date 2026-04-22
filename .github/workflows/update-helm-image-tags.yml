@@ -1,0 +1,105 @@
+name: Update Helm Image Tags
+
+on:
+  workflow_run:
+    workflows:
+      - Build and Push Play App
+      - Build and Push Web App
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-helm-image-tags-${{ github.event.workflow_run.name }}
+  cancel-in-progress: true
+
+jobs:
+  update-helm-values:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Resolve app targets
+        id: targets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "${{ github.event.workflow_run.name }}" in
+            "Build and Push Play App")
+              echo "app=play" >> "$GITHUB_OUTPUT"
+              {
+                echo "files<<EOF"
+                echo "apps/py-play/helm-chart/values.yaml"
+                echo "apps/py-play/helm-chart/values-test.yaml"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              ;;
+            "Build and Push Web App")
+              echo "app=web" >> "$GITHUB_OUTPUT"
+              {
+                echo "files<<EOF"
+                echo "apps/py-web/helm-chart/values.yaml"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported workflow name: ${{ github.event.workflow_run.name }}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Update image tag in Helm values
+        id: update
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          source_sha="${{ github.event.workflow_run.head_sha }}"
+          new_tag="sha-${source_sha::7}"
+          changed=0
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            before_hash=$(sha256sum "$file" | awk '{print $1}')
+
+            # Update the first image tag in each chart values file.
+            sed -i -E "0,/^[[:space:]]*tag:[[:space:]]*/s|^[[:space:]]*tag:[[:space:]].*|  tag: \"${new_tag}\"|" "$file"
+
+            after_hash=$(sha256sum "$file" | awk '{print $1}')
+            if [ "$before_hash" != "$after_hash" ]; then
+              changed=1
+            fi
+          done <<< "${{ steps.targets.outputs.files }}"
+
+          echo "new_tag=${new_tag}" >> "$GITHUB_OUTPUT"
+          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changed == '1'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ci/update-image-tag-${{ steps.targets.outputs.app }}-${{ steps.update.outputs.new_tag }}
+          delete-branch: true
+          commit-message: "chore(${{ steps.targets.outputs.app }}): update Helm image tag to ${{ steps.update.outputs.new_tag }}"
+          title: "chore(${{ steps.targets.outputs.app }}): update Helm image tag to ${{ steps.update.outputs.new_tag }}"
+          body: |
+            Automated update generated after a successful image build on `main`.
+
+            - App: `${{ steps.targets.outputs.app }}`
+            - Image tag: `${{ steps.update.outputs.new_tag }}`
+            - Source build workflow: `${{ github.event.workflow_run.name }}`
+            - Source commit: `${{ github.event.workflow_run.head_sha }}`
+          labels: |
+            automation
+            helm
+            image-tag
+          base: main
