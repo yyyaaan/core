@@ -16,6 +16,9 @@ concurrency:
 jobs:
   test-play:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,4 +38,10 @@ jobs:
         run: uv run ruff check apps/py-play/
 
       - name: Run Pytest
-        run: uv run pytest apps/py-play/tests/
+        run: uv run pytest apps/py-play/tests/ --junitxml=pytest-results.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: "pytest-results.xml"
