@@ -7,6 +7,15 @@ authors = ["Yan Pan <yan@yan.fi>"]
 [tool.uv.workspace]
 members = ["apps/py-*", "packages/py-*"]
 
+# SecOps, override transitive dependencies for known vulnerabilities
+[tool.uv]
+constraint-dependencies = [
+    "aiohttp>=3.13.5",
+    "pillow>=12.2.0",
+    "pypdf>=6.10.2",
+    "python-dotenv>=1.2.2"
+]
+
 # global python test configurations
 [dependency-groups]
 dev = [
