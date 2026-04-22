@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: web
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        {{- range .Values.envFromSecretList }}
+          - secretRef:
+              name: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "500m"
+            memory: "500Mi"
+        volumeMounts:
+        - name: mem-disk-volume
+          mountPath: /tmp/cache
+      volumes:
+      - name: mem-disk-volume
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.memDiskSize }}

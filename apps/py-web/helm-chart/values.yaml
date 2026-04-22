@@ -1,0 +1,15 @@
+namespace: web
+authMiddleware:
+  enabled: true
+  name: auth-oauth@kubernetescrd
+image:
+  repository: ghcr.io/yyyaaan/core/web
+  tag: "sha-7f07e1b"
+  pullPolicy: IfNotPresent
+envFromSecretList:
+  - tz-config
+memDiskSize: 10Mi
+service:
+  targetPort: 8001
+ingress:
+  host: staging.yan.fi
