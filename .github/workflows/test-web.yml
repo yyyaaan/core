@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'apps/py-web/**'
+      - '!apps/py-web/helm-chart/**'
       - 'packages/**'
       - 'pyproject.toml'
       - 'uv.lock'

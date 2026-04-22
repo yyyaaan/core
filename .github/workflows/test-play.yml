@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'apps/py-play/**'
+      - '!apps/py-play/helm-chart/**'
       - 'packages/**'
       - 'pyproject.toml'
       - 'uv.lock'

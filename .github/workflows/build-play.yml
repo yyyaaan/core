@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'apps/py-play/**'
+      - '!apps/py-play/helm-chart/**'
       - 'packages/**'
       - 'pyproject.toml'
       - 'uv.lock'
