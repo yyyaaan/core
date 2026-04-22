@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from web.main import app
+from web.main import app, projects
 
 client = TestClient(app)
 
@@ -14,5 +14,5 @@ def test_root_contains_projects():
     response = client.get("/")
     assert response.status_code == 200
     # All project titles should appear in the rendered HTML
-    for title in ("Resonant", "Ditto", "Utility", "Flex"):
+    for title in [p["title"] for p in projects]:
         assert title in response.text
