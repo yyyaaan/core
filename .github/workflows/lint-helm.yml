@@ -6,14 +6,16 @@ on:
       - '**/helm-chart/**'
       - '**/Chart.yaml'
       - '**/values*.yaml'
-      - '**/*.yaml' # Catch templates
+      - '**/*.yaml'
+      - '.github/workflows/lint-helm.yml'
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint:
+  lint-helm:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
