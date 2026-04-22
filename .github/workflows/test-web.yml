@@ -45,3 +45,4 @@ jobs:
         if: always()
         with:
           files: "pytest-results.xml"
+          comment_title: "🧪 Web App Test Results"
