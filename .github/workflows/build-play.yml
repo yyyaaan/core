@@ -6,7 +6,7 @@ on:
     paths:
       - 'apps/py-play/**'
       - '!apps/py-play/helm-chart/**'
-      - 'packages/**'
+      # - 'packages/**'
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/build-play.yml'
@@ -17,6 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/play
 
@@ -29,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
