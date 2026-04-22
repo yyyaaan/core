@@ -29,7 +29,7 @@ jobs:
         run: uv lock --check
         
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --package play
 
       - name: Run Ruff check
         run: uv run ruff check apps/py-play/

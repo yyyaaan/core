@@ -10,7 +10,8 @@ members = ["apps/py-*", "packages/py-*"]
 # global python test configurations
 [dependency-groups]
 dev = [
-    "pytest"
+    "pytest",
+    "ruff"
 ]
 
 [tool.pytest.ini_options]
