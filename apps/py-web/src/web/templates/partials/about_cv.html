@@ -2,7 +2,7 @@
     <div class="about-bg-pattern grid-overlay"></div>
     
     <!-- Close Button -->
-    <button onclick="closeAbout()" class="fixed top-8 right-8 z-50 p-2 hover:bg-black/5 rounded-full transition-colors">
+    <button onclick="if(typeof closeAbout === 'function') { closeAbout() } else { window.location.href='/' }" class="fixed top-8 right-8 z-50 p-2 hover:bg-black/5 rounded-full transition-colors">
         <i data-lucide="x" class="w-8 h-8"></i>
     </button>
 

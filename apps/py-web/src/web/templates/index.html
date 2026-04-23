@@ -19,11 +19,7 @@
 </div>
 
 <nav class="fixed top-8 right-8 z-10 flex gap-8">
-    <a href="#" 
-       class="nav-link"
-       hx-get="/public/api/project/about"
-       hx-target="#about-overlay"
-       hx-swap="innerHTML">About Me</a>
+    <a href="/about" class="nav-link">About Me</a>
     <a href="#" 
        class="nav-link"
        hx-get="/public/api/contact"
@@ -39,9 +35,13 @@
                 class="wheel-item"
                 style="transform: rotate({{ (360 / projects|length) * index }}deg) translate(18vw, -50%);"
                 {% if project.id != 'utility' %}
-                hx-get="/public/api/project/{{ project.id }}"
-                hx-target="{% if project.isAbout %}#about-overlay{% else %}#project-modal{% endif %}"
-                hx-swap="innerHTML"
+                    {% if project.isAbout %}
+                        onclick="window.location.href='/about'"
+                    {% else %}
+                        hx-get="/public/api/project/{{ project.id }}"
+                        hx-target="#project-modal"
+                        hx-swap="innerHTML"
+                    {% endif %}
                 {% else %}
                 onclick="toggleUtility(event)"
                 {% endif %}
@@ -141,16 +141,33 @@
         closeUtility(); // Close sub-wheel on rotation for safety
     });
 
-    let startY = 0;
+    let isDragging = false;
+    let startAngle = 0;
+
+    function getAngle(x, y) {
+        const rect = wheel.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        return Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+    }
+
     window.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].pageY;
+        const touch = e.touches[0];
+        startAngle = getAngle(touch.clientX, touch.clientY) - rotation;
+        isDragging = true;
     });
+
     window.addEventListener('touchmove', (e) => {
-        const deltaY = e.touches[0].pageY - startY;
-        rotation += deltaY * 0.1;
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const newAngle = getAngle(touch.clientX, touch.clientY);
+        rotation = newAngle - startAngle;
         if (wheel) wheel.style.transform = `rotate(${rotation}deg)`;
-        startY = e.touches[0].pageY;
-        closeUtility(); // Close on touch movement
+        closeUtility(); 
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+        isDragging = false;
     });
 
     // Global click listener to close utility if clicking elsewhere

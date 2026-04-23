@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="about-page-standalone">
+    {% include "partials/about_cv.html" %}
+</div>
+
+<script>
+    // Ensure the about layout is treated as shown since it's a standalone page
+    document.addEventListener('DOMContentLoaded', () => {
+        const aboutDiv = document.getElementById('about-page-standalone').firstElementChild;
+        if (aboutDiv) {
+            aboutDiv.classList.add('show');
+        }
+    });
+
+    // Override closeAbout for standalone page to go back home
+    function closeAbout() {
+        window.location.href = '/';
+    }
+</script>
+{% endblock %}
