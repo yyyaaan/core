@@ -21,12 +21,12 @@
 <nav class="fixed top-8 right-8 z-10 flex gap-8">
     <a href="#" 
        class="nav-link"
-       hx-get="/api/project/about"
+       hx-get="/public/api/project/about"
        hx-target="#about-overlay"
        hx-swap="innerHTML">About Me</a>
     <a href="#" 
        class="nav-link"
-       hx-get="/api/contact"
+       hx-get="/public/api/contact"
        hx-target="#project-modal"
        hx-swap="innerHTML">Contact</a>
 </nav>
@@ -39,7 +39,7 @@
                 class="wheel-item"
                 style="transform: rotate({{ (360 / projects|length) * index }}deg) translate(18vw, -50%);"
                 {% if project.id != 'utility' %}
-                hx-get="/api/project/{{ project.id }}"
+                hx-get="/public/api/project/{{ project.id }}"
                 hx-target="{% if project.isAbout %}#about-overlay{% else %}#project-modal{% endif %}"
                 hx-swap="innerHTML"
                 {% else %}

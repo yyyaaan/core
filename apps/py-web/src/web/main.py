@@ -16,14 +16,15 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # Mock data
 projects = [
     {
-        "id": "kubernetes",
-        "title": "K8s Cluster",
-        "context": "GitOps Orchestration",
-        "summary": "ArgoCD / GitOps / K3s<br/>Prometheus + Grafana",
-        "desc": "Technical instrumentation suite for distributed systems.",
-        "color": "#3B82F6",
-        "icon": "server",
-        "image": "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop",
+        "id": "about",
+        "title": "About Me",
+        "context": "Human / Engineer",
+        "summary": "System Architect<br/>CV & Background",
+        "desc": "A comprehensive look at my professional journey, education, and technical stack.",
+        "color": "#F27D26",
+        "icon": "user",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
+        "isAbout": True,
     },
     {
         "id": "omop",
@@ -36,15 +37,14 @@ projects = [
         "image": "https://images.unsplash.com/photo-1504813184591-01f944cdf0f4?q=80&w=800&auto=format&fit=crop",
     },
     {
-        "id": "about",
-        "title": "About Me",
-        "context": "Human / Engineer",
-        "summary": "System Architect<br/>CV & Background",
-        "desc": "A comprehensive look at my professional journey, education, and technical stack.",
-        "color": "#F27D26",
-        "icon": "user",
-        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
-        "isAbout": True,
+        "id": "kubernetes",
+        "title": "K8s Cluster",
+        "context": "GitOps Orchestration",
+        "summary": "ArgoCD / GitOps / K3s<br/>Prometheus + Grafana",
+        "desc": "Technical instrumentation suite for distributed systems.",
+        "color": "#3B82F6",
+        "icon": "server",
+        "image": "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop",
     },
     {
         "id": "home",
@@ -91,12 +91,12 @@ async def read_root(request: Request):
     return templates.TemplateResponse(request, "index.html", {"projects": projects})
 
 
-@app.get("/api/contact", response_class=HTMLResponse)
+@app.get("/public/api/contact", response_class=HTMLResponse)
 async def get_contact(request: Request):
     return templates.TemplateResponse(request, "partials/contact.html")
 
 
-@app.get("/api/project/{project_id}", response_class=HTMLResponse)
+@app.get("/public/api/project/{project_id}", response_class=HTMLResponse)
 async def get_project(request: Request, project_id: str):
     if project_id == "about":
         return templates.TemplateResponse(request, "partials/about_cv.html")
