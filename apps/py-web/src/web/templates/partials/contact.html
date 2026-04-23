@@ -28,8 +28,8 @@
             </p>
         </div>
 
-        <button onclick="closeProject()" class="block w-full px-4 py-3 bg-black text-white text-[10px] uppercase tracking-[0.2em] font-bold text-center hover:bg-white hover:text-black hover:outline hover:outline-1 hover:outline-black transition-all">
-            Dismiss Signal
+        <button hx-get="/api/project/about" hx-target="#about-overlay" hx-swap="innerHTML" onclick="closeProject()" class="block w-full px-4 py-3 bg-black text-white text-[10px] uppercase tracking-[0.2em] font-bold text-center hover:bg-white hover:text-black hover:outline hover:outline-1 hover:outline-black transition-all">
+            About Me
         </button>
     </div>
 </div>
