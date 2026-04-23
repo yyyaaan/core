@@ -15,21 +15,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons Library -->
-    <script src="https://unpkg.com/lucide@0.474.0"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        @theme {
-            --color-bg-primary: #FDFCF8;
-            --color-ink: #1A1A1A;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: #FDFCF8;
             color: #1A1A1A;
             margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Prevent scroll only on root if needed, but let standalone pages breathe */
+        .no-scroll {
             overflow: hidden;
             height: 100vh;
+        }
+
+        @theme {
+            --color-bg-primary: #FDFCF8;
+            --color-ink: #1A1A1A;
+            --color-soft-cyan: #6ae5ee;
+            --color-avocado: #A7BA89;
         }
 
         /* Organic Bubble Node */
@@ -246,10 +253,27 @@
             text-decoration: none;
             transition: all 0.3s ease;
             font-weight: 600;
+            position: relative;
         }
         
-        .nav-link:hover {
-            text-decoration: underline;
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #6ae5ee;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .system-dot {
+            background-color: #A7BA89; /* Avocado hint */
+            box-shadow: 0 0 8px rgba(167, 186, 137, 0.4);
         }
     </style>
 </head>

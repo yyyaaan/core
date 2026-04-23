@@ -94,6 +94,11 @@ async def read_root(request: Request):
     return templates.TemplateResponse(request, "index.html", {"projects": projects})
 
 
+@app.get("/about", response_class=HTMLResponse)
+async def read_about(request: Request):
+    return templates.TemplateResponse(request, "about_page.html")
+
+
 @app.get("/public/api/contact", response_class=HTMLResponse)
 async def get_contact(request: Request):
     return templates.TemplateResponse(request, "partials/contact.html")
