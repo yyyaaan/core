@@ -8,19 +8,22 @@
     </div>
     
     <div class="w-full h-40 border border-black overflow-hidden bg-[#FDFCF8] relative mb-6">
+        {% if project.image %}
+        <div class="absolute inset-0 grayscale contrast-125 opacity-30 bg-cover bg-center" style="background-image: url('{{ project.image }}')"></div>
+        {% endif %}
         <div class="absolute inset-0 opacity-10 filter blur-xl" style="background-color: {{ project.color }}"></div>
-        <div class="absolute inset-0 flex items-center justify-center">
-             <span class="text-[12px] uppercase tracking-[0.1em] font-bold opacity-60">{{ project.summary|safe or project.title|safe }}</span>
+        <div class="absolute inset-0 flex items-center justify-center p-6 text-center">
+             <span class="text-[12px] uppercase tracking-[0.1em] font-bold opacity-80 leading-snug">{{ project.summary|safe or project.title|safe }}</span>
         </div>
     </div>
 
     <div class="space-y-4">
         <div class="flex justify-between items-center border-b border-black/5 pb-2">
             <span class="text-xs font-medium uppercase tracking-tighter">Identity</span>
-            <span class="text-[10px] font-mono bg-black text-white px-2 py-0.5 uppercase">{{ project.title }}</span>
+            <span class="text-[10px] font-mono bg-black text-white px-2 py-0.5 uppercase tracking-widest">{{ project.title }}</span>
         </div>
         
-        <p class="text-[12px] text-black/70 leading-relaxed italic border-l-2 border-black pl-4">
+        <p class="text-[12px] text-black/70 leading-relaxed italic border-l-2 border-black pl-4 font-medium">
             "{{ project.desc }}"
         </p>
 

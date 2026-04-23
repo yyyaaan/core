@@ -16,45 +16,72 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # Mock data
 projects = [
     {
-        "id": "kubernetes",
-        "title": "Kubernetes Cluster",
-        "summary": "Technical Instrumentation Suite<br/>ArgoCD for GitOpsContinuous Delivery<br/>Headlamp for Observability<br/>Prometheus + Grafana for Metrics",
-        "desc": "Technical instrumentation suite.",
-        "color": "#3B82F6",
+        "id": "about",
+        "title": "About Me",
+        "context": "Human / Engineer",
+        "summary": "System Architect<br/>CV & Background",
+        "desc": "A comprehensive look at my professional journey, education, and technical stack.",
+        "color": "#F27D26",
+        "icon": "user",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
+        "isAbout": True,
     },
     {
         "id": "omop",
-        "title": "OMOP",
-        "summary": "OHDSI/OMOP CDM ETL pipelines.<br/>OMOP Ecosystem Cloud Engineering.",
-        "desc": "Individual contributor to the OHDSI/OMOP CDM ETL pipelines. Developed and maintained robust ETL pipelines to transform healthcare data into the OMOP Common Data Model (CDM) format, ensuring data consistency and quality for research and analysis.",
-        "color": "#00FF00",
+        "title": "OMOP CDM",
+        "context": "Healthcare Engineering",
+        "summary": "Healthcare Data ETL<br/>OHDSI Ecosystem Cloud",
+        "desc": "Individual contributor to OHDSI/OMOP CDM ETL pipelines. Transforming healthcare data into standard formats.",
+        "color": "#10B981",
+        "icon": "activity",
+        "image": "https://images.unsplash.com/photo-1504813184591-01f944cdf0f4?q=80&w=800&auto=format&fit=crop",
     },
     {
-        "id": "resonant",
-        "title": "Resonant",
-        "summary": "Resonant Archives<br/>Web Scrapping<br/>R, Shiny, Data Visualization<br/>R & SAS in clinical research",
-        "desc": "Clinical Research Data Analysis and Visualization. Utilized R and SAS for data analysis in clinical research projects, including data cleaning, statistical analysis, and visualization. Developed interactive dashboards using Shiny to present research findings effectively.",
-        "color": "#F27D26",
-    },
-    {
-        "id": "flex",
-        "title": "Flex",
-        "summary": "Dynamic branding system.<br/>Flexible design components.",
-        "desc": "Dynamic branding system.",
-        "color": "#EF4444",
-    },
-    {
-        "id": "utility-2",
-        "title": "Utility",
-        "desc": "Technical instrumentation suite.",
-        "color": "#EC4899",
+        "id": "kubernetes",
+        "title": "K8s Cluster",
+        "context": "GitOps Orchestration",
+        "summary": "ArgoCD / GitOps / K3s<br/>Prometheus + Grafana",
+        "desc": "Technical instrumentation suite for distributed systems.",
+        "color": "#3B82F6",
+        "icon": "server",
+        "image": "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?q=80&w=800&auto=format&fit=crop",
     },
     {
         "id": "home",
         "title": "Smart Home",
-        "summary": "Home Automation & Integration<br/>Reliable services on Kubernetes",
-        "desc": "Bring Home Assistant, Frigate, HomeBridge, and more to the smart home. Enables seamless integration and control of various smart devices, creating a unified and efficient smart home ecosystem. Apple HomeKit, Google Home, Amazon Alexa, and more.",
+        "context": "Home Automation",
+        "summary": "Home Assistant<br/>K8s Integration",
+        "desc": "Powering smart homes with Home Assistant, Frigate, and HomeBridge running on Kubernetes.",
         "color": "#8B5CF6",
+        "icon": "home",
+        "image": "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+        "id": "ai_ml",
+        "title": "AI/ML Prof.",
+        "context": "Applied Intel",
+        "summary": "Advanced ML Pipelines<br/>Neural Architecture",
+        "desc": "Developing production-grade AI/ML pipelines, focusing on transformer architectures and high-performance inference systems.",
+        "color": "#EF4444",
+        "icon": "brain",
+        "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+        "id": "utility",
+        "title": "Utility",
+        "context": "System Nodes",
+        "summary": "Technical Suite<br/>Instrumentation",
+        "desc": "Direct access to internal infrastructure dashboards and micro-services.",
+        "color": "#EC4899",
+        "icon": "cpu",
+        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
+        "sublinks": [
+            {"label": "Dash", "url": "https://dash.yan.fi"},
+            {"label": "ArgoCD", "url": "https://argocd.yan.fi"},
+            {"label": "Home", "url": "https://h.yan.fi"},
+            {"label": "Frigate", "url": "https://frigate.yan.fi"},
+            {"label": "Bridge", "url": "https://homebridge.yan.fi"},
+        ],
     },
 ]
 
@@ -64,13 +91,16 @@ async def read_root(request: Request):
     return templates.TemplateResponse(request, "index.html", {"projects": projects})
 
 
-@app.get("/api/contact", response_class=HTMLResponse)
+@app.get("/public/api/contact", response_class=HTMLResponse)
 async def get_contact(request: Request):
     return templates.TemplateResponse(request, "partials/contact.html")
 
 
-@app.get("/api/project/{project_id}", response_class=HTMLResponse)
+@app.get("/public/api/project/{project_id}", response_class=HTMLResponse)
 async def get_project(request: Request, project_id: str):
+    if project_id == "about":
+        return templates.TemplateResponse(request, "partials/about_cv.html")
+
     project = next((p for p in projects if p["id"] == project_id), None)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")

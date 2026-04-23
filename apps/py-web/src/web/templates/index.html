@@ -1,17 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="fixed top-8 left-8 z-10 flex flex-col gap-2">
-    <h1 class="text-xs tracking-[0.2em] font-bold uppercase">Personal Archive 2024</h1>
-    <p class="text-[10px] uppercase tracking-[0.2em] opacity-40">Design x Code (FastAPI Stack)</p>
+
+<div class="fixed top-12 left-12 z-10 flex flex-col gap-6 max-w-sm">
+    <div class="flex flex-col gap-1">
+        <h1 class="text-[80px] font-light leading-none tracking-tighter italic">Y...</h1>
+    </div>
+</div>
+
+<div class="fixed bottom-12 left-12 z-10 flex flex-col gap-4 max-w-xs scale-90 origin-bottom-left">
+    <p class="text-[14px] font-light tracking-tight leading-relaxed opacity-80 border-l border-black/10 pl-4 py-1">
+        Bridging AI/ML and DevOps into meaningful daily life — powering smart homes, healthcare, and the ecosystems that matter.
+    </p>
+    <div class="flex items-center gap-2 mt-2 opacity-40">
+        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.3)]"></span>
+        <span class="text-[9px] uppercase tracking-[0.2em] font-bold">K3s Cluster Optimal / System State Verified</span>
+    </div>
 </div>
 
 <nav class="fixed top-8 right-8 z-10 flex gap-8">
-    <a href="#" class="nav-link">Work</a>
-    <a href="#" class="nav-link">Studio</a>
     <a href="#" 
        class="nav-link"
-       hx-get="/api/contact"
+       hx-get="/public/api/project/about"
+       hx-target="#about-overlay"
+       hx-swap="innerHTML">About Me</a>
+    <a href="#" 
+       class="nav-link"
+       hx-get="/public/api/contact"
        hx-target="#project-modal"
        hx-swap="innerHTML">Contact</a>
 </nav>
@@ -23,49 +38,109 @@
             <div 
                 class="wheel-item"
                 style="transform: rotate({{ (360 / projects|length) * index }}deg) translate(18vw, -50%);"
-                hx-get="/api/project/{{ project.id }}"
-                hx-target="#project-modal"
+                {% if project.id != 'utility' %}
+                hx-get="/public/api/project/{{ project.id }}"
+                hx-target="{% if project.isAbout %}#about-overlay{% else %}#project-modal{% endif %}"
                 hx-swap="innerHTML"
+                {% else %}
+                onclick="toggleUtility(event)"
+                {% endif %}
             >
-                <div class="flex flex-col items-center group">
-                    <span class="text-[10px] font-mono mb-2 opacity-0 group-hover:opacity-100 transition-opacity">[0{{ index + 1 }}]</span>
-                    <div class="w-25 h-25 rounded-full border border-black/10 flex items-center justify-center bg-white shadow-sm group-hover:bg-black group-hover:text-white transition-all overflow-hidden relative">
-                       <div class="absolute inset-0 opacity-10 group-hover:opacity-100 transition-opacity" style="background-color: {{ project.color }}"></div>
-                       <span class="text-[12px] tracking-wider z-10 uppercase">{{ project.title }}</span>
+                <div class="flex flex-col items-center group relative">
+                    <!-- Hover Context -->
+                    <div class="text-[10px] font-mono mb-2 opacity-0 group-hover:opacity-60 transition-all duration-500 translate-y-2 group-hover:translate-y-0 text-center uppercase tracking-widest h-auto min-h-[1.5rem]">
+                        <span class="inline-block">{{ project.context }}</span>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-[3000ms] text-[9px] mt-1 italic lowercase text-[#E11D48] font-bold">
+                            — {% if project.id == 'utility' %}click to expand nodes{% else %}click for details{% endif %}
+                        </div>
                     </div>
+
+                    <div class="bubble-node group-hover:bg-black group-hover:text-white group-hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] overflow-hidden relative">
+                        {% if project.image %}
+                        <div class="absolute inset-0 grayscale contrast-125 opacity-10 group-hover:opacity-30 transition-opacity bg-cover bg-center" style="background-image: url('{{ project.image }}')"></div>
+                        {% endif %}
+                        <div class="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-xl rounded-full" style="background-color: {{ project.color }}"></div>
+                        <div class="relative z-10 flex flex-col items-center justify-center text-center p-3 gap-1">
+                           {% if project.icon %}
+                           <i data-lucide="{{ project.icon }}" class="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity"></i>
+                           {% endif %}
+                           <span class="text-[11px] leading-tight tracking-wider uppercase font-bold break-words w-full px-1">
+                               {{ project.title|safe }}
+                           </span>
+                        </div>
+                    </div>
+
+                    {% if project.id == 'utility' and project.sublinks %}
+                    <div id="utility-subwheel" class="sub-wheel">
+                        {% for link in project.sublinks %}
+                            {% set lIndex = loop.index0 %}
+                            {% set angle = (360 / project.sublinks|length) * lIndex %}
+                            {% set radius = 90 %}
+                            <a href="{{ link.url }}" target="_blank" class="sub-link" 
+                               style="transform: translate(-50%, -50%) rotate(calc({{ angle }}deg)) translate({{ radius }}px) rotate(calc(-{{ angle }}deg)) rotate(-{{ (360 / projects|length) * index }}deg);">
+                                <span class="text-center px-1">{{ link.label }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
     </div>
 </div>
 
-<div class="fixed bottom-12 left-12 z-10 max-w-sm">
-    <h1 class="text-[80px] font-light leading-none tracking-tighter italic mb-6">Y...<br/></h1>
-    <h2 class="text-xl font-light tracking-tight leading-[1.1] mb-4 opacity-80">
-        Bridging AI/ML and DevOps into meaningful daily life — powering smart homes, healthcare, and the ecosystems that matter.
-    </h2>
-    <div class="flex items-center gap-2">
-        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-        <span class="text-[10px] uppercase tracking-widest font-bold opacity-40">Status: Optimal (FastAPI) (K3s)</span>
-    </div>
-</div>
-
 <script>
     let rotation = 0;
+    let utilityTimer = null;
     const wheel = document.getElementById('main-wheel');
     
-    // Listen for global reset event from base layout
+    function closeUtility() {
+        const subwheel = document.getElementById('utility-subwheel');
+        if (subwheel) subwheel.classList.remove('active');
+        if (utilityTimer) clearTimeout(utilityTimer);
+    }
+
+    function toggleUtility(event) {
+        if (event) event.stopPropagation();
+        const subwheel = document.getElementById('utility-subwheel');
+        
+        if (subwheel && subwheel.classList.contains('active')) {
+            closeUtility();
+        } else if (subwheel) {
+            if (typeof closeProject === 'function') closeProject();
+            subwheel.classList.add('active');
+            
+            // Start auto-close timer (5 seconds of no interaction)
+            resetUtilityTimer();
+        }
+    }
+
+    function resetUtilityTimer() {
+        if (utilityTimer) clearTimeout(utilityTimer);
+        utilityTimer = setTimeout(() => {
+            closeUtility();
+        }, 5000);
+    }
+
+    // Reset timer on any movement or click
+    window.addEventListener('mousemove', () => {
+        const subwheel = document.getElementById('utility-subwheel');
+        if (subwheel && subwheel.classList.contains('active')) resetUtilityTimer();
+    });
+
+    // Listen for global reset
     window.addEventListener('wheel:reset', () => {
         rotation = 0;
-        wheel.style.transform = `rotate(${rotation}deg)`;
+        if (wheel) wheel.style.transform = `rotate(${rotation}deg)`;
+        closeUtility();
     });
 
     window.addEventListener('wheel', (e) => {
         rotation += e.deltaY * 0.1;
-        wheel.style.transform = `rotate(${rotation}deg)`;
+        if (wheel) wheel.style.transform = `rotate(${rotation}deg)`;
+        closeUtility(); // Close sub-wheel on rotation for safety
     });
 
-    // Touch support basic
     let startY = 0;
     window.addEventListener('touchstart', (e) => {
         startY = e.touches[0].pageY;
@@ -73,8 +148,26 @@
     window.addEventListener('touchmove', (e) => {
         const deltaY = e.touches[0].pageY - startY;
         rotation += deltaY * 0.1;
-        wheel.style.transform = `rotate(${rotation}deg)`;
+        if (wheel) wheel.style.transform = `rotate(${rotation}deg)`;
         startY = e.touches[0].pageY;
+        closeUtility(); // Close on touch movement
+    });
+
+    // Global click listener to close utility if clicking elsewhere
+    window.addEventListener('click', (e) => {
+        const subwheel = document.getElementById('utility-subwheel');
+        if (subwheel && subwheel.classList.contains('active')) {
+            if (!e.target.closest('.sub-wheel') && !e.target.closest('.bubble-node')) {
+                closeUtility();
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+    document.body.addEventListener('htmx:afterOnLoad', () => {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 </script>
 {% endblock %}
