@@ -18,18 +18,25 @@
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 
     <style>
-        @theme {
-            --color-bg-primary: #FDFCF8;
-            --color-ink: #1A1A1A;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: #FDFCF8;
             color: #1A1A1A;
             margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Prevent scroll only on root if needed, but let standalone pages breathe */
+        .no-scroll {
             overflow: hidden;
             height: 100vh;
+        }
+
+        @theme {
+            --color-bg-primary: #FDFCF8;
+            --color-ink: #1A1A1A;
+            --color-soft-cyan: #6ae5ee;
+            --color-avocado: #A7BA89;
         }
 
         /* Organic Bubble Node */
@@ -48,6 +55,17 @@
             /* Organic non-perfect circle shape */
             border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
             animation: organic-morph 12s infinite alternate ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .bubble-node {
+                width: 75px;
+                height: 75px;
+            }
+            .wheel-container {
+                width: 90vw;
+                height: 90vw;
+            }
         }
 
         @keyframes organic-morph {
@@ -171,6 +189,7 @@
             bottom: 60px;
             right: 60px;
             width: 450px;
+            max-width: calc(100vw - 120px);
             background: #FFFFFF;
             border: 1px solid #000000;
             box-shadow: 20px 20px 0px 0px rgba(0,0,0,1);
@@ -180,6 +199,19 @@
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            #project-modal {
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                width: auto;
+                max-width: none;
+                margin: 0;
+                box-shadow: 10px 10px 0px 0px rgba(0,0,0,1);
+                padding: 24px;
+            }
         }
 
         #project-modal.show {
@@ -221,10 +253,27 @@
             text-decoration: none;
             transition: all 0.3s ease;
             font-weight: 600;
+            position: relative;
         }
         
-        .nav-link:hover {
-            text-decoration: underline;
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: #6ae5ee;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .system-dot {
+            background-color: #A7BA89; /* Avocado hint */
+            box-shadow: 0 0 8px rgba(167, 186, 137, 0.4);
         }
     </style>
 </head>
@@ -239,7 +288,7 @@
     </div>
 
     <!-- Full page About Overlay -->
-    <div id="about-overlay" class="opacity-0 pointer-events-none">
+    <div id="about-overlay">
         <!-- CV content will be injected here -->
     </div>
 
@@ -247,8 +296,9 @@
         function showAbout() {
             const overlay = document.getElementById('about-overlay');
             if (overlay) {
+                // Ensure other modals are closed and wheel is home
+                if (typeof closeProject === 'function') closeProject();
                 overlay.classList.add('show');
-                overlay.classList.remove('opacity-0', 'pointer-events-none');
             }
         }
 
@@ -266,9 +316,8 @@
 
         function closeProject() {
             const modal = document.getElementById('project-modal');
-            modal.classList.remove('show');
+            if (modal) modal.classList.remove('show');
             
-            // Restore wheel to center
             const wheelContainer = document.querySelector('.wheel-container');
             if (wheelContainer) {
                 wheelContainer.classList.remove('pushed');
@@ -278,7 +327,7 @@
 
         function closeAbout() {
             const overlay = document.getElementById('about-overlay');
-            overlay.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
         }
 
         // Click outside to close

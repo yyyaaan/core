@@ -60,6 +60,7 @@ auth:
   envFromSecret: oauth2-proxy-credentials
   skipAuthRoutes:
     - "^/$"
+    - "^/about$"
     - "^/public/.*"
     - "^/docs$"
     - "^/openapi.json$"

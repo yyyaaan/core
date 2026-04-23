@@ -13,6 +13,9 @@ app = FastAPI()
 # Setup Templates (Jinja2)
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
+with open(os.path.join(BASE_DIR, "static", "yan.jpg.txt"), "r") as f:
+    yan_image_base64 = f.read().strip()
+
 # Mock data
 projects = [
     {
@@ -21,9 +24,9 @@ projects = [
         "context": "Human / Engineer",
         "summary": "System Architect<br/>CV & Background",
         "desc": "A comprehensive look at my professional journey, education, and technical stack.",
-        "color": "#F27D26",
+        "color": "#6ae5ee",
         "icon": "user",
-        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
+        "image": f"data:image/jpeg;base64,{yan_image_base64}",
         "isAbout": True,
     },
     {
@@ -89,6 +92,11 @@ projects = [
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse(request, "index.html", {"projects": projects})
+
+
+@app.get("/about", response_class=HTMLResponse)
+async def read_about(request: Request):
+    return templates.TemplateResponse(request, "about_page.html")
 
 
 @app.get("/public/api/contact", response_class=HTMLResponse)
