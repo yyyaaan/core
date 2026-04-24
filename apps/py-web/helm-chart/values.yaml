@@ -14,5 +14,5 @@ service:
 ingress:
   host: yan.fi
   additionalHosts:
-    - host: staging.yan.fi
-    - host: omop.fi
+    - staging.yan.fi
+    - omop.fi
