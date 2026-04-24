@@ -12,4 +12,7 @@ memDiskSize: 10Mi
 service:
   targetPort: 8001
 ingress:
-  host: staging.yan.fi
+  host: yan.fi
+  additionalHosts:
+    - staging.yan.fi
+    - omop.fi
