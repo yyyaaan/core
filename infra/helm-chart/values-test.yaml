@@ -36,10 +36,11 @@ auth:
   skipAuthRoutes:
     - "^/$"
     - "^/public/.*"
+    - "^/api/public/.*"
+    - "^/api/health$"
     - "^/docs$"
     - "^/openapi.json$"
     - "^/favicon.ico$"
-    - "^/api/health$"
     - "^/robots.txt$"
 
 stirlingPdf:
