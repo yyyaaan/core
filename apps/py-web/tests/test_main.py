@@ -11,14 +11,19 @@ def test_root_loads():
 
 
 def test_root_contains_projects():
-    """
-    also verifies the /public/api/project/{project_id} endpoint
-    """
     response = client.get("/")
     assert response.status_code == 200
     # All project titles should appear in the rendered HTML
     for title in [p["title"] for p in projects]:
         assert title in response.text
+
+
+def test_api_projects():
+    for id in [p["id"] for p in projects]:
+        response = client.get(f"/api/public/project/{id}")
+        assert response.status_code == 200
+        if "about" not in id.lower():
+            assert id in response.text
 
 
 def test_about_page_loads():
