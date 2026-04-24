@@ -12,7 +12,7 @@ def test_root_loads():
 
 def test_root_contains_projects():
     """
-    also verifies the /public/api/project/{project_id} endpoint
+    also verifies the /api/public/project/{project_id} endpoint
     """
     response = client.get("/")
     assert response.status_code == 200

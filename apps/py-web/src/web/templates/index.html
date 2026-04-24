@@ -22,7 +22,7 @@
     <a href="/about" class="nav-link">About Me</a>
     <a href="#" 
        class="nav-link"
-       hx-get="/public/api/contact"
+       hx-get="/api/public/contact"
        hx-target="#project-modal"
        hx-swap="innerHTML">Contact</a>
 </nav>
@@ -38,7 +38,7 @@
                     {% if project.isAbout %}
                         onclick="window.location.href='/about'"
                     {% else %}
-                        hx-get="/public/api/project/{{ project.id }}"
+                        hx-get="/api/public/project/{{ project.id }}"
                         hx-target="#project-modal"
                         hx-swap="innerHTML"
                     {% endif %}
