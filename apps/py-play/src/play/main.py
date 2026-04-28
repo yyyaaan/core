@@ -121,5 +121,10 @@ def main():
     run(app, host="0.0.0.0", port=7999)
 
 
+def main_dev():
+    makedirs("/tmp/cache", exist_ok=True)
+    run("play.main:app", host="0.0.0.0", port=7999, reload=True)
+
+
 if __name__ == "__main__":
     main()

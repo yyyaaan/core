@@ -9,16 +9,19 @@ async def play_hok_elanto():
         timeout=12000,
     ) as play:  # noqa: E501
         output = ">>>ready>>>"
-        for x in await play.page.query_selector_all(
-            "body > div:nth-child(2) > div > main > div:nth-child(3) > div > div > article"
-        ):
-            title_element = await x.query_selector("h2")
-            title = await title_element.text_content()
-            if title and "tuplana" in title.lower():
-                elements = await x.query_selector_all("span")
-                for each_span in elements:
-                    span_text = await each_span.text_content()
-                    output = output + "\n" + span_text
+        for selector in [
+            "body > div:nth-child(2) > div > main > div:nth-child(3) > div > div > article",
+            "body > div:nth-child(2) > div > main > div:nth-child(4) > div > div > article",
+            "body > div:nth-child(2) > div > main > div:nth-child(5) > div > div > article",
+        ]:
+            for x in await play.page.query_selector_all(selector):
+                title_element = await x.query_selector("h2")
+                title = await title_element.text_content()
+                if title and "tuplana" in title.lower():
+                    elements = await x.query_selector_all("span")
+                    for each_span in elements:
+                        span_text = await each_span.text_content()
+                        output = output + "\n" + span_text
 
         output = "\n".join([x for x in output.split("\n") if x.startswith("-")])
         print("Before processing Hok-Elanto:", output)
