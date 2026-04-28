@@ -5,10 +5,11 @@ ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.xdev"]' uv 
 
 from datetime import datetime
 from glob import glob
-from os import getenv, makedirs
+from json import dumps
+from os import getenv, makedirs, path
 
 from fastapi import Depends, FastAPI, Request, Response
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from markdown import markdown
 from pytz import timezone
@@ -19,23 +20,35 @@ from play.config import get_settings
 from play.energy.Electricity import Electricity
 from play.energy.WaterMeter import WaterMeter
 from play.utils.EmailClient import EmailClient
-from play.utils.ViewLogs import ViewLogs
 from play.web.html import sports_and_bonus
 
 app = FastAPI()
+templates = Jinja2Templates(
+    directory=path.join(path.dirname(path.abspath(__file__)), "templates")
+)
 
 
 @app.get("/")
-async def root():
-    return {
+async def root(request: Request):
+    payload = {
         "message": "server is up",
         "paths": ["/view", "/scheduled&audience=0", "now"],
     }
+    accept = (request.headers.get("accept") or "").lower()
 
+    if "text/html" not in accept:
+        return JSONResponse(content=payload)
 
-@app.get("/logs")
-async def logs(filename: str = ""):
-    return HTMLResponse(content=ViewLogs.view_logs(filename))
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "title": "Server is up",
+            "payload": dumps(payload, indent=2),
+            "redirect_url": "https://yan.fi",
+            "delay": 10,
+        },
+    )
 
 
 @app.get("/public/spot")
@@ -75,7 +88,7 @@ async def html_render_markdown(
         )
         style_content = ""
 
-    return Jinja2Templates(directory="templates/").TemplateResponse(
+    return templates.TemplateResponse(
         request=request,
         name="minimal.html",
         context={

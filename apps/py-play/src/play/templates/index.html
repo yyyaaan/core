@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="refresh" content="{{ delay }};url={{ redirect_url }}">
+  <title>{{ title }}</title>
+  <style>
+    body { font-family: monospace; max-width: 760px; margin: 32px auto; padding: 0 16px; }
+    pre  { background: #f3f4f6; border-radius: 8px; padding: 12px; overflow: auto; }
+    p    { color: #374151; }
+  </style>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <pre>{{ payload }}</pre>
+  <p>Redirecting to <a href="{{ redirect_url }}">{{ redirect_url }}</a> in {{ delay }} seconds...</p>
+  <script>setTimeout(function(){ window.location.href = "{{ redirect_url }}"; }, {{ delay }} * 1000);</script>
+</body>
+</html>
