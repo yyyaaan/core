@@ -4,7 +4,7 @@ authMiddleware:
   name: auth-oauth@kubernetescrd
 image:
   repository: ghcr.io/yyyaaan/core/play
-  tag: "sha-5890b24"
+  tag: "sha-9444029"
   pullPolicy: IfNotPresent
 envFromSecretList:
   - email-credentials
