@@ -9,9 +9,8 @@ async def play_hok_elanto():
         timeout=12000,
     ) as play:  # noqa: E501
         output = ">>>ready>>>"
-        for x in await play.page.query_selector_all(
-            "body > div:nth-child(2) > div > main > div:nth-child(3) > div > div > article"
-        ):
+        selectors = [f"body > div:nth-child(2) > div > main > div:nth-child({i}) > div > div > article" for i in range(3, 6)]
+        for x in await play.page.query_selector_all(", ".join(selectors)):
             title_element = await x.query_selector("h2")
             title = await title_element.text_content()
             if title and "tuplana" in title.lower():

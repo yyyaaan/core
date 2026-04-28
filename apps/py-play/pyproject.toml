@@ -19,6 +19,7 @@ dependencies = [
 
 [project.scripts]
 play = "play.main:main"
+play-dev = "play.main:main_dev"
 
 [build-system]
 requires = ["hatchling"]
