@@ -5,6 +5,7 @@ on:
     workflows:
       - Build and Push Play App
       - Build and Push Web App
+      - Build and Push Poller
     types:
       - completed
 
@@ -51,6 +52,14 @@ jobs:
               {
                 echo "files<<EOF"
                 echo "apps/py-web/helm-chart/values.yaml"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              ;;
+            "Build and Push Poller")
+              echo "app=bash-poller" >> "$GITHUB_OUTPUT"
+              {
+                echo "files<<EOF"
+                echo "apps/bash-poller/helm-chart/values.yaml"
                 echo "EOF"
               } >> "$GITHUB_OUTPUT"
               ;;

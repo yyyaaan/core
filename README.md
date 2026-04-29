@@ -55,7 +55,7 @@ uv run play
 uv run pytest -v
 
 # Local auth example for play
-ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play
+ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev
 ```
 
 ## Services 🏠
