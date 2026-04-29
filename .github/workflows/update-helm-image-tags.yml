@@ -5,6 +5,7 @@ on:
     workflows:
       - Build and Push Play App
       - Build and Push Web App
+      - Build and Push Poller
     types:
       - completed
 
@@ -54,6 +55,14 @@ jobs:
                 echo "EOF"
               } >> "$GITHUB_OUTPUT"
               ;;
+            "Build and Push Poller")
+              echo "app=poller" >> "$GITHUB_OUTPUT"
+              {
+                echo "files<<EOF"
+                echo "apps/bash-poller/helm-chart/values.yaml"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              ;;
             *)
               echo "Unsupported workflow name: ${{ github.event.workflow_run.name }}" >&2
               exit 1
@@ -74,8 +83,8 @@ jobs:
             [ -z "$file" ] && continue
             before_hash=$(sha256sum "$file" | awk '{print $1}')
 
-            # Update the first image tag in each chart values file.
-            sed -i -E "0,/^[[:space:]]*tag:[[:space:]]*/s|^[[:space:]]*tag:[[:space:]].*|  tag: \"${new_tag}\"|" "$file"
+            # Update all image tags in each chart values file, preserving original indentation.
+            sed -i -E "s|^([[:space:]]*)tag:[[:space:]].*|\1tag: \"${new_tag}\"|" "$file"
 
             after_hash=$(sha256sum "$file" | awk '{print $1}')
             if [ "$before_hash" != "$after_hash" ]; then

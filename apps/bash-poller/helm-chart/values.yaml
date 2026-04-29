@@ -1,6 +1,11 @@
+imageConfig: &imageConfig
+  repository: ghcr.io/yyyaaan/core/poller
+  tag: "alpha1"
+  pullPolicy: IfNotPresent
+
+# debugPod use ffmpeg configs and all jobs' volumes
 debugPod:
   enabled: false
-# debugPod use ffmpeg configs and all jobs' volumes
 
 # ffmpeg has init container, see manifest directly
 ffmpeg:
@@ -8,9 +13,7 @@ ffmpeg:
   schedule: "3 1 * * *"
   timeZone: "Europe/Helsinki"
   image:
-    repository: yyyaaan/poller
-    tag: "alpha1"
-    pullPolicy: IfNotPresent
+    <<: *imageConfig
   envFromSecretList:
     - poller-credentials
     - tz-config
@@ -28,9 +31,7 @@ elenia:
   schedule: "2-59/15 * * * *"
   timezone: "Europe/Helsinki"
   image:
-    repository: yyyaaan/poller
-    tag: "alpha1"
-    pullPolicy: IfNotPresent
+    <<: *imageConfig
   envFromSecretList:
     - poller-credentials
     - tz-config
