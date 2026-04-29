@@ -13,7 +13,7 @@ RUN apt-get update && \
 
 RUN pip install --no-cache-dir b2sdk requests tqdm
 
-COPY ./src/poller /app
+COPY apps/bash-poller/src/poller /app
 RUN chmod +x /app/job_ffmpeg.sh
 
 WORKDIR /app
