@@ -8,7 +8,7 @@ ffmpeg:
   schedule: "3 1 * * *"
   timeZone: "Europe/Helsinki"
   image:
-    repository: yyyaaan/poller
+    repository: ghcr.io/yyyaaan/core/poller
     tag: "alpha1"
     pullPolicy: IfNotPresent
   envFromSecretList:
@@ -28,7 +28,7 @@ elenia:
   schedule: "2-59/15 * * * *"
   timezone: "Europe/Helsinki"
   image:
-    repository: yyyaaan/poller
+    repository: ghcr.io/yyyaaan/core/poller
     tag: "alpha1"
     pullPolicy: IfNotPresent
   envFromSecretList:
