@@ -6,7 +6,7 @@ on:
     paths:
       - 'apps/bash-poller/**'
       - '!apps/bash-poller/helm-chart/**'
-      - '.github/workflows/build-bash-poller.yml'
+      - '.github/workflows/build-poller.yml'
   workflow_dispatch:
 
 concurrency:
@@ -16,7 +16,7 @@ concurrency:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/bash-poller
+  IMAGE_NAME: ${{ github.repository }}/poller
 
 jobs:
   build-and-push:

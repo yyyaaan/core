@@ -56,7 +56,7 @@ jobs:
               } >> "$GITHUB_OUTPUT"
               ;;
             "Build and Push Poller")
-              echo "app=bash-poller" >> "$GITHUB_OUTPUT"
+              echo "app=poller" >> "$GITHUB_OUTPUT"
               {
                 echo "files<<EOF"
                 echo "apps/bash-poller/helm-chart/values.yaml"
