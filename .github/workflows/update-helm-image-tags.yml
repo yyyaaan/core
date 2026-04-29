@@ -83,8 +83,8 @@ jobs:
             [ -z "$file" ] && continue
             before_hash=$(sha256sum "$file" | awk '{print $1}')
 
-            # Update the first image tag in each chart values file.
-            sed -i -E "0,/^[[:space:]]*tag:[[:space:]]*/s|^[[:space:]]*tag:[[:space:]].*|  tag: \"${new_tag}\"|" "$file"
+            # Update all image tags in each chart values file, preserving original indentation.
+            sed -i -E "s|^([[:space:]]*)tag:[[:space:]].*|\1tag: \"${new_tag}\"|" "$file"
 
             after_hash=$(sha256sum "$file" | awk '{print $1}')
             if [ "$before_hash" != "$after_hash" ]; then
