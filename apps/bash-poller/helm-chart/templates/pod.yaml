@@ -27,7 +27,7 @@ spec:
         mountPath: /media
       - name: data-volume
         mountPath: /mnt
-    volumes:
+  volumes:
     - name: media
       hostPath:
         path: {{ .Values.elenia.hostPathMedia }}
