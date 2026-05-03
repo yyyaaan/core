@@ -20,7 +20,7 @@ spec:
           containers:
           - name: ffmpeg-monthly
             image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
-            imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy }}
+            imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy | default "IfNotPresent" | quote }}
             command: ["/bin/sh", "/app/manual_monthly.sh"]
             envFrom:
             {{- range $.Values.ffmpeg.envFromSecretList }}

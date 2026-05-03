@@ -10,7 +10,7 @@ spec:
   containers:
     - name: debug-pod
       image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
-      imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy | default "IfNotPresent" | quote }}
       command: ["/bin/sh", "-c", "sleep infinity"]
       env:
         - name: PYTHONUNBUFFERED

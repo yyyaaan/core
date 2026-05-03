@@ -25,7 +25,7 @@ spec:
           containers:
           - name: elenia
             image: "{{ .Values.elenia.image.repository }}:{{ .Values.elenia.image.tag }}"
-            imagePullPolicy: {{ .Values.elenia.image.pullPolicy }}
+            imagePullPolicy: {{ .Values.elenia.image.pullPolicy | default "IfNotPresent" | quote }}
             command: ["/usr/local/bin/python", "/app/job_elenia.py"]
             envFrom:
             {{- range .Values.elenia.envFromSecretList }}
