@@ -80,7 +80,8 @@ def get_meter_reading(token):
     print("Meter", meter_reading.status_code, end=" ")
     meter_reading.raise_for_status()
     meter = meter_reading.json()
-    print(f"n={len(meter)}", meter[-1]["dt"][-11:], meter[-1]["a"], flush=True)
+    if meter:
+        print(f"n={len(meter)}", meter[-1]["dt"][-11:], meter[-1]["a"], flush=True)
     return meter
 
 
