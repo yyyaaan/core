@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: cronjob-video
+  name: cronjob-ffmpeg-monthly
   namespace: {{ .Values.ffmpeg.namespace }}
   labels:
     app.kubernetes.io/name: video
