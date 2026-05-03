@@ -94,8 +94,8 @@ spec:
                 memory: "100Mi"
           containers:
           - name: ffmpeg-encoding
-            image: yyyaaan/poller:alpha1
-            imagePullPolicy: IfNotPresent
+            image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
+            imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy }}
             command: ["/bin/sh", "/app/job_ffmpeg.sh"]
             envFrom:
             {{- range $.Values.ffmpeg.envFromSecretList }}
