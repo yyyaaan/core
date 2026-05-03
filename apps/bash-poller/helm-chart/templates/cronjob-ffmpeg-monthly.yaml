@@ -4,7 +4,7 @@ metadata:
   name: cronjob-ffmpeg-monthly
   namespace: {{ .Values.ffmpeg.namespace }}
   labels:
-    app.kubernetes.io/name: video
+    app.kubernetes.io/name: ffmpeg-monthly
     app.kubernetes.io/component: scheduled
 spec:
   schedule: "59 11 2 * *"
