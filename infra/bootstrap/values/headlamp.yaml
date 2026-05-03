@@ -18,3 +18,11 @@ ingress:
         - path: /
           type: ImplementationSpecific
 # oidc callback url host.com/oidc-callback
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 768Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
