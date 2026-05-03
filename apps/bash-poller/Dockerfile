@@ -15,5 +15,6 @@ RUN pip install --no-cache-dir b2sdk requests tqdm
 
 COPY apps/bash-poller/src/poller /app
 RUN chmod +x /app/job_ffmpeg.sh
+RUN chmod +x /app/manual_monthly.sh
 
 WORKDIR /app

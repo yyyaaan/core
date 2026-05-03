@@ -31,7 +31,7 @@ spec:
                 offset = 0                  # yesterday
                 hours = 24                  # a whole day
                 name_prefix = "day90sec"
-                max_polling_hours = 8
+                max_polling_hours = 12
                 polling_interval_seconds = 300
                 frigate_url = "http://frigate-service.home-internal.svc.cluster.local:5000"
 

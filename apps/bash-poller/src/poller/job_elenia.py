@@ -1,8 +1,9 @@
 # %%
 from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
-from json import loads, dumps
+from json import dumps, loads
 from os import getenv
+
 from requests import get, post
 
 user, password = getenv("ELENIA_U"), getenv("ELENIA_P")
@@ -14,16 +15,13 @@ def login(user, password):
     login = post(
         url="https://api.aina.elenia.fi/api/auth/login/credentials-authentication",
         headers={
-                "accept": "application/json, text/plain, */*",
-                "content-type": "application/json",
-                "origin": "https://aina.elenia.fi",
-                "referer": "https://aina.elenia.fi/",
-                "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
-            },
-        json={
-            "email": user,
-            "password": password
-        }
+            "accept": "application/json, text/plain, */*",
+            "content-type": "application/json",
+            "origin": "https://aina.elenia.fi",
+            "referer": "https://aina.elenia.fi/",
+            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36",
+        },
+        json={"email": user, "password": password},
     )
     print("Login", login.status_code, f"u{len(user)}p{len(password)}", end=" ")
     login.raise_for_status()
@@ -42,8 +40,8 @@ def login(user, password):
             "accept": "application/json, text/plain, */*",
             "cookie": f"sessionId={session_id}; csrf_token={csrf_token}; access_token={access_token}; id_token={id_token}; refresh_token={refresh_token}",
             "x-csrf-token": csrf_token,
-            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
-        }
+            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36",
+        },
     )
     print("Proxy", login.status_code, f"csrf{len(csrf_token)}", end=" ")
     proxy.raise_for_status()
@@ -58,7 +56,7 @@ def login(user, password):
 def get_service_token(application_token):
     auth = get(
         url="https://public.sgp-prod.aws.elenia.fi/api/gen/customer_data_and_token",
-        headers={"Authorization": f"Bearer {application_token}"}
+        headers={"Authorization": f"Bearer {application_token}"},
     )
 
     print("SvcApp", auth.status_code, end=" ")
@@ -76,20 +74,20 @@ def get_meter_reading(token):
             "&gsrn=643006966035524955"
             f"&day={datetime.now().strftime('%Y-%m-%d')}"
         ),
-        headers={
-            "Authorization": f"Bearer {token}"
-        }
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     print("Meter", meter_reading.status_code, end=" ")
     meter_reading.raise_for_status()
     meter = meter_reading.json()
-    print(f"n={len(meter)}", meter[-1]['dt'][-11:],  meter[-1]['a'])
+    if meter:
+        print(f"n={len(meter)}", meter[-1]["dt"][-11:], meter[-1]["a"], flush=True)
     return meter
 
 
 # %%
 def get_spot_prices(force_update=False):
+    print("Force update is ", force_update)
     try:
         with open("/mnt/spot_price.json", "r") as f:
             spot_prices_fi = loads(f.read())
@@ -101,8 +99,8 @@ def get_spot_prices(force_update=False):
         spot_price = get(
             url=(
                 "https://dashboard.elering.ee/api/nps/price"
-                f"?start={datetime.now()-timedelta(days=1):%Y-%m-%d}T20:59:59.999Z"
-                f"&end={datetime.now()+timedelta(days=1):%Y-%m-%d}T03:59:59.999Z"
+                f"?start={datetime.now() - timedelta(days=1):%Y-%m-%d}T20:59:59.999Z"
+                f"&end={datetime.now() + timedelta(days=1):%Y-%m-%d}T03:59:59.999Z"
             )
         )
         print("Elering EE", spot_price.status_code, end=" ")
@@ -110,29 +108,36 @@ def get_spot_prices(force_update=False):
         with open("/mnt/spot_price.json", "w") as f:
             f.write(dumps(spot_prices_fi, indent=2))
 
-        print(f"n={len(spot_prices_fi)}", f"{datetime.fromtimestamp(spot_prices_fi[-1]['timestamp']):%b%d %H:%M}")
+        print(
+            f"n={len(spot_prices_fi)}",
+            f"{datetime.fromtimestamp(spot_prices_fi[-1]['timestamp']):%b%d %H:%M}",
+        )
     return spot_prices_fi
 
 
 def matching_price_for_dt(dt, tax_rate=0.255):
     """unit cent/kWh"""
     ts = int(datetime.fromisoformat(dt).timestamp())
-    matched = [x for x in get_spot_prices() if x['timestamp'] <= ts]
-    if len(matched) < 1 or (ts - matched[-1]['timestamp'] > 3601):
+    matched = [x for x in get_spot_prices() if x["timestamp"] <= ts]
+    if len(matched) < 1 or (ts - matched[-1]["timestamp"] > 3601):
         price = get_spot_prices(force_update=True)
-        matched = [x for x in price if x['timestamp'] <= ts]
+        matched = [x for x in price if x["timestamp"] <= ts]
 
-    matched_price = matched[-1]['price'] * (1 + tax_rate)
-    return matched_price/1000
+    if not matched:
+        return 0.0
+    matched_price = matched[-1]["price"] * (1 + tax_rate)
+    return matched_price / 1000
 
 
 def estimate_sales_price(meter):
     spot_price, fixed_price, consumption = 0.0, 0.0, 0  # float float int
-    for i in range(len(meter)-1):
+    for i in range(len(meter) - 1):
         try:
-            this_consumption = meter[i+1]['a'] - meter[i]['a']
+            this_consumption = meter[i + 1]["a"] - meter[i]["a"]
             consumption += this_consumption
-            spot_price += matching_price_for_dt(meter[i]['dt']) * this_consumption / 1000
+            spot_price += (
+                matching_price_for_dt(meter[i]["dt"]) * this_consumption / 1000
+            )
             fixed_price += fixed_unit_price / 100_000 * this_consumption
         except Exception:
             pass
@@ -169,5 +174,4 @@ def main():
 
 
 if __name__ == "__main__":
-    print(f"@{datetime.now():%b%d %H:%M:%S}")
     main()

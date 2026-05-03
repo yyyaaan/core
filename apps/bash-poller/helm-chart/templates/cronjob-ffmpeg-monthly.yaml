@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-video
+  namespace: {{ .Values.ffmpeg.namespace }}
+  labels:
+    app.kubernetes.io/name: video
+    app.kubernetes.io/component: scheduled
+spec:
+  schedule: "59 11 2 * *"
+  timeZone: {{ .Values.ffmpeg.timezone | quote}}
+  suspend: true
+  concurrencyPolicy: Forbid 
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: ffmpeg-monthly
+            image: yyyaaan/poller:alpha1
+            imagePullPolicy: IfNotPresent
+            command: ["/bin/sh", "/app/manual_monthly.sh"]
+            envFrom:
+            {{- range $.Values.ffmpeg.envFromSecretList }}
+              - secretRef:
+                  name: {{ . | quote }}
+            {{- end }}
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+            volumeMounts:
+            - name: media-folder
+              mountPath: /media
+          volumes:
+          - name: media-folder
+            hostPath:
+              path: {{ .Values.ffmpeg.hostPathMedia }}
+              type: Directory
