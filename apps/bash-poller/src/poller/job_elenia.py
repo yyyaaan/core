@@ -87,7 +87,6 @@ def get_meter_reading(token):
 
 # %%
 def get_spot_prices(force_update=False):
-    print("Force update is ", force_update)
     try:
         with open("/mnt/spot_price.json", "r") as f:
             spot_prices_fi = loads(f.read())
@@ -161,9 +160,8 @@ def main():
     with open("/media/data_energy.txt", "a") as f:
         f.write(f"\n{meter[-1]['dt']}\n{meter[-1]['a']}")
 
-    # end of normal elenia polling
-
     try:
+        print("Estimating sales price")
         spot, fixed, consumption = estimate_sales_price(meter)
         with open("/media/data_energy_prices.txt", "a") as f:
             content = f"{spot:.2f},{fixed:.2f},{consumption}"
