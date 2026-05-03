@@ -122,6 +122,8 @@ def matching_price_for_dt(dt, tax_rate=0.255):
         price = get_spot_prices(force_update=True)
         matched = [x for x in price if x["timestamp"] <= ts]
 
+    if not matched:
+        return 0.0
     matched_price = matched[-1]["price"] * (1 + tax_rate)
     return matched_price / 1000
 
