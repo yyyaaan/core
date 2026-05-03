@@ -19,8 +19,8 @@ spec:
           restartPolicy: Never
           containers:
           - name: ffmpeg-monthly
-            image: yyyaaan/poller:alpha1
-            imagePullPolicy: IfNotPresent
+            image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
+            imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy | default "IfNotPresent" | quote }}
             command: ["/bin/sh", "/app/manual_monthly.sh"]
             envFrom:
             {{- range $.Values.ffmpeg.envFromSecretList }}

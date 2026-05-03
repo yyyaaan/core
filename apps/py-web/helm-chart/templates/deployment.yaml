@@ -20,7 +20,7 @@ spec:
       containers:
       - name: web
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" | quote }}
         envFrom:
         {{- range .Values.envFromSecretList }}
           - secretRef:

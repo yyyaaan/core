@@ -103,7 +103,7 @@ jobs:
           branch: ci/update-image-tag-${{ steps.targets.outputs.app }}-${{ steps.update.outputs.new_tag }}
           delete-branch: true
           commit-message: "chore: ${{ steps.targets.outputs.app }} image tag to ${{ steps.update.outputs.new_tag }}"
-          title: "chore: ${{ steps.targets.outputs.app }}) image tag to ${{ steps.update.outputs.new_tag }}"
+          title: "chore: ${{ steps.targets.outputs.app }} image tag to ${{ steps.update.outputs.new_tag }}"
           body: |
             Automated update generated after a successful image build on `main`.
 
