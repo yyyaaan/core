@@ -1,4 +1,4 @@
 fn main() {
-println!("Hello, world!");
-println!("This is the rs-y-one crate.");
+    println!("Hello, world!");
+    println!("Welcome to the rs-y-one crate.");
 }
