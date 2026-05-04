@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rs-yan-one"
+name = "rs-y-one"
 version = "0.1.0"
 dependencies = [
  "anyhow",
