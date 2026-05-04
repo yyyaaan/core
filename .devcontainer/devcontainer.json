@@ -4,6 +4,12 @@
         "dockerfile": "Dockerfile" 
     },
     "runArgs": ["--name", "devcontainer-${localWorkspaceFolderBasename}"],
+    "features": {
+        "ghcr.io/devcontainers/features/rust:1": {
+            "version": "latest",
+            "profile": "default"
+        }
+    },
     "workspaceFolder": "/workspace",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "customizations": {

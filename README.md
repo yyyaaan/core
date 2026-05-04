@@ -48,8 +48,8 @@ Naming convention:
 Use the devcontainer for Python and Rust development. Infrastructure flows are GitOps-based and should be validated from host/cluster context.
 
 ```bash
-uv run autobrowser
-uv run play
+uv run play-dev
+cargo run rs-y-one
 
 # Unit tests (workspace)
 uv run pytest -v
