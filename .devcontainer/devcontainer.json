@@ -4,6 +4,12 @@
         "dockerfile": "Dockerfile" 
     },
     "runArgs": ["--name", "devcontainer-${localWorkspaceFolderBasename}"],
+    "features": {
+        "ghcr.io/devcontainers/features/rust:1": {
+            "version": "latest",
+            "profile": "default"
+        }
+    },
     "workspaceFolder": "/workspace",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "customizations": {
@@ -12,6 +18,10 @@
                 "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
                 "python.terminal.activateEnvironment": true,
                 "python.testing.pytestEnabled": true,
+                "[rust]": {
+                    "editor.formatOnSave": true,
+                    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+                },
                 "[python]": {
                     "editor.formatOnSave": true,
                     "editor.defaultFormatter": "charliermarsh.ruff",
@@ -46,6 +56,7 @@
                 "cSpell.diagnosticLevel": "Hint" // Warning, Information
             },
             "extensions": [
+                "rust-lang.rust-analyzer",
                 "ms-python.python",
                 "ms-python.vscode-pylance",
                 "charliermarsh.ruff",

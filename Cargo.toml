@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["apps/rs-*", "crates/*"]
+members = ["crates/*"]  # "apps/rs-*" to avoid rust-analyzer error
 
 [workspace.package]
 version = "0.1.0"

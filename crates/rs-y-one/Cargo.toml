@@ -1,5 +1,5 @@
 [package]
-name = "rs-yan-one"
+name = "rs-y-one"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
