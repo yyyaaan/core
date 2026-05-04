@@ -49,7 +49,8 @@ Use the devcontainer for Python and Rust development. Infrastructure flows are G
 
 ```bash
 uv run play-dev
-cargo run rs-y-one
+cargo run
+cargo run -p rs-y-one
 
 # Unit tests (workspace)
 uv run pytest -v
