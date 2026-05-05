@@ -41,7 +41,7 @@ async def sports_and_bonus(refresh=False):
             <a href="https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/">HOK Elanto</a> |
             <a href="https://hameenmaa.fi/ajankohtaista/?cat=etu-s-etukortilla">Hämeenmaa</a> |
             <a href="https://vbo.fi/ajankohtaista-osuuskaupastasi/?cat=edut-ja-vinkit">VBO</a>
-            <br>Updated: {datetime.now():%b%d %H:%M:%S}
+            <br>Updated: {datetime.now():%b%d %H:%M:%S} UTC
         </small></p>
     """
     with open(cache_path, "w") as f:
