@@ -1,5 +1,6 @@
 # %%
 from datetime import datetime, timedelta
+from functools import lru_cache
 from http.cookies import SimpleCookie
 from json import dumps, loads
 from os import getenv
@@ -8,6 +9,7 @@ from requests import get, post
 
 user, password = getenv("ELENIA_U"), getenv("ELENIA_P")
 fixed_unit_price = 8.96  # cent/kWh
+cache_folder = "/mnt"
 
 
 # %% Proxy and application tokens
@@ -52,7 +54,7 @@ def login(user, password):
     return applications_token
 
 
-# %%
+@lru_cache()
 def get_service_token(application_token):
     auth = get(
         url="https://public.sgp-prod.aws.elenia.fi/api/gen/customer_data_and_token",
@@ -85,10 +87,10 @@ def get_meter_reading(token):
     return meter
 
 
-# %%
+@lru_cache()
 def get_spot_prices(force_update=False):
     try:
-        with open("/mnt/spot_price.json", "r") as f:
+        with open(f"{cache_folder}/spot_price.json", "r") as f:
             spot_prices_fi = loads(f.read())
     except Exception as e:
         print("Spot price cache", e)
@@ -104,7 +106,7 @@ def get_spot_prices(force_update=False):
         )
         print("Elering EE", spot_price.status_code, end=" ")
         spot_prices_fi = spot_price.json().get("data", {}).get("fi", [])
-        with open("/mnt/spot_price.json", "w") as f:
+        with open(f"{cache_folder}/spot_price.json", "w") as f:
             f.write(dumps(spot_prices_fi, indent=2))
 
         print(
@@ -143,17 +145,16 @@ def estimate_sales_price(meter):
     return spot_price, fixed_price, consumption
 
 
-# %%
 def main():
     try:
-        with open("/mnt/token_elenia", "r") as f:
+        with open(f"{cache_folder}/token_elenia", "r") as f:
             token = f.read()
         meter = get_meter_reading(token)
     except Exception:
         print()
         token_app = login(user, password)
         token = get_service_token(token_app)
-        with open("/mnt/token_elenia", "w") as f:
+        with open(f"{cache_folder}/token_elenia", "w") as f:
             f.write(token)
         meter = get_meter_reading(token)
 
