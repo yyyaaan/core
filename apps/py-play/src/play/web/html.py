@@ -4,6 +4,7 @@ from json import dumps, loads
 
 from play.web.bbcsports import bbc_sports
 from play.web.sryhma import bonus_doubled
+from pytz import timezone
 
 
 async def sports_and_bonus(refresh=False):
@@ -41,7 +42,7 @@ async def sports_and_bonus(refresh=False):
             <a href="https://hok-elanto.fi/asiakasomistajapalvelu/ajankohtaista-asiakasomistajalle/">HOK Elanto</a> |
             <a href="https://hameenmaa.fi/ajankohtaista/?cat=etu-s-etukortilla">Hämeenmaa</a> |
             <a href="https://vbo.fi/ajankohtaista-osuuskaupastasi/?cat=edut-ja-vinkit">VBO</a>
-            <br>Updated: {datetime.now():%b%d %H:%M:%S} UTC
+            <br>Updated: {datetime.now(timezone("Europe/Helsinki")):%b %d %H:%M:%S} EET
         </small></p>
     """
     with open(cache_path, "w") as f:
