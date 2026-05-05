@@ -54,7 +54,6 @@ def login(user, password):
     return applications_token
 
 
-@lru_cache()
 def get_service_token(application_token):
     auth = get(
         url="https://public.sgp-prod.aws.elenia.fi/api/gen/customer_data_and_token",
@@ -97,6 +96,8 @@ def get_spot_prices(force_update=False):
         force_update = True
 
     if force_update:
+        print("Updating spot price, force_update=True")
+        get_spot_prices.cache_clear()
         spot_price = get(
             url=(
                 "https://dashboard.elering.ee/api/nps/price"
