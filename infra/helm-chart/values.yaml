@@ -10,7 +10,7 @@ homebridge:
   namespace: home-internal
   image:
     repository: homebridge/homebridge
-    tag: "2026-04-17"
+    tag: "2026-05-13"
     pullPolicy: IfNotPresent
   hostPathConfig: /mnt/kingston/home/config/hb
   ingress:
@@ -23,7 +23,7 @@ ha: # mariaDB migration flag controls resource provisioning
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.4.3"
+    tag: "2026.5.2"
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
