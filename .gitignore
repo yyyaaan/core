@@ -1,3 +1,5 @@
+secrets.yaml
+secrets.yml
 *.env
 .DS_Store
 

@@ -1,0 +1,72 @@
+packages:
+  remote_package: https://github.com/esphome/bluetooth-proxies/raw/main/esp32-generic/esp32-generic.yaml
+
+esphome:
+  name: esphome-bluetooth proxy
+  friendly_name: BLE Proxy
+  name_add_mac_suffix: false
+  on_boot:
+    priority: -10
+    then:
+      - if:
+          condition:
+            switch.is_on: mamomo_ble_switch
+          then:
+            - ble_client.connect: mamomo_ble
+
+esp32:
+  variant: ESP32C3
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+    version: recommended
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+# Allow Over-The-Air updates
+ota:
+  - platform: esphome
+
+improv_serial:
+
+esp32_ble:
+  max_connections: 4
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: A8:B5:8E:33:96:FD
+    id: mamomo_ble
+    auto_connect: false
+    on_disconnect:
+      - if:
+          condition:
+            switch.is_on: mamomo_ble_switch
+          then:
+            - ble_client.connect: mamomo_ble
+
+bluetooth_proxy:
+  active: true
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# This switch appears in Home Assistant to control the connection
+switch:
+  - platform: template
+    name: "Mamomo Bluetooth Connection"
+    id: mamomo_ble_switch
+    icon: "mdi:bluetooth"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    on_turn_on:
+      - ble_client.connect: mamomo_ble
+    on_turn_off:
+      - ble_client.disconnect: mamomo_ble
