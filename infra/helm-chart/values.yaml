@@ -10,7 +10,7 @@ homebridge:
   namespace: home-internal
   image:
     repository: homebridge/homebridge
-    tag: "2026-05-13"
+    tag: "2026-06-19"
     pullPolicy: IfNotPresent
   hostPathConfig: /mnt/kingston/home/config/hb
   ingress:
@@ -23,7 +23,7 @@ ha: # mariaDB migration flag controls resource provisioning
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.5.2"
+    tag: "2026.6.4"
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
@@ -102,7 +102,7 @@ restic:
   timezone: "Europe/Helsinki"
   image:
     repository: restic/restic
-    tag: "0.18.1"
+    tag: "0.19.0"
   resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
   hostPathConfig: /mnt/kingston/home/config
 
