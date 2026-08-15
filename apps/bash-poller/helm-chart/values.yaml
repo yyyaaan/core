@@ -1,6 +1,6 @@
 imageConfig: &imageConfig
   repository: ghcr.io/yyyaaan/core/poller
-  tag: "sha-f57c8e8"
+  tag: "sha-b8a56e5"
   pullPolicy: IfNotPresent
 
 # debugPod use ffmpeg configs and all jobs' volumes
