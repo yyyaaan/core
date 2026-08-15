@@ -1,6 +1,7 @@
 # this file is moved into kubernetes manifest start point
 from datetime import datetime, timedelta
 from time import sleep
+
 from requests import get, post
 
 offset = 0 # yesterday
@@ -18,10 +19,11 @@ yesterday_end = datetime(now.year, now.month, now.day)
 ts = int(yesterday_end.timestamp()) - offset * 3600
 ts0 = ts - hours * 3600
 
+
 r = post(
-    url=f"{frigate_url}/api/export/yard/start/{ts0}/end/{ts}",
+    url=f"{frigate_url}/api/export/custom/yard/start/{ts0}/end/{ts}",
     json={
-        "playback": "timelapse_25x",  # actual speed set in frigate config
+        "ffmpeg_output_args": "-vf setpts=0.001*PTS -r 120 -crf 30",
         "name": f"{name_prefix}_{datetime.fromtimestamp(ts0):%Y%m%d}.mp4",
     },
 )
