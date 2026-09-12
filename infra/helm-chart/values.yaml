@@ -43,7 +43,7 @@ mariaDB:
   envFromSecret: mariadb-credentials
   image:
     repository: mariadb
-    tag: "12.2.2"
+    tag: "12.3"
     pullPolicy: IfNotPresent
  
 auth:
