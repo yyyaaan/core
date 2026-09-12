@@ -23,7 +23,7 @@ ha: # mariaDB migration flag controls resource provisioning
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.8.1"
+    tag: "2026.9.2"
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
@@ -76,7 +76,7 @@ frigate:
   namespace: home-internal
   image:
     repository: ghcr.io/blakeblackshear/frigate
-    tag: "0.18.0-beta3"
+    tag: "0.18.0"
     pullPolicy: IfNotPresent
   envFromSecret: frigate-credentials
   privileged: true
