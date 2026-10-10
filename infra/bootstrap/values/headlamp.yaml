@@ -5,7 +5,7 @@ config:
     externalSecret:
       enabled: true
       name: oidc-secret
-      hasScopes: true  # secret has OIDC_SCOPES; chart >=0.43 omits -oidc-scopes otherwise
+      hasScopes: true
 
 ingress:
   enabled: true
