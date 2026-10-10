@@ -5,6 +5,7 @@ config:
     externalSecret:
       enabled: true
       name: oidc-secret
+      hasScopes: true
 
 ingress:
   enabled: true
