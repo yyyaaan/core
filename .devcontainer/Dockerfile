@@ -1,31 +1,58 @@
-FROM mcr.microsoft.com/devcontainers/base:debian
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/devcontainers/base:2-trixie
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Fail a RUN when any command in a pipe fails (curl | tar, curl | bash)
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# 1. Install tmux, node, unzip, and Playwright OS dependencies for Chromium
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get install -y --no-install-recommends \
-    tmux nodejs npm unzip curl \
-    libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
-    libcups2 libdrm2 libxkbcommon0 libxcomposite1 \
-    libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 \
-    libcairo2 libpango-1.0-0 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ARG USERNAME=vscode
+ARG PLAYWRIGHT_VERSION=latest
+# Bump deliberately; see https://github.com/openai/codex/releases
+ARG CODEX_VERSION=0.162.1
 
-# 2. Install Bun globally
-RUN curl -fsSL https://bun.sh/install | bash && \
-    mv /root/.bun/bin/bun /usr/local/bin/bun && \
-    ln -s /usr/local/bin/bun /usr/local/bin/bunx
+# uv / uvx (pinned to a minor line)
+COPY --from=ghcr.io/astral-sh/uv:0.13 /uv /uvx /usr/local/bin/
 
-# 3. Prepare the global Playwright browser path
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN mkdir -p /ms-playwright && chmod 777 /ms-playwright
+# ripgrep: code search for the agents. bubblewrap: Codex's Linux sandbox.
+# tmux: only for Claude Code agent-team split panes; drop it if unused.
+RUN apt-get update \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends ripgrep bubblewrap tmux \
+    && rm -rf /var/lib/apt/lists/*
 
-# 4. Install OpenCode as the VSCODE user
-USER vscode
-RUN curl -fsSL https://opencode.ai/install | bash
+# Chromium system libraries, resolved by Playwright for this distro.
+# Browser binaries go into the shared volume later, matching uv.lock.
+RUN uvx "playwright@${PLAYWRIGHT_VERSION}" install-deps chromium \
+    && rm -rf /var/lib/apt/lists/* /root/.cache/uv /root/.local/share/uv
 
-# 5. Switch back to root
+# Codex CLI: single static binary in /usr/local/bin, so the ~/.codex volume never
+# shadows it (the standalone installer would keep the binary inside ~/.codex).
+RUN arch="$(uname -m)" \
+    && curl -fsSL "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-${arch}-unknown-linux-musl.tar.gz" \
+       | tar -xz -C /usr/local/bin \
+    && mv "/usr/local/bin/codex-${arch}-unknown-linux-musl" /usr/local/bin/codex \
+    && codex --version
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_INSTALL_DIR=/home/${USERNAME}/.local/share/uv/python \
+    CARGO_TARGET_DIR=/home/${USERNAME}/.cache/cargo-target \
+    CLAUDE_CONFIG_DIR=/home/${USERNAME}/.claude \
+    CODEX_HOME=/home/${USERNAME}/.codex \
+    PATH=/home/${USERNAME}/.local/bin:${PATH}
+
+# Pre-create volume mount points so fresh named volumes inherit vscode ownership.
+RUN install -d -m 0777 /ms-playwright \
+    && mkdir -p \
+        /home/${USERNAME}/.cache/uv \
+        /home/${USERNAME}/.cache/cargo-target \
+        /home/${USERNAME}/.local/share/uv/python \
+        /home/${USERNAME}/.config/gh \
+        /home/${USERNAME}/.claude \
+        /home/${USERNAME}/.codex \
+        /home/${USERNAME}/.agents \
+    && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
+
+# Claude Code: native installer (no Node.js, self-updating).
+USER ${USERNAME}
+RUN curl -fsSL https://claude.ai/install.sh | bash
 USER root
-
-CMD ["sleep", "infinity"]
