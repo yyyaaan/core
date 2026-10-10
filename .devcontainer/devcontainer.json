@@ -1,88 +1,83 @@
 {
-    "name": "core-dev",
-    "build": { 
-        "dockerfile": "Dockerfile" 
-    },
-    "runArgs": ["--name", "devcontainer-${localWorkspaceFolderBasename}"],
-    "features": {
-        "ghcr.io/devcontainers/features/rust:1": {
-            "version": "latest",
-            "profile": "default"
-        }
-    },
-    "workspaceFolder": "/workspace",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
-                "python.terminal.activateEnvironment": true,
-                "python.testing.pytestEnabled": true,
-                "[rust]": {
-                    "editor.formatOnSave": true,
-                    "editor.defaultFormatter": "rust-lang.rust-analyzer"
-                },
-                "[python]": {
-                    "editor.formatOnSave": true,
-                    "editor.defaultFormatter": "charliermarsh.ruff",
-                    "editor.codeActionsOnSave": {
-                        "source.organizeImports": "explicit",
-                        "source.fixAll.ruff": "explicit"
-                    }
-                },
-                "ruff.format.preview": true,
-                "[markdown]": {
-                    "editor.formatOnSave": true,
-                    "editor.defaultFormatter": "charliermarsh.ruff"
-                },
-                "html.format.enable": true,
-                "files.associations": {
-                    "*.html": "jinja-html"
-                },
-                "cSpell.userWords": [
-                    "htmx",
-                    "pytest",
-                    "uvicorn",
-                    "fastapi",
-                    "pydantic",
-                    "ruff",
-                    "tailwindcss"
-                ],
-                "cSpell.enabledFileTypes": {
-                    "jinja-html": true,
-                    "python": true,
-                    "markdown": true
-                },
-                "cSpell.diagnosticLevel": "Hint" // Warning, Information
-            },
-            "extensions": [
-                "rust-lang.rust-analyzer",
-                "ms-python.python",
-                "ms-python.vscode-pylance",
-                "charliermarsh.ruff",
-                "samuelcolvin.jinjahtml",
-                "dzhavat.css-initial-value",
-                "streetsidesoftware.code-spell-checker"
-            ]
-        }
-    },
-    "remoteUser": "vscode",
-    "updateRemoteUserUID": true,
-    "mounts": [
-        "source=venv-${localWorkspaceFolderBasename},target=/workspace/.venv,type=volume",
-        "source=sisyphus-${localWorkspaceFolderBasename},target=/workspace/.sisyphus,type=volume",
-        "source=${localEnv:HOME}/.local/share/opencode/auth.json,target=/home/vscode/.local/share/opencode/auth.json,type=bind",
-        "source=${localEnv:HOME}/.config/opencode,target=/home/vscode/.config/opencode,type=bind",
-        "source=uv-shared-cache-py314,target=/home/vscode/.cache/uv,type=volume",
-        "source=opencode-global-cache,target=/home/vscode/.cache/opencode,type=volume",
-        "source=playwright-shared-cache,target=/ms-playwright,type=volume"
-    ],
-    "containerEnv": {
-        "OLLAMA_HOST": "http://host.orb.internal:11434",
-        "OMO_AUTO_RECOVERY": "true",
-        "PLAYWRIGHT_BROWSERS_PATH": "/ms-playwright",
-        "UV_LINK_MODE": "copy"
-    },
-    "forwardPorts": [],
-    "postCreateCommand": "sudo chown -R vscode:vscode /workspace/.venv /home/vscode/.local /home/vscode && uv sync --all-packages --all-extras && uv run playwright install chromium"
+  "name": "core-dev",
+  "build": { "dockerfile": "Dockerfile" },
+
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {},
+    // Helm only, for lint/template; no kubectl, no cluster access from here
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": { "version": "none", "minikube": "none" },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "remoteUser": "vscode",
+
+  "initializeCommand": "mkdir -p ${localEnv:HOME}/.agents",
+
+  "mounts": [
+    // Per-project build state, off the bind mount
+    "source=venv-${devcontainerId},target=/workspace/.venv,type=volume",
+    "source=cargo-target-${devcontainerId},target=/home/vscode/.cache/cargo-target,type=volume",
+
+    // Caches shared by all your devcontainers
+    "source=uv-cache,target=/home/vscode/.cache/uv,type=volume",
+    "source=uv-python,target=/home/vscode/.local/share/uv/python,type=volume",
+    "source=cargo-registry,target=/usr/local/cargo/registry,type=volume",
+    "source=playwright-browsers,target=/ms-playwright,type=volume",
+
+    // Agents: login + history per tool (shared by all containers), personal config from host
+    "source=claude-code-config,target=/home/vscode/.claude,type=volume",
+    "source=codex-home,target=/home/vscode/.codex,type=volume",
+    "source=${localEnv:HOME}/.agents,target=/home/vscode/.agents,type=bind",
+
+    "source=gh-config,target=/home/vscode/.config/gh,type=volume"
+  ],
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "openai.chatgpt",
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "redhat.vscode-yaml",
+        "samuelcolvin.jinjahtml",
+        "dzhavat.css-initial-value",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.testing.pytestEnabled": true,
+        "[rust]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll.ruff": "explicit"
+          }
+        },
+        "ruff.format.preview": true,
+        "[markdown]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "html.format.enable": true,
+        "files.associations": { "*.html": "jinja-html" },
+        "cSpell.userWords": ["htmx", "pytest", "uvicorn", "fastapi", "pydantic", "ruff", "tailwindcss"],
+        "cSpell.enabledFileTypes": { "jinja-html": true, "python": true, "markdown": true },
+        "cSpell.diagnosticLevel": "Hint"
+      }
+    }
+  }
 }
