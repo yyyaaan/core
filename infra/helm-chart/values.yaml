@@ -10,7 +10,7 @@ homebridge:
   namespace: home-internal
   image:
     repository: homebridge/homebridge
-    tag: "2026-08-11"
+    tag: "2026-09-25"
     pullPolicy: IfNotPresent
   hostPathConfig: /mnt/kingston/home/config/hb
   ingress:
@@ -23,7 +23,7 @@ ha: # mariaDB migration flag controls resource provisioning
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.9.2"
+    tag: "2026.10.1"
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
@@ -51,7 +51,7 @@ auth:
   enableMultiAuth: false
   image:
     repository: quay.io/oauth2-proxy/oauth2-proxy
-    tag: "v7.15.2-alpine"
+    tag: "v7.15.5-alpine"
     pullPolicy: IfNotPresent
   cookieDomain: .yan.fi
   cookieSecure: true
@@ -102,7 +102,7 @@ restic:
   timezone: "Europe/Helsinki"
   image:
     repository: restic/restic
-    tag: "0.19.0"
+    tag: "0.19.1"
   resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
   hostPathConfig: /mnt/kingston/home/config
 

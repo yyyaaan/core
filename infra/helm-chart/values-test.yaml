@@ -18,7 +18,7 @@ mariaDB:
   envFromSecret: mariadb-credentials
   image:
     repository: mariadb
-    tag: "12.0.2"
+    tag: "12.3"
     pullPolicy: IfNotPresent
  
 auth:
@@ -26,7 +26,7 @@ auth:
   enableMultiAuth: false
   image:
     repository: quay.io/oauth2-proxy/oauth2-proxy
-    tag: "v7.15.1-alpine"
+    tag: "v7.15.5-alpine"
     pullPolicy: IfNotPresent
   cookieDomain: .omop.fi
   cookieSecure: true
