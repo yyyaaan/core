@@ -25,7 +25,9 @@ Everything here deploys from `main` through ArgoCD (manual sync). Ingress: Cloud
 
 ## Common tasks
 
-**Upgrade a service image** (HA, Frigate, Homebridge, MariaDB, ...): bump `image.tag` in `values.yaml` (and `values-test.yaml` if pinned there). Read the upstream release notes between the old and new version and flag breaking changes, especially config-schema changes for HA/Frigate and major versions for MariaDB.
+**Upgrade a service image or bootstrap chart**: use the `infra-upgrade` skill.
+
+**Cross-service dependencies**: `apps/bash-poller` calls Frigate's export API (`/api/export/custom/...`, `/api/exports`) from `job_timelapse.py` and inline in `helm-chart/templates/cronjob-ffmpeg.yaml`. `apps/py-play` publishes meter readings to Mosquitto. Changing Frigate or MQTT means checking those.
 
 **Add a service**: copy the closest existing `templates/<svc>/` (deployment, service, ingress), add a values block with `enabled`, `namespace`, `image`, `ingress.host`, plus test overrides. A new namespace must also be added to `Taskfile.yaml` `setup-namespaces`.
 
