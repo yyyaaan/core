@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/name: play-mailing
     app.kubernetes.io/component: scheduled
 spec:
-  schedule: {{ .Values.mailing.schedule  }}
-  timeZone: {{ .Values.mailing.timezone  }}
+  schedule: {{ .Values.mailing.schedule | quote }}
+  timeZone: {{ .Values.mailing.timeZone | quote }}
   concurrencyPolicy: Forbid 
   jobTemplate:
     spec:
@@ -23,7 +23,7 @@ spec:
             command: ["/bin/sh", "-c"]
             args:
               - |
-                curl -sSf -H "X-Forwarded-Email: internal@kube.system" -X POST "http://play-svc/scheduled?audience=2"
+                curl -sSf --max-time 120 -H "X-Forwarded-Email: internal@kube.system" -X POST "http://play-svc/scheduled?audience=2"
             resources:
               requests:
                 cpu: "10m"

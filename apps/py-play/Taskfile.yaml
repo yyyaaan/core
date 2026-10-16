@@ -9,7 +9,7 @@ tasks:
   test:
     desc: "run unit tests"
     cmds:
-      - echo "Running unit tests pending implementation"
+      - uv run pytest tests/
 
   run:
     desc: Run the application from published image (for local testing)
@@ -17,4 +17,4 @@ tasks:
       - |
         read -r -p "Docker image tag [latest/main/sha-]: " IMAGE_TAG
         IMAGE_TAG=${IMAGE_TAG:-main}
-        docker run -i -p 7999:7999 --rm ghcr.io/yyyaaan/core/web:${IMAGE_TAG}
+        docker run -i -p 7999:7999 --rm ghcr.io/yyyaaan/core/play:${IMAGE_TAG}

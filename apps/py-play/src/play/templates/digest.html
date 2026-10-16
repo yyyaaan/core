@@ -1,0 +1,24 @@
+{#- email body: inline styles only -#}
+{% if campaigns %}
+<p style="font-family: system-ui; color: #999;">
+  Bonus X2
+  {%- for c in campaigns %}<br>- {{ c }}{% endfor %}
+</p>
+{% endif %}
+{% for c in competitions %}
+<div style="margin-bottom: 30px; font-family: system-ui; {% if loop.index is odd %}border-right: 9px solid {{ c.color }}33; padding-right: 30px;{% else %}border-left: 9px solid {{ c.color }}33; padding-left: 30px;{% endif %}">
+  <h3 style="color: {{ c.color }}">{{ c.name }}</h3>
+  <p>
+    {%- for g in c.games %}
+    <span style="font-family: monospace; font-weight: bold;">{{ g.time }}</span>&nbsp;&nbsp;{{ g.home }} <span style="color: #999">{{ g.score or "vs" }}</span> {{ g.away }}{% if not loop.last %}<br>{% endif %}
+    {%- endfor %}
+  </p>
+</div>
+{% endfor %}
+{% if not campaigns %}
+<p style="font-family: system-ui; color: #999; font-size: small">HOK-Elanto {{ bonus_error or "no offer available" }}</p>
+{% endif %}
+<p><small>
+  <a href="{{ bbc_url }}">BBC Sport</a> | <a href="{{ hok_url }}">HOK-Elanto</a>
+  <br>Updated: {{ updated.strftime("%b %d %H:%M:%S %Z") }}
+</small></p>

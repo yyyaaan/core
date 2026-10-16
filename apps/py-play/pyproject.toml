@@ -1,20 +1,18 @@
 [project]
 name = "play"
-version = "1.0.0"
-description = "Play App with Playwright and FastAPI"
+version = "2.0.0"
+description = "Personal utilities: daily football + S-Bonus digest, spot price chart, water meter camera"
 readme = "README.md"
 requires-python = "==3.14.*"
 dependencies = [
+    "beautifulsoup4",
     "fastapi[standard]",
+    "httpx",
     "jinja2",
-    "markdown",
-    "opencv-python-headless",
-    "pandas",
+    "pillow",
     "plotly",
     "pydantic-settings",
-    "pytest-playwright",
-    "pytz",
-    "uvicorn"
+    "uvicorn",
 ]
 
 [project.scripts]

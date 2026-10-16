@@ -6,7 +6,7 @@ Personal monorepo (private project): Python + Rust services and the Helm/ArgoCD 
 
 | Path | What |
 |------|------|
-| `apps/py-play/` | FastAPI app: Playwright scraping, OpenCV, Pandas/Plotly. Own Helm chart, `web` ns |
+| `apps/py-play/` | FastAPI app: daily football + S-Bonus digest email, spot price chart, water meter camera crop. Browser-free scraping (httpx). Own Helm chart, `web` ns. See `apps/py-play/AGENTS.md` |
 | `apps/py-web/` | FastAPI + Jinja2 + HTMX personal site. Zero-Node. See `apps/py-web/AGENTS.md` |
 | `apps/bash-poller/` | CronJob workloads (Elenia energy, FFmpeg/timelapse), shell + Python helpers |
 | `packages/py-autobrowser/` | `browser-use` agentic browser library, not deployed on its own |
@@ -56,7 +56,7 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 - FastAPI handlers are `async def`; Jinja2 templates under `src/<pkg>/templates/`.
 - Config via `pydantic-settings` / env vars, never hardcoded secrets or domains.
 - Light type hints, no type checker enforced. Ruff is the formatter and linter.
-- Playwright and browser-use run server-side (backend code, not frontend). Wrap Playwright in async context managers, prefer CSS selectors, and catch per element so one missing selector doesn't fail a whole page.
+- Scraping: prefer a site's JSON API or server-rendered HTML over httpx; a headless browser is the last resort (only `packages/py-autobrowser` uses one, server-side). Catch per element so one missing field doesn't fail a whole page.
 
 ## Agent config layout
 

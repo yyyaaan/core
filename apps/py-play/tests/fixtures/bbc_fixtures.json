@@ -1,0 +1,151 @@
+{
+ "eventGroups": [
+  {
+   "displayLabel": "Championship",
+   "secondaryGroups": [
+    {
+     "displayLabel": null,
+     "events": [
+      {
+       "id": "s-1ilav5i7wp6wz167rmiz3nnkk",
+       "home": {
+        "fullName": "Burnley",
+        "score": "1"
+       },
+       "away": {
+        "fullName": "Wolverhampton Wanderers",
+        "score": "0"
+       },
+       "status": "MidEvent",
+       "statusComment": {
+        "value": "21'",
+        "accessible": "21 minutes"
+       },
+       "startDateTime": "2026-10-16T19:00:00Z"
+      },
+      {
+       "id": "broken",
+       "status": "PreEvent"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "displayLabel": "Highland / Lowland",
+   "secondaryGroups": [
+    {
+     "displayLabel": "Highland League",
+     "events": [
+      {
+       "id": "s-1ag67rks85ujwhinod8qie42c",
+       "home": {
+        "fullName": "Strathspey Thistle",
+        "score": "1"
+       },
+       "away": {
+        "fullName": "Lossiemouth",
+        "score": "0"
+       },
+       "status": "MidEvent",
+       "statusComment": {
+        "value": "21'",
+        "accessible": "21 minutes"
+       },
+       "startDateTime": "2026-10-16T19:00:00Z"
+      }
+     ]
+    },
+    {
+     "displayLabel": "Lowland League West",
+     "events": [
+      {
+       "id": "s-91fs9lnht615twx4z04usuh3o",
+       "home": {
+        "fullName": "Celtic II",
+        "score": "0"
+       },
+       "away": {
+        "fullName": "Caledonian Braves",
+        "score": "1"
+       },
+       "status": "MidEvent",
+       "statusComment": {
+        "value": "34'",
+        "accessible": "34 minutes"
+       },
+       "startDateTime": "2026-10-16T18:45:00Z"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "displayLabel": "Welsh Cup",
+   "secondaryGroups": [
+    {
+     "displayLabel": "2nd Round",
+     "events": [
+      {
+       "id": "s-a7r8u6bjfsj18klt49tg9rtas",
+       "home": {
+        "fullName": "Evans & Williams"
+       },
+       "away": {
+        "fullName": "Rockspur"
+       },
+       "status": "PreEvent",
+       "statusComment": {
+        "value": "Scheduled",
+        "accessible": "Scheduled"
+       },
+       "startDateTime": "2026-10-16T18:30:00Z"
+      },
+      {
+       "id": "s-92uxnma28k2v7mj8raxt03p5g",
+       "home": {
+        "fullName": "Airbus UK"
+       },
+       "away": {
+        "fullName": "The New Saints"
+       },
+       "status": "PreEvent",
+       "statusComment": {
+        "value": "Scheduled",
+        "accessible": "Scheduled"
+       },
+       "startDateTime": "2026-10-16T18:45:00Z"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "displayLabel": "CONMEBOL Libertadores",
+   "secondaryGroups": [
+    {
+     "displayLabel": "Semi-finals",
+     "events": [
+      {
+       "id": "s-der9x03eb86tatq843cjeioes",
+       "home": {
+        "fullName": "Estudiantes",
+        "score": "0"
+       },
+       "away": {
+        "fullName": "Flamengo",
+        "score": "0"
+       },
+       "status": "PostEvent",
+       "statusComment": {
+        "value": "FT",
+        "accessible": "Full time"
+       },
+       "startDateTime": "2026-10-16T00:30:00Z"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
