@@ -26,24 +26,23 @@ spec:
           - secretRef:
               name: {{ . | quote }}
         {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.service.targetPort }}
+          periodSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 60
         resources:
           requests:
             cpu: "50m"
-            memory: "50Mi"
+            memory: "128Mi"
           limits:
-            cpu: "1500m"
-            memory: "2500Mi"
-        volumeMounts:
-        - name: data-volume
-          mountPath: /mnt
-        - name: mem-disk-volume
-          mountPath: /tmp/cache
-      volumes:
-      - name: data-volume
-        hostPath:
-          path: {{ .Values.hostPathForData }}
-          type: DirectoryOrCreate
-      - name: mem-disk-volume
-        emptyDir:
-          medium: Memory
-          sizeLimit: {{ .Values.memDiskSize }}
+            cpu: "1000m"
+            memory: "384Mi"

@@ -1,12 +1,11 @@
 # --- Stage 1: Builder ---
-FROM python:3.14-slim AS builder 
+FROM python:3.14-slim AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV UV_PYTHON_DOWNLOADS=never \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy \
-    PYTHONUNBUFFERED=1
+    UV_LINK_MODE=copy
 
 WORKDIR /app
 
@@ -19,29 +18,17 @@ RUN uv sync --frozen --no-dev --no-install-project --package play
 # --- Stage 2: Runtime ---
 FROM python:3.14-slim AS runner
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    mosquitto-clients \
-    libsm6 \
-    libxext6 \
-    && rm -rf /var/lib/apt/lists/*
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Install OS dependencies for Chromium
-RUN playwright install-deps chromium
-
-# Create user with home directory so playwright can store browsers
-RUN groupadd -r appuser && useradd -r -m -g appuser appuser
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
 
 COPY --chown=appuser:appuser apps/py-play/src/play /app/play
 
 USER appuser
-
-# Install Chromium browser binary as the user
-RUN playwright install chromium
 
 EXPOSE 7999
 

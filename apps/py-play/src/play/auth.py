@@ -1,15 +1,17 @@
 """
-Authentication based header (X-Forwarded-Email) verification from OAUTH proxy.
-To test locally, using curl or environment variables:
-(a) curl -H 'X-Forwarded-Email: yan@yan.fi' http://localhost:7999/view
-(b) ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play
+X-Forwarded-Email check on top of oauth2-proxy.
+Locally: curl -H 'X-Forwarded-Email: yan@yan.fi' ..., or
+ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev
 """
 
+import logging
 from urllib.parse import urlencode
 
 from fastapi import Depends, Header, HTTPException, Request
 
 from play.config import Settings, get_settings
+
+log = logging.getLogger(__name__)
 
 
 async def require_user(
@@ -18,28 +20,17 @@ async def require_user(
     x_auth_request_email: str | None = Header(None),
     settings: Settings = Depends(get_settings),
 ) -> str:
-    """
-    FastAPI dependency: verifies X-Forwarded-Email (set by oauth2-proxy)
-    is in the allowed list. Returns the verified email.
-    """
-    auth_url = f"{settings.auth_url}?{urlencode({'rd': str(request.url)})}"
-
     email = x_forwarded_email or x_auth_request_email
-    if email:
-        normalized_email = email.lower().strip()
-    elif settings.allow_local_auth and settings.local_auth_email:
-        normalized_email = settings.local_auth_email.lower().strip()
-    else:
-        print(f"Authentication missing. Headers: {request.headers}")
+    if not email and settings.allow_local_auth:
+        email = settings.local_auth_email
+    if not email:
+        auth_url = f"{settings.auth_url}?{urlencode({'rd': str(request.url)})}"
         raise HTTPException(
-            status_code=401,
-            detail=f"Authentication required. Please authenticate at {auth_url}.",
+            401, f"Authentication required. Please authenticate at {auth_url}."
         )
 
-    if normalized_email not in settings.allowed_emails:
-        print(
-            f"Unauthorized email: {normalized_email} | Allowed: {settings.allowed_emails} | Headers: {request.headers}"
-        )
-        raise HTTPException(status_code=403, detail="User not authorized")
-
-    return normalized_email
+    email = email.lower().strip()
+    if email not in settings.allowed_emails:
+        log.warning("unauthorized email %s on %s", email, request.url.path)
+        raise HTTPException(403, "User not authorized")
+    return email
