@@ -53,7 +53,7 @@ tasks:
       - kubectl label secret oidc-secret --namespace argocd "app.kubernetes.io/part-of=argocd"
       - helm repo add argo https://argoproj.github.io/argo-helm
       - helm repo update
-      - helm upgrade --install argocd argo/argo-cd --namespace argocd -f bootstrap/values/argocd.yaml
+      - helm upgrade --install argocd argo/argo-cd --version 10.10.5 --namespace argocd -f bootstrap/values/argocd.yaml
 
   # --- MONITORING OPS ---
 
