@@ -18,6 +18,21 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: argocd-gitops-bootstrap
+  namespace: argocd
+spec:
+  project: gitops
+  source:
+    repoURL: https://github.com/yyyaaan/core.git
+    targetRevision: main
+    path: infra/gitops-config/bootstrap-cluster
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: core-infra
   namespace: argocd
 spec:
