@@ -22,4 +22,3 @@ link ~/.agents/AGENTS.md     ~/.codex/AGENTS.md
 
 # Project environment
 uv sync --all-packages --all-extras
-uv run playwright install chromium

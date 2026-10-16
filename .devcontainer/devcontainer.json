@@ -24,7 +24,6 @@
     "source=uv-cache,target=/home/vscode/.cache/uv,type=volume",
     "source=uv-python,target=/home/vscode/.local/share/uv/python,type=volume",
     "source=cargo-registry,target=/usr/local/cargo/registry,type=volume",
-    "source=playwright-browsers,target=/ms-playwright,type=volume",
 
     // Agents: login + history per tool (shared by all containers), personal config from host
     "source=claude-code-config,target=/home/vscode/.claude,type=volume",

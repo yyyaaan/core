@@ -5,7 +5,6 @@ FROM mcr.microsoft.com/devcontainers/base:2-trixie
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG USERNAME=vscode
-ARG PLAYWRIGHT_VERSION=latest
 # Bump deliberately; see https://github.com/openai/codex/releases
 ARG CODEX_VERSION=0.162.1
 
@@ -19,11 +18,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ripgrep bubblewrap tmux \
     && rm -rf /var/lib/apt/lists/*
 
-# Chromium system libraries, resolved by Playwright for this distro.
-# Browser binaries go into the shared volume later, matching uv.lock.
-RUN uvx "playwright@${PLAYWRIGHT_VERSION}" install-deps chromium \
-    && rm -rf /var/lib/apt/lists/* /root/.cache/uv /root/.local/share/uv
-
 # Codex CLI: single static binary in /usr/local/bin, so the ~/.codex volume never
 # shadows it (the standalone installer would keep the binary inside ~/.codex).
 RUN arch="$(uname -m)" \
@@ -32,8 +26,7 @@ RUN arch="$(uname -m)" \
     && mv "/usr/local/bin/codex-${arch}-unknown-linux-musl" /usr/local/bin/codex \
     && codex --version
 
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-    UV_LINK_MODE=copy \
+ENV UV_LINK_MODE=copy \
     UV_PYTHON_INSTALL_DIR=/home/${USERNAME}/.local/share/uv/python \
     CARGO_TARGET_DIR=/home/${USERNAME}/.cache/cargo-target \
     CLAUDE_CONFIG_DIR=/home/${USERNAME}/.claude \
@@ -41,8 +34,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     PATH=/home/${USERNAME}/.local/bin:${PATH}
 
 # Pre-create volume mount points so fresh named volumes inherit vscode ownership.
-RUN install -d -m 0777 /ms-playwright \
-    && mkdir -p \
+RUN mkdir -p \
         /home/${USERNAME}/.cache/uv \
         /home/${USERNAME}/.cache/cargo-target \
         /home/${USERNAME}/.local/share/uv/python \
