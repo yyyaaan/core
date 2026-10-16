@@ -59,7 +59,7 @@ def _parse_event(event: dict, zone: ZoneInfo) -> Game | None:
             start = datetime.fromisoformat(event["startDateTime"])
             time = f"{start.astimezone(zone):%H:%M}"
         else:
-            time = event.get("statusComment", {}).get("value", "")
+            time = (event.get("statusComment") or {}).get("value", "")
         score = (
             f"{home['score']}-{away['score']}"
             if "score" in home and "score" in away

@@ -95,9 +95,9 @@ class SpotChart:
 
     async def html(self, now: datetime) -> str:
         if self._stale(now):
+            self.fetched_at = now  # also throttles retries while Elering is down
             try:
-                self.prices = await fetch_prices(now)
-                self.fetched_at, self.rendered = now, None
+                self.prices, self.rendered = await fetch_prices(now), None
             except httpx.HTTPError:
                 if not self.prices:
                     raise

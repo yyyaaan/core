@@ -41,3 +41,21 @@ def test_event_states(parsed):
 
 def test_malformed_event_is_skipped_not_fatal(parsed):
     assert len(parsed["Championship"]) == 1
+
+
+def test_null_fields_do_not_break_parsing():
+    event = {
+        "home": {"fullName": "A"},
+        "away": {"fullName": "B"},
+        "status": "PostEvent",
+        "statusComment": None,
+    }
+    data = {
+        "eventGroups": [
+            {
+                "displayLabel": "X",
+                "secondaryGroups": [{"events": [event, {"home": None}]}],
+            }
+        ]
+    }
+    assert parse_fixtures(data, HELSINKI) == {"X": [Game(time="", home="A", away="B")]}

@@ -59,5 +59,6 @@ def test_serves_cached_prices_when_refresh_fails(fetches, monkeypatch):
 
     monkeypatch.setattr(spot, "fetch_prices", down)
     assert "Nordpool Finland" in asyncio.run(chart.html(MIDNIGHT + timedelta(hours=15)))
+    assert chart.fetched_at == MIDNIGHT + timedelta(hours=15)  # retry throttled
     with pytest.raises(httpx.ConnectError):
         asyncio.run(SpotChart().html(MIDNIGHT))
