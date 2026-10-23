@@ -1,6 +1,6 @@
 ---
 name: infra-upgrade
-description: Upgrade platform service images (Home Assistant, Homebridge, Frigate, MariaDB, Mosquitto, oauth2-proxy, Restic, Stirling-PDF) or bootstrap charts (Traefik, Headlamp) in infra/. Use when asked to bump, update or upgrade infra versions, or to check what's outdated.
+description: Upgrade platform service images (Home Assistant, Homebridge, Frigate, MariaDB, Mosquitto, oauth2-proxy, Restic, Stirling-PDF) or bootstrap charts (Traefik, Headlamp) and the Cloudflare tunnel in infra/. Use when asked to bump, update or upgrade infra versions, or to check what's outdated.
 ---
 
 # Infra upgrade
@@ -11,7 +11,8 @@ Goal: a reviewed tag bump plus a short risk report. The edit is trivial; the val
 
 - Images: `image.repository` / `image.tag` in `infra/helm-chart/values.yaml`. `values-test.yaml` pins some services separately (often older); report the drift, ask before aligning.
 - Bootstrap charts: `targetRevision` in `infra/gitops-config/bootstrap-cluster/apps.yaml`.
-- Skip floating `latest` tags (Stirling-PDF, cloudflared) unless asked.
+- Cloudflare tunnel: `image` in `infra/bootstrap/manifests/deployment-cloudflared-tunnel.yaml` (ArgoCD app `cert-cloudflare-etc`). Releases: `cloudflare/cloudflared` `RELEASE_NOTES`.
+- Skip floating `latest` tags (Stirling-PDF) unless asked.
 
 ## 2. Pick targets
 
