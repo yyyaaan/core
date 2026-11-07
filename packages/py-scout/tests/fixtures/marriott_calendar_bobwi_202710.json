@@ -1,0 +1,551 @@
+{
+ "variables": {
+  "id": [
+   "BOBWI"
+  ],
+  "search": {
+   "propertyId": "BOBWI",
+   "options": {
+    "startDate": "2027-09-26",
+    "numberOfRooms": 1,
+    "rateRequestTypes": [
+     {
+      "value": "",
+      "type": "STANDARD"
+     }
+    ],
+    "endDate": "2027-10-22",
+    "numberInParty": 2,
+    "numberOfDays": 4
+   }
+  }
+ },
+ "response": {
+  "data": {
+   "propertiesByIds": [
+    {
+     "__typename": "Hotel",
+     "basicInformation": {
+      "__typename": "HotelBasicInformation",
+      "descriptions": [
+       {
+        "__typename": "PropertyDescription",
+        "type": {
+         "__typename": "Lookup",
+         "enumCode": "DESTINATION_FEE_DESCRIPTION"
+        }
+       }
+      ],
+      "isAdultsOnly": false,
+      "resort": true
+     }
+    }
+   ],
+   "search": {
+    "__typename": "SearchQuery",
+    "calendarSearchByProperty": {
+     "__typename": "CalendarSearchByPropertyConnection",
+     "edges": [
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-09-26",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 172970,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 345940,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-09-26"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-09-29",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 176400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 352800,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-09-27"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-09-30",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-09-30"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-01",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 171000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 342000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-01"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-02",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-02"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-06",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 176400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 352800,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-03"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-07",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-07"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-08",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 171000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 342000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-08"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-09",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-09"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-13",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 176400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 352800,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-10"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-14",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-14"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-15",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 171000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 342000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-15"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-16",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-16"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-20",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 176400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 352800,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-17"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-21",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 173700,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 347400,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-21"
+       }
+      },
+      {
+       "__typename": "CalendarSearchByPropertyEdge",
+       "node": {
+        "__typename": "CalendarProduct",
+        "endDate": "2027-10-22",
+        "rateModes": {
+         "__typename": "CalendarSearchByPropertyRateModes",
+         "lowestAverageRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 171000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "pointsPerQuantity": null,
+         "sourceOfRate": "MARSHA",
+         "totalRate": {
+          "__typename": "CalendarSearchByPropertyRateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 342000,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        },
+        "startDate": "2027-10-22"
+       }
+      }
+     ],
+     "total": 16
+    }
+   }
+  }
+ }
+}

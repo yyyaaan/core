@@ -11,7 +11,6 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 COPY apps/py-play/pyproject.toml ./apps/py-play/
-COPY packages/py-autobrowser/pyproject.toml ./packages/py-autobrowser/
 
 RUN uv sync --frozen --no-dev --no-install-project --package play
 

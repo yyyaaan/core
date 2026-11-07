@@ -1,0 +1,661 @@
+{
+ "commerce": {
+  "__typename": "CommerceQuery",
+  "product": {
+   "__typename": "CommerceProductQuery",
+   "searchProductsByProperty": {
+    "__typename": "ProductSearchByPropertyConnection",
+    "attributeDefinitions": [],
+    "edges": [
+     {
+      "__typename": "ProductSearchEdge",
+      "node": {
+       "__typename": "HotelRoom",
+       "id": "Qk9CV0l8QVA3RHxLSU5HfDIwMjctMDktMjB8MjAyNy0wOS0yNHw4NWZlOTRlNy01ODI1LTQxOTAtYTBjNS0zOTBjN2E0ZjJiYWE",
+       "availabilityAttributes": {
+        "__typename": "HotelRoomAvailabilityAttributes",
+        "isNearSellout": true,
+        "productRateCategory": {
+         "__typename": "HotelRoomAvailabilityAttributesRateCategory",
+         "typeCode": "Prepay",
+         "value": null
+        }
+       },
+       "basicInformation": {
+        "__typename": "HotelRoomBasicInformation",
+        "actualRoomsAvailable": null,
+        "depositRequired": true,
+        "description": "Bungalow, 1 King, Lagoon view, Beach front access, Lagoon access",
+        "freeCancellationUntil": null,
+        "inventoryTypeNames": [
+         {
+          "__typename": "CommerceChannelDescription",
+          "channelDescriptions": [
+           {
+            "__typename": "CommerceDescription",
+            "text": [
+             "Lagoon View Beach Villa"
+            ],
+            "type": "Standard"
+           }
+          ]
+         }
+        ],
+        "isHousingProtected": false,
+        "isMembersOnly": false,
+        "isRepresentativeRoom": false,
+        "name": "Lagoon View Beach Villa",
+        "parentRoomType": null,
+        "ratePlan": [
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "35AP7D",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "AP7D",
+          "ratePlanType": "12.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "35AP7D",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "AP7D",
+          "ratePlanType": "12.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "35AP7D",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "AP7D",
+          "ratePlanType": "12.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "35AP7D",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "AP7D",
+          "ratePlanType": "12.RPT"
+         }
+        ],
+        "roomsAvailable": null,
+        "roomsRequested": null,
+        "sourceOfRate": "MARSHA",
+        "type": "king"
+       },
+       "rates": {
+        "__typename": "HotelRoomRate",
+        "description": "prepay in full, non-refundable if cancelled more than 1 day after booking, no changes",
+        "name": "Prepay Non-refundable Non-changeable",
+        "rateModes": {
+         "__typename": "HotelRoomRateModesCash",
+         "averageNightlyRatePerUnit": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 131812,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       },
+       "roomAttributes": [],
+       "roomDetails": null,
+       "totalPricing": {
+        "__typename": "HotelRoomTotalPricing",
+        "quantity": 1,
+        "rateModes": {
+         "__typename": "HotelRoomTotalPricingRateModes",
+         "grandTotal": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 661027,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "subtotalPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 527250,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "totalMandatoryFeesPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 47960,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       }
+      }
+     },
+     {
+      "__typename": "ProductSearchEdge",
+      "node": {
+       "__typename": "HotelRoom",
+       "id": "Qk9CV0l8U05MQ3xETEFOfDIwMjctMDktMjB8MjAyNy0wOS0yNHwzM2NmYjRjNC05Y2VkLTQ3YTQtODZmYi0xYjQ5OGRlYWQzMDk",
+       "availabilityAttributes": {
+        "__typename": "HotelRoomAvailabilityAttributes",
+        "isNearSellout": false,
+        "productRateCategory": {
+         "__typename": "HotelRoomAvailabilityAttributesRateCategory",
+         "typeCode": "Packages",
+         "value": null
+        }
+       },
+       "basicInformation": {
+        "__typename": "HotelRoomBasicInformation",
+        "actualRoomsAvailable": null,
+        "depositRequired": true,
+        "description": "Bungalow, 1 King, Lagoon access, Terrace",
+        "freeCancellationUntil": "2027-08-21T00:00:00Z",
+        "inventoryTypeNames": [
+         {
+          "__typename": "CommerceChannelDescription",
+          "channelDescriptions": [
+           {
+            "__typename": "CommerceDescription",
+            "text": [
+             "Overwater"
+            ],
+            "type": "Standard"
+           }
+          ]
+         }
+        ],
+        "isHousingProtected": false,
+        "isMembersOnly": false,
+        "isRepresentativeRoom": false,
+        "name": "Overwater",
+        "parentRoomType": null,
+        "ratePlan": [
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         }
+        ],
+        "roomsAvailable": null,
+        "roomsRequested": null,
+        "sourceOfRate": "MARSHA",
+        "type": "dlan"
+       },
+       "rates": {
+        "__typename": "HotelRoomRate",
+        "description": "buffet breakfast for 2 guests daily at Tipanier, see Rate details",
+        "name": "Bora Bora Tropical Retreat Experience more",
+        "rateModes": {
+         "__typename": "HotelRoomRateModesCash",
+         "averageNightlyRatePerUnit": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 157312,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       },
+       "roomAttributes": [],
+       "roomDetails": null,
+       "totalPricing": {
+        "__typename": "HotelRoomTotalPricing",
+        "quantity": 1,
+        "rateModes": {
+         "__typename": "HotelRoomTotalPricingRateModes",
+         "grandTotal": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 777307,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "subtotalPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 629250,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "totalMandatoryFeesPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 47960,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       }
+      }
+     },
+     {
+      "__typename": "ProductSearchEdge",
+      "node": {
+       "__typename": "HotelRoom",
+       "id": "Qk9CV0l8U05MQ3xETEFOfDIwMjctMDktMjB8MjAyNy0wOS0yNHw2MjJhYzY1My05NTM2LTQxNDctYWZiNi1mMjBhZThjZDhhNTQ",
+       "availabilityAttributes": {
+        "__typename": "HotelRoomAvailabilityAttributes",
+        "isNearSellout": false,
+        "productRateCategory": {
+         "__typename": "HotelRoomAvailabilityAttributesRateCategory",
+         "typeCode": "Packages",
+         "value": null
+        }
+       },
+       "basicInformation": {
+        "__typename": "HotelRoomBasicInformation",
+        "actualRoomsAvailable": null,
+        "depositRequired": true,
+        "description": "Bungalow, 1 King, Lagoon access, Terrace",
+        "freeCancellationUntil": "2027-08-21T00:00:00Z",
+        "inventoryTypeNames": [
+         {
+          "__typename": "CommerceChannelDescription",
+          "channelDescriptions": [
+           {
+            "__typename": "CommerceDescription",
+            "text": [
+             "Overwater"
+            ],
+            "type": "Standard"
+           }
+          ]
+         }
+        ],
+        "isHousingProtected": false,
+        "isMembersOnly": false,
+        "isRepresentativeRoom": false,
+        "name": "Overwater",
+        "parentRoomType": null,
+        "ratePlan": [
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21SNLC",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "SNLC",
+          "ratePlanType": "11.RPT"
+         }
+        ],
+        "roomsAvailable": null,
+        "roomsRequested": null,
+        "sourceOfRate": "MARSHA",
+        "type": "dlan"
+       },
+       "rates": {
+        "__typename": "HotelRoomRate",
+        "description": "buffet breakfast for 2 guests daily at Tipanier, see Rate details",
+        "name": "Bora Bora Tropical Retreat Experience more",
+        "rateModes": {
+         "__typename": "HotelRoomRateModesCash",
+         "averageNightlyRatePerUnit": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 157312,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       },
+       "roomAttributes": [],
+       "roomDetails": null,
+       "totalPricing": {
+        "__typename": "HotelRoomTotalPricing",
+        "quantity": 1,
+        "rateModes": {
+         "__typename": "HotelRoomTotalPricingRateModes",
+         "grandTotal": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 777307,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "subtotalPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 629250,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "totalMandatoryFeesPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 47960,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       }
+      }
+     },
+     {
+      "__typename": "ProductSearchEdge",
+      "node": {
+       "__typename": "HotelRoom",
+       "id": "Qk9CV0l8RUNQWnxLSU5HfDIwMjctMDktMjB8MjAyNy0wOS0yNHw0OGE2ZmUxNC1mZDJlLTQzMjAtYTkxOS04NmY5ODYyNmE5NDI",
+       "availabilityAttributes": {
+        "__typename": "HotelRoomAvailabilityAttributes",
+        "isNearSellout": true,
+        "productRateCategory": {
+         "__typename": "HotelRoomAvailabilityAttributesRateCategory",
+         "typeCode": "Packages",
+         "value": null
+        }
+       },
+       "basicInformation": {
+        "__typename": "HotelRoomBasicInformation",
+        "actualRoomsAvailable": null,
+        "depositRequired": true,
+        "description": "Bungalow, 1 King, Lagoon view, Beach front access, Lagoon access",
+        "freeCancellationUntil": "2027-08-21T00:00:00Z",
+        "inventoryTypeNames": [
+         {
+          "__typename": "CommerceChannelDescription",
+          "channelDescriptions": [
+           {
+            "__typename": "CommerceDescription",
+            "text": [
+             "Lagoon View Beach Villa"
+            ],
+            "type": "Standard"
+           }
+          ]
+         }
+        ],
+        "isHousingProtected": false,
+        "isMembersOnly": false,
+        "isRepresentativeRoom": false,
+        "name": "Lagoon View Beach Villa",
+        "parentRoomType": null,
+        "ratePlan": [
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21ECPZ",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "ECPZ",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21ECPZ",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "ECPZ",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21ECPZ",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "ECPZ",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21ECPZ",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "ECPZ",
+          "ratePlanType": "11.RPT"
+         }
+        ],
+        "roomsAvailable": null,
+        "roomsRequested": null,
+        "sourceOfRate": "MARSHA",
+        "type": "king"
+       },
+       "rates": {
+        "__typename": "HotelRoomRate",
+        "description": "includes buffet breakfast for up to 2 guests daily at Tipanier, 3 course set dinner for up to 2 guests daily at Selected Restaurants, see Rate details",
+        "name": "Half Board Haven",
+        "rateModes": {
+         "__typename": "HotelRoomRateModesCash",
+         "averageNightlyRatePerUnit": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 164812,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       },
+       "roomAttributes": [],
+       "roomDetails": null,
+       "totalPricing": {
+        "__typename": "HotelRoomTotalPricing",
+        "quantity": 1,
+        "rateModes": {
+         "__typename": "HotelRoomTotalPricingRateModes",
+         "grandTotal": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 811507,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "subtotalPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 659250,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "totalMandatoryFeesPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 47960,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       }
+      }
+     },
+     {
+      "__typename": "ProductSearchEdge",
+      "node": {
+       "__typename": "HotelRoom",
+       "id": "Qk9CV0l8RU42S3xETEFOfDIwMjctMDktMjB8MjAyNy0wOS0yNHwzZTNkZDU3MS1mZjY1LTRlZjItYjliNC00ZjVmYzNiYTZjMjU",
+       "availabilityAttributes": {
+        "__typename": "HotelRoomAvailabilityAttributes",
+        "isNearSellout": false,
+        "productRateCategory": {
+         "__typename": "HotelRoomAvailabilityAttributesRateCategory",
+         "typeCode": "Packages",
+         "value": null
+        }
+       },
+       "basicInformation": {
+        "__typename": "HotelRoomBasicInformation",
+        "actualRoomsAvailable": null,
+        "depositRequired": true,
+        "description": "Bungalow, 1 King, Lagoon access, Terrace",
+        "freeCancellationUntil": "2027-08-21T00:00:00Z",
+        "inventoryTypeNames": [
+         {
+          "__typename": "CommerceChannelDescription",
+          "channelDescriptions": [
+           {
+            "__typename": "CommerceDescription",
+            "text": [
+             "Overwater"
+            ],
+            "type": "Standard"
+           }
+          ]
+         }
+        ],
+        "isHousingProtected": false,
+        "isMembersOnly": true,
+        "isRepresentativeRoom": false,
+        "name": "Overwater",
+        "parentRoomType": null,
+        "ratePlan": [
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21EN6K",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "EN6K",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21EN6K",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "EN6K",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21EN6K",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "EN6K",
+          "ratePlanType": "11.RPT"
+         },
+         {
+          "__typename": "HotelRoomBasicInfoRatePlan",
+          "marketCode": "21EN6K",
+          "qualifiedRateRestriction": null,
+          "ratePlanCode": "EN6K",
+          "ratePlanType": "11.RPT"
+         }
+        ],
+        "roomsAvailable": null,
+        "roomsRequested": null,
+        "sourceOfRate": "MARSHA",
+        "type": "dlan"
+       },
+       "rates": {
+        "__typename": "HotelRoomRate",
+        "description": "includes buffet breakfast for 2 guests daily at Tipanier, 3 course dinner for 2 guests per night at without drinks, see Rate details",
+        "name": "Member Rate Half Board Haven",
+        "rateModes": {
+         "__typename": "HotelRoomRateModesCash",
+         "averageNightlyRatePerUnit": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 179156,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       },
+       "roomAttributes": [],
+       "roomDetails": null,
+       "totalPricing": {
+        "__typename": "HotelRoomTotalPricing",
+        "quantity": 1,
+        "rateModes": {
+         "__typename": "HotelRoomTotalPricingRateModes",
+         "grandTotal": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 876913,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "subtotalPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 716625,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         },
+         "totalMandatoryFeesPerQuantity": {
+          "__typename": "RateAmountCash",
+          "amount": {
+           "__typename": "MonetaryAmount",
+           "amount": 47960,
+           "currency": "XPF",
+           "decimalPoint": 0
+          }
+         }
+        }
+       }
+      }
+     }
+    ],
+    "resultsCollectionId": null,
+    "total": 106
+   }
+  }
+ }
+}
