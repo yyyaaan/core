@@ -9,7 +9,7 @@ Personal monorepo (private project): Python + Rust services and the Helm/ArgoCD 
 | `apps/py-play/` | FastAPI app: daily football + S-Bonus digest email, spot price chart, water meter camera crop. Browser-free scraping (httpx). Own Helm chart, `web` ns. See `apps/py-play/AGENTS.md` |
 | `apps/py-web/` | FastAPI + Jinja2 + HTMX personal site. Zero-Node. See `apps/py-web/AGENTS.md` |
 | `apps/bash-poller/` | CronJob workloads (Elenia energy, FFmpeg/timelapse), shell + Python helpers |
-| `packages/py-autobrowser/` | `browser-use` agentic browser library, not deployed on its own |
+| `packages/py-scout/` | CLI price scans through the user's own Chrome over CDP (Marriott first). Not deployed. See `packages/py-scout/AGENTS.md` |
 | `crates/rs-y-one/` | Rust learning project (tokio, serde, anyhow) |
 | `infra/` | Platform Helm chart, ArgoCD app-of-apps, cluster bootstrap. See `infra/AGENTS.md` |
 
@@ -31,6 +31,7 @@ uv run ruff check apps/py-play/ apps/py-web/      # what CI lints
 uv run ruff format <paths>
 uv run play-dev                                   # py-play locally, port 7999
 uv run web                                        # py-web locally, port 8001
+uv run scout marriott report --from 2027-10-01 --to 2027-10-31   # needs debug Chrome only for `scan`
 cargo build -p rs-y-one && cargo test
 helm lint <chart> && helm template t <chart> > /dev/null   # what CI checks
 ```
@@ -56,7 +57,7 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 - FastAPI handlers are `async def`; Jinja2 templates under `src/<pkg>/templates/`.
 - Config via `pydantic-settings` / env vars, never hardcoded secrets or domains.
 - Light type hints, no type checker enforced. Ruff is the formatter and linter.
-- Scraping: prefer a site's JSON API or server-rendered HTML over httpx; a headless browser is the last resort (only `packages/py-autobrowser` uses one, server-side). Catch per element so one missing field doesn't fail a whole page.
+- Scraping: prefer a site's JSON API or server-rendered HTML over httpx; a browser is the last resort, and then only the user's own Chrome via `packages/py-scout` (never headless or server-side). Catch per element so one missing field doesn't fail a whole page.
 
 ## Agent config layout
 
