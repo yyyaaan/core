@@ -1,0 +1,82 @@
+{
+ "data": {
+  "search": {
+   "__typename": "SearchQuery",
+   "lowestAvailableRates": {
+    "__typename": "SearchLowestAvailableRatesQuery",
+    "searchByPropertyIds": {
+     "__typename": "SearchLowestAvailableRatesByPropertyIdsConnection",
+     "edges": [
+      {
+       "__typename": "SearchLowestAvailableRatesSearchEdge",
+       "node": {
+        "__typename": "SearchLowestAvailableRates",
+        "property": {
+         "__typename": "Hotel",
+         "basicInformation": {
+          "__typename": "HotelBasicInformation",
+          "name": "The Westin Bora Bora Resort & Spa"
+         },
+         "id": "BOBWI"
+        },
+        "rates": [
+         {
+          "__typename": "SearchLowestAvailableRate",
+          "rateCategory": {
+           "__typename": "SearchRateCategory",
+           "code": "StandardRates",
+           "description": null,
+           "value": null
+          },
+          "rateModes": {
+           "__typename": "SearchLowestAvailableRatesRateModesCash",
+           "lowestAverageRate": {
+            "__typename": "SearchLowestAvailableRatesRateAmountCash",
+            "amount": {
+             "__typename": "MonetaryAmount",
+             "amount": 169540,
+             "currency": "XPF",
+             "decimalPoint": 0
+            },
+            "amountPlusMandatoryFees": {
+             "__typename": "MonetaryAmount",
+             "amount": 181530,
+             "currency": "XPF",
+             "decimalPoint": 0
+            },
+            "fees": {
+             "__typename": "MonetaryAmount",
+             "amount": 20467,
+             "currency": "XPF",
+             "decimalPoint": 0
+            },
+            "mandatoryFees": {
+             "__typename": "MonetaryAmount",
+             "amount": 11990,
+             "currency": "XPF",
+             "decimalPoint": 0
+            },
+            "totalAmount": {
+             "__typename": "MonetaryAmount",
+             "amount": 206766,
+             "currency": "XPF",
+             "decimalPoint": 0
+            }
+           }
+          },
+          "sourceOfRate": "MARSHA",
+          "status": {
+           "__typename": "Lookup",
+           "code": "AvailableForSale",
+           "description": null
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

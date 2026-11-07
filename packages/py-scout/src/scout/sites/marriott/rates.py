@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)
 
 OPERATION = "PhoenixBookDTTSearchProductsByProperty"
 RATE_LIST_URL = "https://www.marriott.com/reservation/rateListMenu.mi"
-XPF_PER_EUR = 1000 / 8.38  # fixed peg
 
 # finds the rate list query the page itself registered (its document, variables and headers)
 _FIND_QUERY_JS = """

@@ -25,4 +25,13 @@ uv run scout marriott scan --property BOBWI --from 2027-10-01 --to 2027-10-31 --
 uv run scout marriott report --from 2027-10-01 --to 2027-10-31 --rate "Half Board"   # from stored scans, no requests
 ```
 
+Monthly overview from the low-rate calendar (cheapest room, standard rate, before taxes; one request per month):
+
+```bash
+uv run scout marriott calendar --from 2027-05 --to 2027-10 --nights 4 --adults 2
+uv run scout marriott calendar --from 2026-11 --to 2027-10 --stored   # whole window, no requests
+```
+
+No manual setup: scout loads a hotel search URL with your nights and guests (that sets marriott.com's "last search" in the profile), opens the calendar on the first month and clicks forward. Keep ranges to about 6 months per run: an earlier run got a 403 from Akamai after 7 quick clicks; two 6-month runs went through fine.
+
 One request per check-in date returns every room × rate, all stored in `data/scout.sqlite` (`SCOUT_DB_PATH`), so `report` can filter differently without scanning again. Totals are the grand total incl. taxes and fees, as the site shows them; XPF is also shown in EUR (fixed peg). Requests are paced 2–4 s apart (`SCOUT_DELAY_MIN`/`SCOUT_DELAY_MAX`), and a failed request stops the scan.
