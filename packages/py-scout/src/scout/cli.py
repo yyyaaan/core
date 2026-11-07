@@ -12,6 +12,26 @@ def _dates(start: date, end: date) -> list[date]:
     return [start + timedelta(days=i) for i in range((end - start).days + 1)]
 
 
+def _check_ins(args: argparse.Namespace) -> list[date]:
+    if not args.calendar_top:
+        return _dates(args.start, args.end)
+    db = calendar.open_db()
+    picked = calendar.cheapest_dates(
+        db,
+        args.property,
+        args.start,
+        args.end,
+        args.nights,
+        args.adults,
+        args.calendar_top,
+    )
+    if not picked:
+        sys.exit(
+            "scout: no stored calendar data for that range and party; run `scout marriott calendar` first"
+        )
+    return picked
+
+
 def _month(value: str) -> date:
     return date.fromisoformat(f"{value}-01")
 
@@ -108,6 +128,13 @@ def main() -> None:
         p.add_argument(
             "--rate", default="", help="rate name contains, e.g. 'Half Board'"
         )
+        p.add_argument(
+            "--calendar-top",
+            type=int,
+            default=0,
+            metavar="N",
+            help="only the N cheapest check-ins per month from stored calendar data",
+        )
     p = actions.add_parser(
         "calendar", help="lowest nightly rate per month from the low-rate calendar"
     )
@@ -130,10 +157,11 @@ def main() -> None:
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    if args.action in ("scan", "report"):
+        check_ins = _check_ins(args)
     failure = None
     try:
         if args.action == "scan":
-            check_ins = _dates(args.start, args.end)
             asyncio.run(rates.scan(args.property, check_ins, args.nights, args.adults))
         elif args.action == "calendar" and not args.stored:
             asyncio.run(
@@ -154,7 +182,7 @@ def main() -> None:
         rows = rates.best_per_date(
             rates.open_db(),
             args.property,
-            _dates(args.start, args.end),
+            check_ins,
             args.nights,
             args.adults,
             args.room,

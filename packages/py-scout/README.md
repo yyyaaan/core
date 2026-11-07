@@ -15,23 +15,36 @@ Quit Chrome first (Cmd+Q), otherwise this only opens a window in the running ins
 
 Check: `http://localhost:9222/json/version` on the Mac. From the devcontainer scout resolves `host.docker.internal` to an IP itself (Chrome rejects hostnames in the `Host` header). Override with `SCOUT_CDP_URL`.
 
-## Marriott
+## Marriott: finding the cheapest stay
 
-Once per profile, search the hotel on marriott.com in that Chrome until room rates show (any dates). Then:
+Three passes, coarse to fine, so a year of dates costs well under 100 requests. No manual setup: scout opens the pages it needs through marriott.com's own hotel search (this replaces the profile's "last search").
 
-```bash
-uv run scout marriott scan --property BOBWI --from 2027-10-01 --to 2027-10-31 --nights 4 --adults 2 \
-  --room "Lagoon View Beach Villa" --rate "Half Board"
-uv run scout marriott report --from 2027-10-01 --to 2027-10-31 --rate "Half Board"   # from stored scans, no requests
-```
-
-Monthly overview from the low-rate calendar (cheapest room, standard rate, before taxes; one request per month):
+**1. Which months are cheap?** The low-rate calendar, one request per month. It shows the cheapest room on a standard rate, per night incl. the destination fee, before taxes: good for ranking months, not for pricing your room.
 
 ```bash
-uv run scout marriott calendar --from 2027-05 --to 2027-10 --nights 4 --adults 2
+uv run scout marriott calendar --property BOBWI --from 2026-11 --to 2027-04 --nights 4 --adults 2
+uv run scout marriott calendar --from 2027-05 --to 2027-10
 uv run scout marriott calendar --from 2026-11 --to 2027-10 --stored   # whole window, no requests
 ```
 
-No manual setup: scout loads a hotel search URL with your nights and guests (that sets marriott.com's "last search" in the profile), opens the calendar on the first month and clicks forward. Keep ranges to about 6 months per run: an earlier run got a 403 from Akamai after 7 quick clicks; two 6-month runs went through fine.
+**2. What does my room cost on those dates?** Exact totals (taxes and fees included) for the 3 cheapest calendar check-ins per month, one request per date. Filter by room afterwards for free; another room on the same rate plan is sometimes cheaper.
 
-One request per check-in date returns every room × rate, all stored in `data/scout.sqlite` (`SCOUT_DB_PATH`), so `report` can filter differently without scanning again. Totals are the grand total incl. taxes and fees, as the site shows them; XPF is also shown in EUR (fixed peg). Requests are paced 2–4 s apart (`SCOUT_DELAY_MIN`/`SCOUT_DELAY_MAX`), and a failed request stops the scan.
+```bash
+uv run scout marriott scan --from 2026-11-08 --to 2027-09-30 --calendar-top 3 --rate "Half Board"
+uv run scout marriott report --from 2026-11-08 --to 2027-09-30 --calendar-top 3 \
+  --room "Lagoon View Beach Villa" --rate "Half Board"
+```
+
+**3. Refine the best month.** Every check-in date of the 1–2 most promising months, since step 2 only samples:
+
+```bash
+uv run scout marriott scan --from 2027-03-01 --to 2027-03-31 --room "Lagoon View Beach Villa" --rate "Half Board"
+```
+
+Asking an agent "find the cheapest Half Board week at the Westin Bora Bora" runs the same steps (repo skill `hotel-price-scout`).
+
+### Notes
+
+- Each scanned date stores every room × rate in `data/scout.sqlite` (`SCOUT_DB_PATH`), so `report` and `calendar --stored` re-filter without new requests. XPF totals are also shown in EUR (fixed peg).
+- Requests are sequential, 2–4 s apart (`SCOUT_DELAY_MIN`/`SCOUT_DELAY_MAX`). Keep runs to about 6 calendar months or ~35 dates; once a burst of 7 quick calendar clicks got a 403 from Akamai. A failed request stops the run; check marriott.com in that Chrome before trying again.
+- Member rates need a (free) Marriott Bonvoy account.

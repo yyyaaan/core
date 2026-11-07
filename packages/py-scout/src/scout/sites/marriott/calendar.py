@@ -15,7 +15,6 @@ import sqlite3
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
-from urllib.parse import urlencode
 
 from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page, Response
@@ -23,55 +22,12 @@ from playwright.async_api import Page, Response
 from scout import cdp, store
 from scout.cdp import ScoutError
 from scout.config import get_settings
+from scout.sites.marriott.search import search_url
 
 log = logging.getLogger(__name__)
 
 CALENDAR_OPERATION = "phoenixShopADFSearchProductsByProperty"
 FEE_OPERATION = "phoenixShopHQVRateOnly"
-SEARCH_URL = "https://www.marriott.com/search/findHotels.mi"
-# a Bora Bora flexible-dates search as the site's form submits it; search_url() adds dates and party.
-# The calendar picks the hotel by propertyCode, so the destination here only has to be valid.
-SEARCH_PARAMS = {
-    "flexibleDateSearch": "true",
-    "childrenCountBox": "0 Children Per Room",
-    "childrenCount": "0",
-    "clusterCode": "none",
-    "useRewardsPoints": "false",
-    "isAdvanceSearch": "true",
-    "isNGSF": "false",
-    "recordsPerPage": "20",
-    "destinationAddress.type": "Hotel Name",
-    "destinationAddress.latitude": "-16.497141499999998",
-    "isInternalSearch": "true",
-    "vsInitialRequest": "false",
-    "searchType": "InCity",
-    "destinationAddress.stateProvinceDisplayName": "Leeward Islands",
-    "countryName": "PF",
-    "destinationAddress.stateProvince": "Leeward Islands",
-    "searchRadius": "50",
-    "singleSearchAutoSuggest": "Unmatched",
-    "destinationAddress.placeId": "ChIJx-RZnHCXvXYR95AaxgOP5OY",
-    "for-hotels-nearme": "Near",
-    "destinationAddress.country": "PF",
-    "destinationAddress.address": "MOTU TAPE, BP 190, Bora-Bora 98730, French Polynesia",
-    "collapseAccordian": "is-hidden",
-    "singleSearch": "true",
-    "destinationAddress.secondaryText": "Leeward Islands, PF",
-    "destinationAddress.city": "Bora-Bora",
-    "destinationAddress.mainText": "Bora-Bora",
-    "isTransient": "true",
-    "destinationAddress.longitude": "-151.7018508",
-    "initialRequest": "false",
-    "flexibleDateSearchRateDisplay": "false",
-    "isSearch": "true",
-    "isRateCalendar": "true",
-    "destinationAddress.destination": "The Westin Bora Bora Resort Spa",
-    "isHideFlexibleDateCalendar": "false",
-    "roomCountBox": "1 Room",
-    "roomCount": "1",
-    "deviceType": "desktop-web",
-    "view": "list",
-}
 CALENDAR_URL = (
     "https://www.marriott.com/search/availabilityCalendar.mi"
     "?isRateCalendar=true&isSearch=true&propertyCode={}"
@@ -197,6 +153,42 @@ def save(
     db.commit()
 
 
+def _latest_month_rows(
+    db: sqlite3.Connection, property_id: str, nights: int, guests: int, month: date
+) -> list[sqlite3.Row]:
+    next_month = (month + timedelta(days=32)).replace(day=1)
+    return db.execute(
+        """
+        SELECT check_in, currency, avg_nightly, nightly_fee FROM marriott_calendar c
+        WHERE property_id = ? AND nights = ? AND guests = ? AND check_in >= ? AND check_in < ?
+          AND scanned_at = (
+            SELECT MAX(scanned_at) FROM marriott_calendar
+            WHERE property_id = c.property_id AND nights = c.nights
+              AND guests = c.guests AND check_in = c.check_in)
+        ORDER BY avg_nightly, check_in
+        """,
+        (property_id, nights, guests, month.isoformat(), next_month.isoformat()),
+    ).fetchall()
+
+
+def cheapest_dates(
+    db: sqlite3.Connection,
+    property_id: str,
+    first: date,
+    last: date,
+    nights: int,
+    guests: int,
+    per_month: int,
+) -> list[date]:
+    """The per_month cheapest stored check-in dates of each month in first..last, in date order."""
+    picked = []
+    for month in months(first, last):
+        rows = _latest_month_rows(db, property_id, nights, guests, month)
+        dates = [date.fromisoformat(r["check_in"]) for r in rows]
+        picked += [d for d in dates if first <= d <= last][:per_month]
+    return sorted(picked)
+
+
 def monthly_lows(
     db: sqlite3.Connection, property_id: str, first: date, last: date
 ) -> Report:
@@ -213,18 +205,7 @@ def monthly_lows(
     nights, guests = latest
     out = []
     for month in months(first, last):
-        next_month = (month + timedelta(days=32)).replace(day=1)
-        rows = db.execute(
-            """
-            SELECT check_in, currency, avg_nightly, nightly_fee FROM marriott_calendar c
-            WHERE property_id = ? AND nights = ? AND guests = ? AND check_in >= ? AND check_in < ?
-              AND scanned_at = (
-                SELECT MAX(scanned_at) FROM marriott_calendar
-                WHERE property_id = c.property_id AND nights = c.nights
-                  AND guests = c.guests AND check_in = c.check_in)
-            """,
-            (property_id, nights, guests, month.isoformat(), next_month.isoformat()),
-        ).fetchall()
+        rows = _latest_month_rows(db, property_id, nights, guests, month)
         if not rows:
             out.append(MonthLow(month))
             continue
@@ -245,28 +226,6 @@ def monthly_lows(
 
 def _is(operation: str) -> Callable[[Response], bool]:
     return lambda r: f"/mi/query/{operation}" in r.url
-
-
-def search_url(check_in: date, nights: int, adults: int) -> str:
-    def us(d: date) -> str:
-        return d.strftime("%m/%d/%Y")
-
-    check_out = check_in + timedelta(days=nights)
-    return f"{SEARCH_URL}?" + urlencode(
-        {
-            **SEARCH_PARAMS,
-            "fromDate": us(check_in),
-            "fromDateDefaultFormat": us(check_in),
-            "t-start": us(check_in),
-            "toDate": us(check_out),
-            "toDateDefaultFormat": us(check_out),
-            "t-end": us(check_out),
-            "fromToDate_submit": us(check_out),
-            "lengthOfStay": str(nights),
-            "numAdultsPerRoom": str(adults),
-            "guestCountBox": f"{adults} Adult Per Room",
-        }
-    )
 
 
 async def _shown_month(page: Page) -> date:
@@ -326,7 +285,7 @@ async def fetch(
                 found.clear()  # don't store a different search
                 raise ScoutError(
                     f"calendar shows {search[0]} nights, {search[1]} guests, not {nights} and {guests}. "
-                    "The site may have changed its search URL; see SEARCH_PARAMS."
+                    "The site may have changed its search URL; see marriott/search.py."
                 )
 
             # each click is a request (revisits refetch), so do the nearer end first, then sweep

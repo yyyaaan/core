@@ -18,11 +18,11 @@ from playwright.async_api import Error as PlaywrightError
 from scout import cdp, store
 from scout.cdp import ScoutError
 from scout.config import get_settings
+from scout.sites.marriott.search import search_url
 
 log = logging.getLogger(__name__)
 
 OPERATION = "PhoenixBookDTTSearchProductsByProperty"
-RATE_LIST_URL = "https://www.marriott.com/reservation/rateListMenu.mi"
 
 # finds the rate list query the page itself registered (its document, variables and headers)
 _FIND_QUERY_JS = """
@@ -234,21 +234,31 @@ def best_per_date(
     return out
 
 
-async def _rate_list_page(browser: Browser) -> Page:
+async def _rate_list_page(
+    browser: Browser, property_id: str, check_in: date, nights: int, adults: int
+) -> Page:
     for page in cdp.pages(browser):
         if "/reservation/rateListMenu.mi" in page.url and await page.evaluate(
             READY_JS, OPERATION
         ):
             return page
-    # the page renders the session's last search; we only need its client and query
+    # we only need the page's client and query; any dates do. The rate list redirects away
+    # unless the session holds a fixed-date search, so search first, then Continue like a person.
     page = await browser.contexts[0].new_page()
-    await page.goto(RATE_LIST_URL)
     try:
+        await page.goto(search_url(check_in, nights, adults, flexible=False))
+        card = (
+            page.locator(
+                "div", has=page.locator(f"a[href*='propertyCode={property_id}']")
+            )
+            .filter(has=page.get_by_text("Continue", exact=True))
+            .last
+        )
+        await card.get_by_text("Continue", exact=True).click()
         await page.wait_for_function(READY_JS, arg=OPERATION, timeout=30_000)
     except PlaywrightError as e:
         raise ScoutError(
-            "No usable Marriott rate list tab. Search the hotel on marriott.com in the debug Chrome "
-            "until room rates show (any dates), then retry."
+            f"Couldn't open the rate list for {property_id} via the hotel search: {e}"
         ) from e
     return page
 
@@ -259,7 +269,7 @@ async def scan(
     settings = get_settings()
     db = open_db()
     async with cdp.connect() as browser:
-        page = await _rate_list_page(browser)
+        page = await _rate_list_page(browser, property_id, check_ins[0], nights, adults)
         for i, check_in in enumerate(check_ins):
             if i:
                 await asyncio.sleep(

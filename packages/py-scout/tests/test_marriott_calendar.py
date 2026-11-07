@@ -1,7 +1,6 @@
 import json
 from datetime import UTC, date, datetime
 from pathlib import Path
-from urllib.parse import parse_qsl, urlsplit
 
 import pytest
 
@@ -83,10 +82,26 @@ def test_monthly_lows_empty(tmp_path):
     assert report.nights is None and len(report.months) == 2
 
 
-def test_search_url():
-    url = calendar.search_url(date(2027, 5, 3), 4, 2)
-    params = dict(parse_qsl(urlsplit(url).query))
-    assert url.startswith("https://www.marriott.com/search/findHotels.mi?")
-    assert params["fromDate"] == "05/03/2027" and params["toDate"] == "05/07/2027"
-    assert params["lengthOfStay"] == "4" and params["numAdultsPerRoom"] == "2"
-    assert params["isRateCalendar"] == "true" and params["flexibleDateSearch"] == "true"
+def test_cheapest_dates(october, tmp_path):
+    db = store.open_db(tmp_path / "t.sqlite", calendar.SCHEMA)
+    calendar.save(db, "BOBWI", 4, 2, calendar.parse_calendar(october), None)
+
+    picked = calendar.cheapest_dates(
+        db, "BOBWI", date(2027, 9, 1), date(2027, 10, 31), 4, 2, per_month=2
+    )
+    # Sep: only Sep 26-30 stored, cheapest 172,970 (26th) then 173,700 (30th); Oct: the 171,000 Fridays
+    assert picked == [
+        date(2027, 9, 26),
+        date(2027, 9, 30),
+        date(2027, 10, 1),
+        date(2027, 10, 8),
+    ]
+    assert calendar.cheapest_dates(
+        db, "BOBWI", date(2027, 10, 5), date(2027, 10, 31), 4, 2, 1
+    ) == [date(2027, 10, 8)]
+    assert (
+        calendar.cheapest_dates(
+            db, "BOBWI", date(2027, 10, 1), date(2027, 10, 31), 5, 2, 1
+        )
+        == []
+    )
