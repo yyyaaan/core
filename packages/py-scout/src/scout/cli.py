@@ -87,6 +87,41 @@ def _print_calendar(report: calendar.Report) -> None:
     print("For a specific room and rate, run `scout marriott scan` on a cheap month.")
 
 
+def _print_changes(result: rates.Changes, min_pct: float) -> None:
+    if not result.compared:
+        print(
+            "No check-in date has been scanned twice yet. Re-run `scout marriott scan` "
+            "on the same dates later to start tracking."
+        )
+        return
+    print(
+        f"Price changes of {min_pct:g}% or more · latest vs previous scan of each check-in"
+    )
+    if not result.changes:
+        print("None.")
+    else:
+        print(
+            f"{'Check-in':<11} {'Before':>9} → {'Now':>13}  {'Change':<18} Room · Rate"
+        )
+    for c in result.changes:
+        before = f"{c.before:,.0f}" if c.before is not None else "—"
+        now = f"{c.after:,.0f} {c.currency}" if c.after is not None else "—"
+        if c.pct is None:
+            change = "new" if c.before is None else "gone"
+        else:
+            diff = eur(c.after - c.before, c.currency)
+            change = f"{c.pct:+.1f}%" + (
+                f" ≈ {'+' if diff >= 0 else '−'}€{abs(diff):,.0f}"
+                if diff is not None
+                else ""
+            )
+        print(
+            f"{c.check_in:<11} {before:>9} → {now:>13}  {change:<18} {c.room_name} · {c.rate_name} ({c.rate_code})"
+        )
+    single = f"; {result.single} scanned only once" if result.single else ""
+    print(f"{result.compared} check-in dates compared{single}.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="scout", description="Price scans through your own Chrome over CDP"
@@ -154,7 +189,35 @@ def main() -> None:
     p.add_argument(
         "--stored", action="store_true", help="report stored data only, no requests"
     )
+    p = actions.add_parser(
+        "changes", help="price moves between the last two scans of each check-in date"
+    )
+    p.add_argument("--property", default="BOBWI", help="MARSHA code (default: BOBWI)")
+    p.add_argument("--from", dest="start", type=date.fromisoformat, default=date.min)
+    p.add_argument("--to", dest="end", type=date.fromisoformat, default=date.max)
+    p.add_argument("--nights", type=int, default=4)
+    p.add_argument("--adults", type=int, default=2)
+    p.add_argument("--room", default="", help="room name contains")
+    p.add_argument("--rate", default="", help="rate name contains")
+    p.add_argument(
+        "--min-change", type=float, default=3.0, metavar="PCT", help="default: 3"
+    )
     args = parser.parse_args()
+
+    if args.action == "changes":
+        result = rates.price_changes(
+            rates.open_db(),
+            args.property,
+            args.start,
+            args.end,
+            args.nights,
+            args.adults,
+            args.room,
+            args.rate,
+            args.min_change,
+        )
+        _print_changes(result, args.min_change)
+        return
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     if args.action in ("scan", "report"):

@@ -41,6 +41,13 @@ uv run scout marriott report --from 2026-11-08 --to 2027-09-30 --calendar-top 3 
 uv run scout marriott scan --from 2027-03-01 --to 2027-03-31 --room "Lagoon View Beach Villa" --rate "Half Board"
 ```
 
+**4. Watch for price changes.** Every scan adds rows with its own timestamp instead of overwriting, so re-scanning your shortlist now and then builds price history. `changes` compares each date's latest scan with the one before (no requests): moves of 3% or more (`--min-change`), plus offers that appeared (`new`) or disappeared (`gone`, e.g. sold out).
+
+```bash
+uv run scout marriott scan --from 2027-03-15 --to 2027-03-21 --room "Lagoon View Beach Villa" --rate "Half Board"   # again next week
+uv run scout marriott changes --rate "Half Board"
+```
+
 Asking an agent "find the cheapest Half Board week at the Westin Bora Bora" runs the same steps (repo skill `hotel-price-scout`).
 
 ### Notes

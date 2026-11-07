@@ -46,6 +46,17 @@ The calendar ranks months by the cheapest room, not the user's, so the top 3 dat
 uv run scout marriott scan --from 2027-03-01 --to 2027-03-31 --room "Lagoon View Beach Villa" --rate "Half Board"
 ```
 
+## 4. Track: price changes over time
+
+Scans never overwrite; each date keeps every scan. When the user asks whether prices moved, or comes back later about the same trip, re-scan their shortlisted dates (only those, not the whole window), then:
+
+```bash
+uv run scout marriott changes --rate "Half Board"                 # moves of 3% or more, plus new/gone offers
+uv run scout marriott changes --room "Lagoon View" --min-change 1
+```
+
+Lead with drops on the user's room and rate. Treat "gone" on the target room as possibly sold out and say so.
+
 ## Request budget and blocks
 
 - Requests are sequential with 2–4 s pauses. Keep each run to about 35 requests. Ask before going beyond about 100 in a session.

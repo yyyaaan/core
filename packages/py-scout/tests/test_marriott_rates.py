@@ -76,3 +76,54 @@ def test_best_per_date_uses_latest_scan(products, tmp_path):
 
     overall = rates.best_per_date(db, "BOBWI", days, 4, 2)
     assert overall[0].offer.rate_code == "AP7D"
+
+
+def test_price_changes(products, tmp_path):
+    db = store.open_db(tmp_path / "t.sqlite", rates.SCHEMA)
+    offers, _ = rates.parse_offers(products)
+    check_in, check_out = date(2027, 9, 20), date(2027, 9, 24)
+    first, second = datetime(2026, 11, 1, tzinfo=UTC), datetime(2026, 11, 8, tzinfo=UTC)
+    rates.save(db, "BOBWI", check_in, check_out, 2, offers, scanned_at=first)
+    # a date scanned only once
+    rates.save(
+        db, "BOBWI", date(2027, 9, 21), date(2027, 9, 25), 2, offers, scanned_at=first
+    )
+
+    later = []
+    for o in offers:
+        if o.rate_code == "ECPZ":
+            later.append(replace(o, total=o.total * 0.95))  # -5%
+        elif o.rate_code == "AP7D":
+            later.append(replace(o, total=o.total * 1.01))  # +1%, below threshold
+        elif o.rate_code != "SNLC":  # SNLC gone
+            later.append(o)
+    later.append(
+        replace(offers[0], room_name="Royal Overwater w/Pool", rate_code="NEW1")
+    )
+    rates.save(db, "BOBWI", check_in, check_out, 2, later, scanned_at=second)
+
+    result = rates.price_changes(db, "BOBWI", date.min, date.max, 4, 2)
+    assert (result.compared, result.single) == (1, 1)
+    by_code = {c.rate_code: c for c in result.changes}
+    assert set(by_code) == {"ECPZ", "SNLC", "NEW1"}
+    assert by_code["ECPZ"].before == 811507 and round(by_code["ECPZ"].pct, 1) == -5.0
+    assert by_code["SNLC"].after is None and by_code["SNLC"].pct is None
+    assert by_code["NEW1"].before is None
+
+    filtered = rates.price_changes(
+        db, "BOBWI", date.min, date.max, 4, 2, rate="Half Board"
+    )
+    assert [c.rate_code for c in filtered.changes] == ["ECPZ"]
+    assert {
+        c.rate_code
+        for c in rates.price_changes(
+            db, "BOBWI", date.min, date.max, 4, 2, min_pct=0.5
+        ).changes
+    } >= {"AP7D"}
+    assert "LP5F" not in {
+        c.rate_code
+        for c in rates.price_changes(
+            db, "BOBWI", date.min, date.max, 4, 2, min_pct=0
+        ).changes
+    }
+    assert rates.price_changes(db, "BOBWI", date.min, date.max, 5, 2).compared == 0

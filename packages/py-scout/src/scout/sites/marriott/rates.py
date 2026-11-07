@@ -234,6 +234,105 @@ def best_per_date(
     return out
 
 
+@dataclass(frozen=True)
+class Change:
+    check_in: str
+    check_out: str
+    room_name: str
+    rate_name: str
+    rate_code: str
+    currency: str
+    before: float | None  # None: not offered in the previous scan
+    after: float | None  # None: no longer offered (sold out or withdrawn)
+    previous_scan: str
+    latest_scan: str
+
+    @property
+    def pct(self) -> float | None:
+        if self.before is None or self.after is None:
+            return None
+        return (self.after - self.before) / self.before * 100
+
+
+@dataclass(frozen=True)
+class Changes:
+    changes: list[Change]
+    compared: int  # check-in dates with at least two scans
+    single: int  # check-in dates scanned once
+
+
+def _scan_totals(
+    db: sqlite3.Connection, key: tuple, scanned_at: str, room: str, rate: str
+) -> dict[tuple[str, str, str], tuple[float, str]]:
+    rows = db.execute(
+        """
+        SELECT room_name, rate_name, rate_code, MIN(total) AS total, currency
+        FROM marriott_offers
+        WHERE property_id = ? AND check_in = ? AND check_out = ? AND adults = ? AND scanned_at = ?
+          AND room_name LIKE ? AND rate_name LIKE ?
+        GROUP BY room_name, rate_name, rate_code
+        """,
+        (*key, scanned_at, f"%{room}%", f"%{rate}%"),
+    ).fetchall()
+    return {
+        (r["room_name"], r["rate_name"], r["rate_code"]): (r["total"], r["currency"])
+        for r in rows
+    }
+
+
+def price_changes(
+    db: sqlite3.Connection,
+    property_id: str,
+    start: date,
+    end: date,
+    nights: int,
+    adults: int,
+    room: str = "",
+    rate: str = "",
+    min_pct: float = 3.0,
+) -> Changes:
+    """Per check-in date, latest scan vs the one before: price moves of at least min_pct, plus offers that came or went."""
+    scans = db.execute(
+        """
+        WITH ranked AS (
+            SELECT check_in, check_out, scanned_at,
+                   ROW_NUMBER() OVER (PARTITION BY check_in ORDER BY scanned_at DESC) AS n
+            FROM (SELECT DISTINCT check_in, check_out, scanned_at FROM marriott_offers
+                  WHERE property_id = ? AND adults = ? AND check_in BETWEEN ? AND ?
+                    AND julianday(check_out) - julianday(check_in) = ?)
+        )
+        SELECT check_in, check_out,
+               MAX(CASE WHEN n = 1 THEN scanned_at END) AS latest,
+               MAX(CASE WHEN n = 2 THEN scanned_at END) AS previous
+        FROM ranked WHERE n <= 2 GROUP BY check_in, check_out ORDER BY check_in
+        """,
+        (property_id, adults, start.isoformat(), end.isoformat(), nights),
+    ).fetchall()
+    out, single = [], 0
+    for s in scans:
+        if not s["previous"]:
+            single += 1
+            continue
+        key = (property_id, s["check_in"], s["check_out"], adults)
+        before = _scan_totals(db, key, s["previous"], room, rate)
+        after = _scan_totals(db, key, s["latest"], room, rate)
+        for offer in sorted(before.keys() | after.keys()):
+            old, new = before.get(offer), after.get(offer)
+            change = Change(
+                s["check_in"],
+                s["check_out"],
+                *offer,
+                currency=(new or old)[1],
+                before=old and old[0],
+                after=new and new[0],
+                previous_scan=s["previous"],
+                latest_scan=s["latest"],
+            )
+            if change.pct is None or (old[0] != new[0] and abs(change.pct) >= min_pct):
+                out.append(change)
+    return Changes(out, len(scans) - single, single)
+
+
 async def _rate_list_page(
     browser: Browser, property_id: str, check_in: date, nights: int, adults: int
 ) -> Page:
