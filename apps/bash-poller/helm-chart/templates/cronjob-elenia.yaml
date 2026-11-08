@@ -36,7 +36,7 @@ spec:
             - name: PYTHONUNBUFFERED
               value: "1"
             resources:
-              {{- toYaml .Values.resources | nindent 14 }}
+              {{- toYaml .Values.elenia.resources | nindent 14 }}
             volumeMounts:
             - name: media
               mountPath: /media

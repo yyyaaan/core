@@ -1,6 +1,7 @@
 """
-X-Forwarded-Email check on top of oauth2-proxy.
-Locally: curl -H 'X-Forwarded-Email: yan@yan.fi' ..., or
+Allowlist on X-Auth-Request-Email only: Traefik's oauth middleware overwrites it, whereas
+client-sent X-Forwarded-Email passes through and oauth2-proxy admits any Google account.
+Locally: curl -H 'X-Auth-Request-Email: yan@yan.fi' ..., or
 ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev
 """
 
@@ -16,11 +17,10 @@ log = logging.getLogger(__name__)
 
 async def require_user(
     request: Request,
-    x_forwarded_email: str | None = Header(None),
     x_auth_request_email: str | None = Header(None),
     settings: Settings = Depends(get_settings),
 ) -> str:
-    email = x_forwarded_email or x_auth_request_email
+    email = x_auth_request_email
     if not email and settings.allow_local_auth:
         email = settings.local_auth_email
     if not email:

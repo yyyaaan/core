@@ -55,27 +55,26 @@ spec:
                 print(r.text, r.status_code, flush=True)
 
                 # polling for completion
+                r.raise_for_status()
                 export_id = r.json()["export_id"]
 
-                def check_completion(export_id: str) -> bool:
-                    """poll for completion (the opposite of in progress)"""
-                    r_status = get(url=f"{frigate_url}/api/exports")
-                    for item in r_status.json():
+                def find_export(export_id: str) -> dict:
+                    for item in get(url=f"{frigate_url}/api/exports").json():
                         if item["id"] == export_id:
-                            return not item["in_progress"]
+                            return item
                     raise Exception("Export ID not found in polling endpoint")
 
 
-                export_completed = False
-                while not export_completed:
-                    sleep(10)
-                    export_completed = check_completion(export_id)
+                while (export := find_export(export_id))["in_progress"]:
                     print("waiting...", flush=True)
                     if datetime.now() > end_polling_time:
                         raise Exception("Polling ends due to time limit. Export not completed")
                     sleep(polling_interval_seconds)
 
-                print("Ready!")
+                # same path in this pod: Frigate's /media/frigate is our /media/frigate
+                with open("/handoff/export_path", "w") as f:
+                    f.write(export.get("video_path") or "")
+                print("Ready!", export.get("video_path"))
                 EOF
             envFrom:
             {{- range .Values.ffmpeg.envFromSecretList }}
@@ -85,6 +84,9 @@ spec:
             env:
             - name: PYTHONUNBUFFERED
               value: "1"
+            volumeMounts:
+            - name: handoff
+              mountPath: /handoff
             resources:
               requests:
                 cpu: "10m"
@@ -96,18 +98,22 @@ spec:
           - name: ffmpeg-encoding
             image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
             imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy | default "IfNotPresent" | quote }}
-            command: ["/bin/sh", "/app/job_ffmpeg.sh"]
+            command: ["/bin/bash", "/app/job_ffmpeg.sh"]
             envFrom:
             {{- range $.Values.ffmpeg.envFromSecretList }}
               - secretRef:
                   name: {{ . | quote }}
             {{- end }}
             resources:
-              {{- toYaml .Values.resources | nindent 14 }}
+              {{- toYaml .Values.ffmpeg.resources | nindent 14 }}
             volumeMounts:
             - name: media-folder
               mountPath: /media
+            - name: handoff
+              mountPath: /handoff
           volumes:
+          - name: handoff
+            emptyDir: {}
           - name: media-folder
             hostPath:
               path: {{ .Values.ffmpeg.hostPathMedia }}

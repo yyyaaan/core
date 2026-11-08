@@ -18,7 +18,11 @@
 {% if not campaigns %}
 <p style="font-family: system-ui; color: #999; font-size: small">HOK-Elanto {{ bonus_error or "no offer available" }}</p>
 {% endif %}
+<p style="font-family: system-ui; color: #999; font-size: small">
+  {%- if processing_time %}Migri adult citizenship (electronic): {{ processing_time.most }} in most cases, {{ processing_time.minority }} in a minority of cases.
+  {%- else %}Migri processing time unavailable.{% endif -%}
+</p>
 <p><small>
-  <a href="{{ bbc_url }}">BBC Sport</a> | <a href="{{ hok_url }}">HOK-Elanto</a>
+  <a href="{{ bbc_url }}">BBC Sport</a> | <a href="{{ hok_url }}">HOK-Elanto</a> | <a href="{{ migri_url }}">Migri</a>
   <br>Updated: {{ updated.strftime("%b %d %H:%M:%S %Z") }}
 </small></p>

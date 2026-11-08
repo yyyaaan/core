@@ -5,7 +5,7 @@ from play import main
 from play.digest.build import Digest
 
 client = TestClient(main.app)
-AUTH = {"X-Forwarded-Email": "yan@yan.fi"}
+AUTH = {"X-Auth-Request-Email": "yan@yan.fi"}
 
 
 def test_root_loads():
@@ -18,8 +18,20 @@ def test_root_loads():
 def test_view_requires_auth():
     assert client.get("/view").status_code == 401
     assert (
-        client.get("/view", headers={"X-Forwarded-Email": "who@x.dev"}).status_code
+        client.get("/view", headers={"X-Auth-Request-Email": "who@x.dev"}).status_code
         == 403
+    )
+
+
+def test_client_sent_forwarded_email_is_ignored():
+    # oauth2-proxy admits any Google account; only X-Auth-Request-Email is set by Traefik
+    spoofed = {"X-Forwarded-Email": "yan@yan.fi", "X-Auth-Request-Email": "who@x.dev"}
+    assert client.get("/view", headers=spoofed).status_code == 403
+    assert (
+        client.post(
+            "/scheduled", headers={"X-Forwarded-Email": "yan@yan.fi"}
+        ).status_code
+        == 401
     )
 
 

@@ -10,8 +10,9 @@ debugPod:
 # ffmpeg has init container, see manifest directly
 ffmpeg:
   namespace: home-internal
-  schedule: "3 1 * * *"
-  timeZone: "Europe/Helsinki"
+  schedule: "3 1 * * *"          # daily timelapse, yesterday in TZ from tz-config
+  monthlySchedule: "59 11 2 * *"  # 2nd: leaves room for the 1st's daily export
+  timezone: "Etc/UTC"
   image:
     <<: *imageConfig
   envFromSecretList:
