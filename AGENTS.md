@@ -50,7 +50,7 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 - Image tags in app values are bot-managed (`sha-xxxxxxx`); don't hand-edit them.
 - Images are built for `linux/arm64` (Pi). Don't add amd64-only dependencies.
 - Secrets live in `infra/credentials/*.env` (gitignored) and reach the cluster only via `task infra:secrets` on the host. Never inline secret values in code, values or manifests.
-- `apps/py-play` does its own auth check (`play/auth.py`, `X-Forwarded-Email` allowlist) on top of oauth2-proxy; `apps/py-web` has none.
+- `apps/py-play` does its own auth check (`play/auth.py`, allowlist on `X-Auth-Request-Email` only, the header Traefik overwrites from oauth2-proxy) on top of oauth2-proxy; `apps/py-web` has none.
 
 ## Python conventions
 

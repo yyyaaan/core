@@ -1,6 +1,6 @@
 # apps/py-play (personal utilities)
 
-FastAPI app in the `web` namespace behind oauth2-proxy, plus its own `X-Forwarded-Email` allowlist (`auth.py`) on private routes. No browser: every upstream is fetched with httpx.
+FastAPI app in the `web` namespace behind oauth2-proxy, plus its own allowlist (`auth.py`) on private routes. oauth2-proxy admits any Google account, so the allowlist is the real gate: it reads only `X-Auth-Request-Email`, which the Traefik middleware overwrites; never trust `X-Forwarded-Email` or other client-settable headers. No browser: every upstream is fetched with httpx.
 
 ## Routes
 
