@@ -11,7 +11,7 @@ RUN apt-get update && \
         zip && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir b2sdk boto3 requests tqdm
+RUN pip install --no-cache-dir b2sdk boto3 requests
 
 COPY apps/bash-poller/src/poller /app
 RUN chmod +x /app/job_ffmpeg.sh

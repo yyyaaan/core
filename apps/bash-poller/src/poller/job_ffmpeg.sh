@@ -10,8 +10,8 @@ echo "@$(date +'%b%d %H:%M:%S') processing $day"
 input_file=$(cat /handoff/export_path 2>/dev/null || true)
 if [ -z "$input_file" ] || [ ! -f "$input_file" ]; then
     echo "No handoff path, falling back to newest export"
-    input_file=$(ls -t /media/frigate/exports/*.mp4 | head -n 1) || true  # ls may SIGPIPE on a big dir
-    if [ "$(date -r "$input_file" +%Y%m%d)" != "$(date +%Y%m%d)" ]; then
+    input_file=$(ls -t /media/frigate/exports/*.mp4 2>/dev/null | head -n 1) || true  # ls may SIGPIPE on a big dir
+    if [ -z "$input_file" ] || [ "$(date -r "$input_file" +%Y%m%d)" != "$(date +%Y%m%d)" ]; then
         echo "Failed. Latest export '$input_file' was not created today."
         exit 1
     fi
@@ -22,6 +22,7 @@ ffmpeg -hide_banner -loglevel error -y \
     -i "$input_file" \
     -vf "transpose=1" \
     -threads 2 \
+    -movflags +faststart \
     "$out/OneMin_$day.mp4"
 echo "=VideoRotation= $(date +%H:%M:%S)"
 
@@ -31,7 +32,7 @@ ffmpeg -hide_banner -loglevel error -y \
     "$out/A_$day.mp4"
 echo "=VideoFinalDone= $(date +%H:%M:%S)"
 
-python /app/helper_r2.py --source-file "$out/OneMin_$day.mp4" --key "timelapse/daily/$day.mp4"
-python /app/helper_upload.py --source-file "$out/OneMin_$day.mp4" --bucket-name yyyCam --dest-path "onemin/${day:0:6}" \
+python /app/upload.py r2 "$out/OneMin_$day.mp4" "timelapse/daily/$day.mp4"
+python /app/upload.py b2 "$out/OneMin_$day.mp4" "onemin/${day:0:6}/OneMin_$day.mp4" --bucket yyyCam \
     || echo "B2 upload failed (non-fatal)"
 echo "=UploadDone= $(date +%H:%M:%S)"

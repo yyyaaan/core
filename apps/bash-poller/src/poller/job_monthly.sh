@@ -30,11 +30,12 @@ r2=monthly/${month}_r2.mp4
 ffmpeg -hide_banner -loglevel error -y \
     -i "$full" \
     -vf "scale=-2:1620" -r 30 -crf 28 -maxrate 6M -bufsize 12M \
+    -movflags +faststart \
     "$r2"
-python /app/helper_r2.py --source-file "$r2" --key "timelapse/monthly/$month.mp4"
+python /app/upload.py r2 "$r2" "timelapse/monthly/$month.mp4"
 rm "$r2"
 
-python /app/helper_upload.py --source-file "$full" --bucket-name yyyCam --dest-path monthly \
+python /app/upload.py b2 "$full" "monthly/$month.mp4" --bucket yyyCam \
     || echo "B2 upload failed (non-fatal)"
 
 # local copy: 5x faster again and light

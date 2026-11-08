@@ -10,7 +10,7 @@ CronJobs in `home-internal`, schedules in UTC (`helm-chart/values.yaml`); script
 
 ## Timelapse storage
 
-Uploads go to Cloudflare R2 (bucket from `R2_BUCKET`, shared `static` bucket) via `helper_r2.py`, and to B2 `yyyCam` via `helper_upload.py` during the transition.
+Uploads go through `upload.py` (`r2` or `b2` target, explicit object key): Cloudflare R2 (bucket from `R2_BUCKET`, shared `static` bucket), plus B2 `yyyCam` during the transition.
 
 - `timelapse/daily/YYYYMMDD.mp4`: R2 lifecycle rule deletes after 7 days
 - `timelapse/monthly/YYYYMM.mp4`: R2 lifecycle rule deletes after 730 days (24 months)
