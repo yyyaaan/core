@@ -1,4 +1,4 @@
-"""Daily digest (football fixtures + HOK-Elanto Bonus tuplana) for /view and the morning email."""
+"""Daily digest (football fixtures, HOK-Elanto Bonus tuplana, Migri processing time) for /view and the morning email."""
 
 import asyncio
 import logging
@@ -8,7 +8,7 @@ from datetime import datetime
 from hashlib import md5
 
 from play.config import get_settings
-from play.digest import bbc, hok
+from play.digest import bbc, hok, migri
 from play.templating import templates
 
 log = logging.getLogger(__name__)
@@ -38,8 +38,11 @@ async def get_digest(refresh: bool = False) -> Digest:
 async def build_digest() -> Digest:
     zone = get_settings().zone
     now = datetime.now(zone)
-    fixtures, campaigns = await asyncio.gather(
-        bbc.get_fixtures(now.date(), zone), hok.get_campaigns(), return_exceptions=True
+    fixtures, campaigns, processing_time = await asyncio.gather(
+        bbc.get_fixtures(now.date(), zone),
+        hok.get_campaigns(),
+        migri.get_processing_time(),
+        return_exceptions=True,
     )
     if isinstance(fixtures, BaseException):
         raise fixtures
@@ -47,7 +50,10 @@ async def build_digest() -> Digest:
     if isinstance(campaigns, BaseException):
         log.warning("HOK-Elanto failed: %r", campaigns)
         campaigns, bonus_error = [], f"failed to load content: {campaigns!r}"
-    return render_digest(fixtures, campaigns, now, bonus_error)
+    if isinstance(processing_time, BaseException):
+        log.warning("Migri failed: %r", processing_time)
+        processing_time = None
+    return render_digest(fixtures, campaigns, now, bonus_error, processing_time)
 
 
 def render_digest(
@@ -55,6 +61,7 @@ def render_digest(
     campaigns: list[str],
     now: datetime,
     bonus_error: str | None = None,
+    processing_time: migri.ProcessingTime | None = None,
 ) -> Digest:
     competitions = [
         {"name": name, "games": games, "color": _color(name)}
@@ -71,9 +78,11 @@ def render_digest(
         competitions=competitions,
         campaigns=campaigns,
         bonus_error=bonus_error,
+        processing_time=processing_time,
         updated=now,
         bbc_url=bbc.PAGE_URL,
         hok_url=hok.PAGE_URL,
+        migri_url=migri.PAGE_URL,
     )
     return Digest(title=title, html=html)
 

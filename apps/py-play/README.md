@@ -1,6 +1,6 @@
 # play
 
-Personal utilities on the home cluster: a daily football + S-Bonus digest email, a Nordpool spot price chart and a water meter camera crop for Home Assistant. See `AGENTS.md` for routes and upstreams.
+Personal utilities on the home cluster: a daily digest email (football, S-Bonus campaigns, Migri citizenship processing time), a Nordpool spot price chart and a water meter camera crop for Home Assistant. See `AGENTS.md` for routes and upstreams.
 
 Run locally (port 7999):
 

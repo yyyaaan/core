@@ -6,7 +6,7 @@ Personal monorepo (private project): Python + Rust services and the Helm/ArgoCD 
 
 | Path | What |
 |------|------|
-| `apps/py-play/` | FastAPI app: daily football + S-Bonus digest email, spot price chart, water meter camera crop. Browser-free scraping (httpx). Own Helm chart, `web` ns. See `apps/py-play/AGENTS.md` |
+| `apps/py-play/` | FastAPI app: daily digest email (football, S-Bonus, Migri processing time), spot price chart, water meter camera crop. Browser-free scraping (httpx). Own Helm chart, `web` ns. See `apps/py-play/AGENTS.md` |
 | `apps/py-web/` | FastAPI + Jinja2 + HTMX personal site. Zero-Node. See `apps/py-web/AGENTS.md` |
 | `apps/bash-poller/` | CronJob workloads (Elenia energy, FFmpeg/timelapse), shell + Python helpers |
 | `packages/py-scout/` | CLI price scans through the user's own Chrome over CDP (Marriott first). Not deployed. See `packages/py-scout/AGENTS.md` |
