@@ -1,68 +1,37 @@
-cd /media/frigate/exports
+#!/usr/bin/env bash
+# Daily: rotate yesterday's Frigate export, keep a light local copy, upload to R2 (+ B2 during transition).
+set -euo pipefail
 
-echo "$(date +"@%b%d %H:%M:%S")"
-current_date=$(date +%Y%m%d)
-previous_day=$(date -d "yesterday 13:00" '+%Y%m%d')
+day=$(date -d "yesterday 13:00" +%Y%m%d)
+out=/media/DayIn1
+echo "@$(date +'%b%d %H:%M:%S') processing $day"
 
-input_file=$(ls -t | head -n 1)
-file_date=$(date -r "$input_file" +%Y%m%d)
-file_size=$(stat -c %s "$input_file" | numfmt --to=iec)
-
-if [ "$file_date" = "$current_date" ]; then
-    echo "The file $input_file ($file_size) is create today $(date -r "$input_file" +%b%dT%H:%M:%S)."
-else
-    echo "Failed. The latest file '$input_file' was created $file_date."
-    exit 0
+# path handed over by the frigate-export init container; fall back to the newest export made today
+input_file=$(cat /handoff/export_path 2>/dev/null || true)
+if [ -z "$input_file" ] || [ ! -f "$input_file" ]; then
+    echo "No handoff path, falling back to newest export"
+    input_file=$(ls -t /media/frigate/exports/*.mp4 | head -n 1) || true  # ls may SIGPIPE on a big dir
+    if [ "$(date -r "$input_file" +%Y%m%d)" != "$(date +%Y%m%d)" ]; then
+        echo "Failed. Latest export '$input_file' was not created today."
+        exit 1
+    fi
 fi
+echo "Input $input_file ($(stat -c %s "$input_file" | numfmt --to=iec))"
 
-############################
-######### manual ###########
-# input_file=...
-# previous_day=20230918
-############################
-# -crf 0-51 & -qp 0-38/23
-# changed to copy only, since export is ready
-cp $input_file /media/DayIn1/OneMinX_$previous_day.mp4
-echo "=TimelapseCopyDone= $(date +"%H:%M:%S")"
-
-ffmpeg \
-    -i "/media/DayIn1/OneMinX_$previous_day.mp4" \
+ffmpeg -hide_banner -loglevel error -y \
+    -i "$input_file" \
     -vf "transpose=1" \
     -threads 2 \
-    -hide_banner \
-    -loglevel error \
-    "/media/DayIn1/OneMin_$previous_day.mp4"
+    "$out/OneMin_$day.mp4"
+echo "=VideoRotation= $(date +%H:%M:%S)"
 
-echo "=VideoRotation= $(date +"%H:%M:%S")"
-# check default codec ffmpeg -h muxer=mp4
-
-
-#################################################
-### UPLOAD ###
-#################################################
-
-# dest="$(date -d "yesterday 13:00" '+%Y%m')/yard_$(date -d "yesterday 13:00" '+%Y%m%d').mp4"
-
-# gcloud auth login --cred-file=/gcpstorage.json
-# gcloud config set disable_prompts true
-# gcloud config set project yyyaaannn
-# gcloud config set storage/parallel_composite_upload_enabled True
-# gcloud storage cp "/media/DayIn1/OneMin_$previous_day.mp4"  "gs://yyyiot/onemin/$dest"
-# gcloud storage cp "$input_file" "gs://yyyiot/cam/$dest" 
-/usr/local/bin/python /app/helper_upload.py --source-file "/media/DayIn1/OneMin_$previous_day.mp4" --bucket-name yyyCam --dest-path "onemin/$(date -d "yesterday 13:00" '+%Y%m')"
-
-echo "=UploadDone= $(date +"%H:%M:%S")"
-
-
-#################################################
-### Finial Cleanup and Fast Loading ###
-#################################################
-rm "/media/DayIn1/OneMinX_$previous_day.mp4"
-
-ffmpeg \
-    -i "/media/DayIn1/OneMin_$previous_day.mp4" \
+ffmpeg -hide_banner -loglevel error -y \
+    -i "$out/OneMin_$day.mp4" \
     -vf "scale=-2:1620" -r 30 -crf 35 \
-    -loglevel error \
-    "/media/DayIn1/A_$previous_day.mp4"
+    "$out/A_$day.mp4"
+echo "=VideoFinalDone= $(date +%H:%M:%S)"
 
-echo "=VideoFinalDone= $(date +"%H:%M:%S")"
+python /app/helper_r2.py --source-file "$out/OneMin_$day.mp4" --key "timelapse/daily/$day.mp4"
+python /app/helper_upload.py --source-file "$out/OneMin_$day.mp4" --bucket-name yyyCam --dest-path "onemin/${day:0:6}" \
+    || echo "B2 upload failed (non-fatal)"
+echo "=UploadDone= $(date +%H:%M:%S)"

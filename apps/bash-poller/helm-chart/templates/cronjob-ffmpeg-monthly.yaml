@@ -7,9 +7,8 @@ metadata:
     app.kubernetes.io/name: ffmpeg-monthly
     app.kubernetes.io/component: scheduled
 spec:
-  schedule: "59 11 2 * *"
+  schedule: {{ .Values.ffmpeg.monthlySchedule | quote }}
   timeZone: {{ .Values.ffmpeg.timezone | quote}}
-  suspend: true
   concurrencyPolicy: Forbid 
   jobTemplate:
     spec:
@@ -21,14 +20,14 @@ spec:
           - name: ffmpeg-monthly
             image: "{{ .Values.ffmpeg.image.repository }}:{{ .Values.ffmpeg.image.tag }}"
             imagePullPolicy: {{ .Values.ffmpeg.image.pullPolicy | default "IfNotPresent" | quote }}
-            command: ["/bin/sh", "/app/manual_monthly.sh"]
+            command: ["/bin/bash", "/app/job_monthly.sh"]
             envFrom:
             {{- range $.Values.ffmpeg.envFromSecretList }}
               - secretRef:
                   name: {{ . | quote }}
             {{- end }}
             resources:
-              {{- toYaml .Values.resources | nindent 14 }}
+              {{- toYaml .Values.ffmpeg.resources | nindent 14 }}
             volumeMounts:
             - name: media-folder
               mountPath: /media
