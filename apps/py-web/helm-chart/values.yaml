@@ -4,7 +4,7 @@ authMiddleware:
   name: auth-oauth@kubernetescrd
 image:
   repository: ghcr.io/yyyaaan/core/web
-  tag: "sha-74c7797"
+  tag: "sha-c19d9b1"
   pullPolicy: IfNotPresent
 envFromSecretList:
   - tz-config
