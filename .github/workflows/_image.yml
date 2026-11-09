@@ -105,15 +105,18 @@ jobs:
           while read -r file path; do
             [ -z "$file" ] && continue
             yq -e "$path" "$file" > /dev/null  # fail on a wrong path instead of adding a key
-            yq -i "$path = strenv(NEW_TAG) | $path style=\"double\"" "$file"
-            # yq must touch only the tag line; anything else means it reformatted the file
+            # yq only locates the line: rewriting with yq reflows the file (blank lines, final newline)
+            line=$(yq "$path | line" "$file")
+            [ "$line" -gt 0 ] || { echo "::error file=$file::no line for $path" >&2; exit 1; }
+            sed -i -E "${line}s/^([^:]+:[[:space:]]*).*/\1\"${NEW_TAG}\"/" "$file"
+            # safety net: exactly the tag line may change
             changed=$(git diff --numstat -- "$file" | awk '{print $1 + 0}')
-            if [ "${changed:-0}" -gt 1 ]; then
+            if [ "${changed:-0}" -gt 1 ] || ! sed -n "${line}p" "$file" | grep -qF "\"$NEW_TAG\""; then
               git --no-pager diff -- "$file"
-              echo "::error file=$file::yq changed more than the tag line" >&2
+              echo "::error file=$file::tag edit touched more than line $line of $path" >&2
               exit 1
             fi
-            echo "$file $path -> $NEW_TAG (${changed:-0} line changed)"
+            echo "$file $path (line $line) -> $NEW_TAG (${changed:-0} line changed)"
           done <<< "$VALUES"
 
       - name: Create Pull Request
