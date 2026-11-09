@@ -40,7 +40,7 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 
 ## How changes ship
 
-- PR → CI (`test-play`, `test-web`: ruff + pytest; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML).
+- PR → CI (`test-play`, `test-web`: ruff + pytest, results as one PR comment per app updated in place by `.github/scripts/test_comment.py`; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML).
 - Merge to `main` → `build-<app>.yml` (thin caller of the reusable `_image.yml`) builds the arm64 image to `ghcr.io/yyyaaan/core/<app>` and, in the same run, opens a PR bumping the image tag in the app's values → ArgoCD (watching `main`, manual sync) deploys. If a bump is missing, re-run or manually dispatch the build on `main`; it bumps too.
 - So `main` is production. Never run `helm upgrade`/`install` or `kubectl apply` as a way to deploy; propose a change instead.
 

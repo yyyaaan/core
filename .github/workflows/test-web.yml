@@ -9,6 +9,7 @@ on:
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/test-web.yml'
+      - '.github/scripts/test_comment.py'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,8 +19,8 @@ jobs:
   test-web:
     runs-on: ubuntu-latest
     permissions:
-      checks: write
-      pull-requests: write
+      contents: read
+      pull-requests: write  # one comment, updated in place
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -41,9 +42,11 @@ jobs:
       - name: Run Pytest
         run: uv run pytest apps/py-web/tests/ --junitxml=pytest-results.xml
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: "pytest-results.xml"
-          comment_title: "🧪 Web App Test Results"
+      - name: Comment test results
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/scripts/test_comment.py Web pytest-results.xml
