@@ -2,7 +2,7 @@
 # Monthly: concat last month's daily timelapses at 10x; full quality to B2, bitrate-capped copy to R2.
 set -euo pipefail
 shopt -s nullglob
-cd /media/DayIn1
+cd /media/DayIn1 || exit 1
 mkdir -p monthly
 
 month=$(date -d "$(date +%Y-%m-15) -1 month" +%Y%m)  # mid-month anchor avoids "Mar 31 - 1 month" overflow
@@ -16,7 +16,7 @@ echo "@$(date +'%b%d %H:%M:%S') $month: ${#days[@]} of $expected days"
 
 list=$(mktemp)
 trap 'rm -f "$list"' EXIT
-printf "file '$PWD/%s'\n" "${days[@]}" > "$list"
+for d in "${days[@]}"; do printf "file '%s/%s'\n" "$PWD" "$d"; done > "$list"
 
 full=monthly/$month.mp4
 ffmpeg -hide_banner -loglevel error -y \
