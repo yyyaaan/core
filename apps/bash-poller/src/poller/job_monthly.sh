@@ -34,6 +34,7 @@ ffmpeg -hide_banner -loglevel error -y \
     -movflags +faststart \
     "$r2"
 python /app/upload.py r2 "$r2" "timelapse/monthly/$month.mp4"
+python /app/catalog.py || echo "Catalog update failed (non-fatal)"
 rm "$r2"
 
 python /app/upload.py b2 "$full" "monthly/$month.mp4" --bucket yyyCam \

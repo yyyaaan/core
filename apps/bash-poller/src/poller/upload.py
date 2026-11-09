@@ -17,14 +17,14 @@ def require_env(*keys: str) -> list[str]:
     return [os.environ[k] for k in keys]
 
 
-def upload_r2(path: str, key: str, bucket: str | None, content_type: str) -> str:
+def r2_client():
+    """(boto3 S3 client, default bucket) for R2 from the R2_* env vars."""
     import boto3
     from botocore.config import Config
 
-    endpoint, key_id, secret, default_bucket = require_env(
+    endpoint, key_id, secret, bucket = require_env(
         "R2_ENDPOINT", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"
     )
-    bucket = bucket or default_bucket
     s3 = boto3.client(
         "s3",
         endpoint_url=endpoint,
@@ -37,6 +37,12 @@ def upload_r2(path: str, key: str, bucket: str | None, content_type: str) -> str
             response_checksum_validation="when_required",
         ),
     )
+    return s3, bucket
+
+
+def upload_r2(path: str, key: str, bucket: str | None, content_type: str) -> str:
+    s3, default_bucket = r2_client()
+    bucket = bucket or default_bucket
     s3.upload_file(path, bucket, key, ExtraArgs={"ContentType": content_type})
     return bucket
 

@@ -153,6 +153,8 @@ spec:
             env:
             - name: LOCAL_RETENTION_DAYS
               value: {{ .Values.ffmpeg.localRetentionDays | quote }}
+            - name: R2_PUBLIC_URL
+              value: {{ .Values.ffmpeg.publicBaseUrl | quote }}
             resources:
               {{- toYaml .Values.ffmpeg.resources | nindent 14 }}
             volumeMounts:

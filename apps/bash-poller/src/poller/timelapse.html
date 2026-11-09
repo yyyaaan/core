@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Yard Timelapse</title>
+<!-- served from R2 as timelapse/index.html by catalog.py; reads index.json next to it -->
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --text: #1c1c1a; --muted: #6b6a66;
+    --line: #e3e1dc; --accent: #2f6f5e; --accent-text: #ffffff; --player: #000;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121312; --surface: #1c1d1c; --text: #ecebe7; --muted: #9a9993;
+      --line: #2c2d2b; --accent: #7cc4ad; --accent-text: #0f1a16;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 1100px; margin: 0 auto; display: grid; gap: 20px; }
+  @media (min-width: 900px) { main { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } }
+  header { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 20px; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+  .muted { color: var(--muted); font-size: 13px; }
+
+  .stage { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .frame { background: var(--player); display: grid; place-items: center; min-height: 200px; }
+  video { display: block; width: 100%; max-height: 68vh; background: var(--player); }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; flex-wrap: wrap; }
+  .now { font-weight: 600; margin-right: auto; }
+  .note { padding: 0 12px 12px; color: var(--muted); font-size: 13px; }
+  .note:empty { display: none; }
+
+  button, .btn {
+    font: inherit; font-size: 14px; color: var(--text); background: transparent;
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer;
+    text-decoration: none; line-height: 1.2; min-height: 34px; display: inline-flex; align-items: center;
+  }
+  button:disabled { opacity: 0.35; cursor: default; }
+  button[aria-pressed="true"], [role="tab"][aria-selected="true"] {
+    background: var(--accent); border-color: var(--accent); color: var(--accent-text);
+  }
+  button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  aside { display: grid; gap: 12px; }
+  [role="tablist"] { display: flex; gap: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .grid button { flex-direction: column; align-items: flex-start; border-radius: 10px; padding: 8px 10px; min-height: 52px; }
+  .grid small { color: inherit; opacity: 0.7; font-size: 12px; }
+  .empty { color: var(--muted); padding: 24px 0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Yard timelapse</h1>
+    <span class="muted" id="updated"></span>
+  </header>
+
+  <section class="stage" aria-live="polite">
+    <div class="frame"><video id="player" controls playsinline muted preload="metadata"></video></div>
+    <div class="bar">
+      <span class="now" id="now">Loading…</span>
+      <button id="older" aria-label="Older">‹</button>
+      <button id="newer" aria-label="Newer">›</button>
+      <span id="speeds"></span>
+      <a class="btn" id="open" target="_blank" rel="noopener">Open</a>
+    </div>
+    <div class="note" id="note"></div>
+  </section>
+
+  <aside>
+    <div role="tablist" aria-label="Range">
+      <button role="tab" data-kind="daily" aria-selected="true">Daily</button>
+      <button role="tab" data-kind="monthly" aria-selected="false">Monthly</button>
+    </div>
+    <div class="grid" id="list"></div>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const player = $("player");
+const SPEEDS = [0.5, 1, 2];
+let catalog = { daily: [], monthly: [] };
+let kind = "daily";
+let current = null;
+
+function parse(d) {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(y, m - 1, day || 1);
+}
+function label(entry, long) {
+  const dt = parse(entry.date);
+  if (entry.date.length === 7) return dt.toLocaleDateString(undefined, { month: long ? "long" : "short", year: "numeric" });
+  return dt.toLocaleDateString(undefined, long
+    ? { weekday: "long", day: "numeric", month: "long" }
+    : { weekday: "short", day: "numeric", month: "short" });
+}
+
+function select(k, entry, push = true) {
+  kind = k;
+  current = entry;
+  document.querySelectorAll("[role=tab]").forEach((t) => t.setAttribute("aria-selected", t.dataset.kind === k));
+  renderList();
+  const list = catalog[k];
+  $("note").textContent = "";
+  if (!entry) {
+    player.removeAttribute("src");
+    player.load();
+    $("now").textContent = "Nothing here yet";
+    $("open").hidden = true;
+    $("newer").disabled = $("older").disabled = true;
+    return;
+  }
+  const i = list.indexOf(entry);
+  $("now").textContent = label(entry, true);
+  $("newer").disabled = i <= 0;
+  $("older").disabled = i >= list.length - 1;
+  const src = "/" + entry.key;  // same origin as the page, works on any R2 hostname
+  $("open").href = src;
+  $("open").hidden = false;
+  const rate = player.playbackRate;
+  player.src = src;
+  player.playbackRate = rate;
+  player.play().catch(() => {});  // autoplay may be blocked; controls remain
+  if (push) history.replaceState(null, "", `#${k}/${entry.date}`);
+}
+
+function renderList() {
+  const list = catalog[kind];
+  const el = $("list");
+  el.replaceChildren();
+  if (!list.length) {
+    el.innerHTML = '<p class="empty">No videos yet.</p>';
+    return;
+  }
+  for (const entry of list) {
+    const b = document.createElement("button");
+    b.setAttribute("aria-pressed", entry === current);
+    b.innerHTML = `<span></span><small></small>`;
+    b.firstChild.textContent = label(entry, false);
+    b.lastChild.textContent = `${Math.round(entry.size_mb)} MB`;
+    b.onclick = () => select(kind, entry);
+    el.append(b);
+  }
+}
+
+function fromHash() {
+  const [k, d] = decodeURIComponent(location.hash.slice(1)).split("/");
+  const k2 = catalog[k] ? k : "daily";
+  select(k2, catalog[k2].find((e) => e.date === d) || catalog[k2][0] || null, false);
+}
+
+function step(delta) {
+  const list = catalog[kind];
+  const next = list[list.indexOf(current) + delta];
+  if (next) select(kind, next);
+}
+
+$("newer").onclick = () => step(-1);
+$("older").onclick = () => step(1);
+document.querySelectorAll("[role=tab]").forEach((t) => {
+  t.onclick = () => select(t.dataset.kind, catalog[t.dataset.kind][0] || null);
+});
+for (const s of SPEEDS) {
+  const b = document.createElement("button");
+  b.textContent = `${s}×`;
+  b.setAttribute("aria-pressed", s === 1);
+  b.onclick = () => {
+    player.playbackRate = s;
+    $("speeds").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  };
+  $("speeds").append(b);
+}
+player.addEventListener("error", () => {
+  if (player.getAttribute("src")) $("note").textContent = "This video isn't available (it may have just expired). Pick another one.";
+});
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowLeft") step(1);  // lists are newest first: left = older
+  if (e.key === "ArrowRight") step(-1);
+});
+window.addEventListener("hashchange", fromHash);
+
+fetch("index.json", { cache: "no-cache" })
+  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+  .then((data) => {
+    catalog = { daily: data.daily || [], monthly: data.monthly || [] };
+    if (data.updated) $("updated").textContent = "Updated " + new Date(data.updated).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    fromHash();
+  })
+  .catch((err) => {
+    $("now").textContent = "Couldn't load the catalog";
+    $("note").textContent = `index.json: ${err}`;
+  });
+</script>
+</body>
+</html>

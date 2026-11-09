@@ -26,6 +26,9 @@ spec:
               - secretRef:
                   name: {{ . | quote }}
             {{- end }}
+            env:
+            - name: R2_PUBLIC_URL
+              value: {{ .Values.ffmpeg.publicBaseUrl | quote }}
             resources:
               {{- toYaml .Values.ffmpeg.resources | nindent 14 }}
             volumeMounts:

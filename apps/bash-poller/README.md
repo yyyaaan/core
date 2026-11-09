@@ -10,7 +10,7 @@ CronJobs in `home-internal`, schedules in UTC (`helm-chart/values.yaml`); script
 
 The daily export is named `day90sec_YYYYMMDD.mp4`. The init container reuses an export with that name (finished, running or queued) instead of queuing a duplicate, so a failed daily run can be retried the same local day: `kubectl -n home-internal create job --from=cronjob/cronjob-video video-rerun`.
 
-Local retention (`helm-chart/values.yaml`): the init container deletes our own `day90sec_*` Frigate exports older than `exportRetentionDays` (14), by the day in the name; manual UI exports are never touched. After a successful run, `job_ffmpeg.sh` deletes `DayIn1/` `OneMin_`, `OneMinX_` and `A_` files older than `localRetentionDays` (49), by the date in the filename; `DayIn1/monthly/` is kept. The monthly job needs last month's `OneMin_*`, so keep `localRetentionDays` above ~35.
+Local retention (`helm-chart/values.yaml`): the init container deletes our own `day90sec_*` Frigate exports older than `exportRetentionDays` (14), by the day in the name; manual UI exports are never touched. After a successful run, `job_ffmpeg.sh` deletes `DayIn1/` `OneMin_` files (and legacy `OneMinX_`/`A_` ones) older than `localRetentionDays` (49), by the date in the filename; `DayIn1/monthly/` is kept. The monthly job needs last month's `OneMin_*`, so keep `localRetentionDays` above ~35.
 
 ## Timelapse storage
 
@@ -19,4 +19,12 @@ Uploads go through `upload.py` (`r2` or `b2` target, explicit object key): Cloud
 - `timelapse/daily/YYYYMMDD.mp4`: R2 lifecycle rule deletes after 7 days
 - `timelapse/monthly/YYYYMM.mp4`: R2 lifecycle rule deletes after 730 days (24 months)
 
-Retention lives in the R2 bucket's lifecycle rules (Cloudflare dashboard), not in code. Never put anything else under `timelapse/`. Credentials: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` in `infra/credentials/poll.env` (token: Object Read & Write, scoped to the bucket).
+Retention lives in the R2 bucket's lifecycle rules (Cloudflare dashboard), not in code. Only the poller writes under `timelapse/`. Credentials: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` in `infra/credentials/poll.env` (token: Object Read & Write, scoped to the bucket).
+
+## Catalog and viewer
+
+After each upload, `catalog.py` lists `timelapse/` and rewrites `timelapse/index.json` (newest first, `{date, key, url, size_mb}` per `daily`/`monthly` entry, `Cache-Control: max-age=300`) and the viewer `timelapse/index.html` (`timelapse.html` here, no external scripts). Lifecycle-expired videos drop out on the next run; the viewer shows a note if one 404s in between.
+
+- Viewer: `https://assets.yan.fi/timelapse/index.html`, deep link `#daily/YYYY-MM-DD` or `#monthly/YYYY-MM`. Works as a Home Assistant Webpage card.
+- Consumers of `index.json`: the viewer and Home Assistant. Keep its shape backwards compatible.
+- Public base URL: `ffmpeg.publicBaseUrl` in `helm-chart/values.yaml` (`R2_PUBLIC_URL`).
