@@ -2,19 +2,15 @@
 # Daily: rotate yesterday's Frigate export, keep a light local copy, upload to R2 (+ B2 during transition).
 set -euo pipefail
 
-day=$(date -d "yesterday 13:00" +%Y%m%d)
+# set by the frigate-export init container, which only succeeds once the export is finished
+day=$(cat /handoff/day)
+input_file=$(cat /handoff/export_path)
 out=/media/DayIn1
 echo "@$(date +'%b%d %H:%M:%S') processing $day"
 
-# path handed over by the frigate-export init container; fall back to the newest export made today
-input_file=$(cat /handoff/export_path 2>/dev/null || true)
-if [ -z "$input_file" ] || [ ! -f "$input_file" ]; then
-    echo "No handoff path, falling back to newest export"
-    input_file=$(ls -t /media/frigate/exports/*.mp4 2>/dev/null | head -n 1) || true  # ls may SIGPIPE on a big dir
-    if [ -z "$input_file" ] || [ "$(date -r "$input_file" +%Y%m%d)" != "$(date +%Y%m%d)" ]; then
-        echo "Failed. Latest export '$input_file' was not created today."
-        exit 1
-    fi
+if [ ! -f "$input_file" ]; then
+    echo "Failed. Export file '$input_file' not found."
+    exit 1
 fi
 echo "Input $input_file ($(stat -c %s "$input_file" | numfmt --to=iec))"
 
@@ -36,3 +32,17 @@ python /app/upload.py r2 "$out/OneMin_$day.mp4" "timelapse/daily/$day.mp4"
 python /app/upload.py b2 "$out/OneMin_$day.mp4" "onemin/${day:0:6}/OneMin_$day.mp4" --bucket yyyCam \
     || echo "B2 upload failed (non-fatal)"
 echo "=UploadDone= $(date +%H:%M:%S)"
+
+# local retention by the day in the filename; monthly/ is kept
+cutoff=$(date -d "$(date +%Y-%m-%d) -${LOCAL_RETENTION_DAYS:-49} days" +%Y%m%d)
+shopt -s nullglob
+removed=0
+for f in "$out"/OneMin_*.mp4 "$out"/OneMinX_*.mp4 "$out"/A_*.mp4; do
+    d=$(basename "$f" .mp4)
+    d=${d##*_}
+    if [[ $d =~ ^[0-9]{8}$ && $d < $cutoff ]]; then
+        rm -- "$f"
+        removed=$((removed + 1))
+    fi
+done
+echo "=Retention= removed $removed local files before $cutoff"
