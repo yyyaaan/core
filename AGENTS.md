@@ -46,7 +46,7 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 
 ## Gotchas
 
-- The tag bump edits only the yq paths listed in the `values:` input of `build-<app>.yml` (e.g. `.image.tag`, poller `.imageConfig.tag`) and fails if yq changes any other line. Moving the tag key or adding a values file means updating that list.
+- The tag bump uses yq only to locate the line of each path in the `values:` input of `build-<app>.yml` (e.g. `.image.tag`, poller `.imageConfig.tag`), then rewrites just that line's value with sed (yq itself would reflow the file) and fails if anything else changed. Moving the tag key or adding a values file means updating that list; keep trailing comments off the tag line.
 - Image tags in app values are bot-managed (`sha-xxxxxxx`); don't hand-edit them.
 - Images are built for `linux/arm64` (Pi). Don't add amd64-only dependencies.
 - Secrets live in `infra/credentials/*.env` (gitignored) and reach the cluster only via `task infra:secrets` on the host. Never inline secret values in code, values or manifests.
