@@ -15,6 +15,7 @@ ffmpeg:
   timezone: "Etc/UTC"
   exportRetentionDays: 14
   localRetentionDays: 49
+  publicBaseUrl: "https://assets.yan.fi/"
   image:
     <<: *imageConfig
   envFromSecretList:
