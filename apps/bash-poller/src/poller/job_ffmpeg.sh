@@ -32,3 +32,17 @@ python /app/upload.py r2 "$out/OneMin_$day.mp4" "timelapse/daily/$day.mp4"
 python /app/upload.py b2 "$out/OneMin_$day.mp4" "onemin/${day:0:6}/OneMin_$day.mp4" --bucket yyyCam \
     || echo "B2 upload failed (non-fatal)"
 echo "=UploadDone= $(date +%H:%M:%S)"
+
+# local retention by the day in the filename; monthly/ is kept
+cutoff=$(date -d "$(date +%Y-%m-%d) -${LOCAL_RETENTION_DAYS:-49} days" +%Y%m%d)
+shopt -s nullglob
+removed=0
+for f in "$out"/OneMin_*.mp4 "$out"/OneMinX_*.mp4 "$out"/A_*.mp4; do
+    d=$(basename "$f" .mp4)
+    d=${d##*_}
+    if [[ $d =~ ^[0-9]{8}$ && $d < $cutoff ]]; then
+        rm -- "$f"
+        removed=$((removed + 1))
+    fi
+done
+echo "=Retention= removed $removed local files before $cutoff"

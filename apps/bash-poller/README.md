@@ -10,6 +10,8 @@ CronJobs in `home-internal`, schedules in UTC (`helm-chart/values.yaml`); script
 
 The daily export is named `day90sec_YYYYMMDD.mp4`. The init container reuses an export with that name (finished, running or queued) instead of queuing a duplicate, so a failed daily run can be retried the same local day: `kubectl -n home-internal create job --from=cronjob/cronjob-video video-rerun`.
 
+Local retention (`helm-chart/values.yaml`): the init container deletes our own `day90sec_*` Frigate exports older than `exportRetentionDays` (14), by the day in the name; manual UI exports are never touched. After a successful run, `job_ffmpeg.sh` deletes `DayIn1/` `OneMin_`, `OneMinX_` and `A_` files older than `localRetentionDays` (49), by the date in the filename; `DayIn1/monthly/` is kept. The monthly job needs last month's `OneMin_*`, so keep `localRetentionDays` above ~35.
+
 ## Timelapse storage
 
 Uploads go through `upload.py` (`r2` or `b2` target, explicit object key): Cloudflare R2 (bucket from `R2_BUCKET`, shared `static` bucket), plus B2 `yyyCam` during the transition.
