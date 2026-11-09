@@ -13,8 +13,8 @@ ffmpeg:
   schedule: "3 1 * * *"          # daily timelapse, yesterday in TZ from tz-config
   monthlySchedule: "59 11 2 * *"  # 2nd: leaves room for the 1st's daily export
   timezone: "Etc/UTC"
-  exportRetentionDays: 14  # Frigate day90sec_* exports, by day in name
-  localRetentionDays: 49   # DayIn1/ dailies; monthly job needs last month's
+  exportRetentionDays: 14
+  localRetentionDays: 49
   image:
     <<: *imageConfig
   envFromSecretList:
@@ -47,4 +47,3 @@ elenia:
     limits:
       cpu: "100m"
       memory: "200Mi"
-
