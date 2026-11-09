@@ -1,0 +1,42 @@
+name: Test Poller
+
+on:
+  pull_request:
+    paths:
+      - 'apps/bash-poller/**'
+      - '.github/workflows/test-poller.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-poller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Run Ruff check
+        run: uv run --only-dev ruff check apps/bash-poller/src/poller/
+
+      - name: Check shell scripts
+        run: |
+          for f in apps/bash-poller/src/poller/*.sh; do bash -n "$f"; done
+          shellcheck --severity=warning apps/bash-poller/src/poller/*.sh
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      # the frigate-export init container's Python lives inline in the chart
+      - name: Compile the inline frigate-export script
+        run: |
+          helm template t apps/bash-poller/helm-chart \
+            | awk '/python3 -u - << .EOF./{f=1;next} /^ *EOF$/{f=0} f' \
+            | python3 -c "import sys, textwrap; print(textwrap.dedent(sys.stdin.read()))" > init.py
+          test -s init.py
+          python3 -m py_compile init.py

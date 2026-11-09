@@ -40,13 +40,13 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 
 ## How changes ship
 
-- PR → CI (`test-play`, `test-web`: ruff + pytest; `lint-helm` on any YAML).
-- Merge to `main` → GitHub Actions builds arm64 images to `ghcr.io/yyyaaan/core/<app>` → a bot opens a PR bumping `tag:` in the app's `values*.yaml` → ArgoCD (watching `main`, manual sync) deploys.
+- PR → CI (`test-play`, `test-web`: ruff + pytest; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML).
+- Merge to `main` → `build-<app>.yml` (thin caller of the reusable `_image.yml`) builds the arm64 image to `ghcr.io/yyyaaan/core/<app>` and, in the same run, opens a PR bumping the image tag in the app's values → ArgoCD (watching `main`, manual sync) deploys. If a bump is missing, re-run or manually dispatch the build on `main`; it bumps too.
 - So `main` is production. Never run `helm upgrade`/`install` or `kubectl apply` as a way to deploy; propose a change instead.
 
 ## Gotchas
 
-- The tag-bump workflow `sed`s **every** line matching `tag:` in `apps/*/helm-chart/values*.yaml`. Never add another `tag:` key in those files (name it differently).
+- The tag bump edits only the yq paths listed in the `values:` input of `build-<app>.yml` (e.g. `.image.tag`, poller `.imageConfig.tag`) and fails if yq changes any other line. Moving the tag key or adding a values file means updating that list.
 - Image tags in app values are bot-managed (`sha-xxxxxxx`); don't hand-edit them.
 - Images are built for `linux/arm64` (Pi). Don't add amd64-only dependencies.
 - Secrets live in `infra/credentials/*.env` (gitignored) and reach the cluster only via `task infra:secrets` on the host. Never inline secret values in code, values or manifests.

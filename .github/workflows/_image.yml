@@ -1,0 +1,138 @@
+name: Build image and bump Helm tag
+
+# Reusable: called by build-<app>.yml. Builds the arm64 image, then (on main) opens a PR
+# bumping the image tag in the app's Helm values. Same run, so no workflow_run hop to lose.
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: Image name under ghcr.io/<owner>/<repo>/
+        type: string
+        required: true
+      dockerfile:
+        type: string
+        required: true
+      values:
+        description: 'One "<values file> <yq path>" per line, e.g. "apps/py-web/helm-chart/values.yaml .image.tag"'
+        type: string
+        required: true
+      uv-lock-check:
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/${{ inputs.app }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        if: inputs.uv-lock-check
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Check lockfile
+        if: inputs.uv-lock-check
+        run: uv lock --check
+
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,format=short
+            type=raw,value={{date 'YYYY-MM-DD'}}
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  bump:
+    needs: build
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: bump-helm-tag-${{ inputs.app }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Update image tag in Helm values
+        id: update
+        env:
+          VALUES: ${{ inputs.values }}
+        run: |
+          set -euo pipefail
+          # same tag docker/metadata-action makes with type=sha,format=short
+          export NEW_TAG="sha-${GITHUB_SHA::7}"
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+          while read -r file path; do
+            [ -z "$file" ] && continue
+            yq -e "$path" "$file" > /dev/null  # fail on a wrong path instead of adding a key
+            yq -i "$path = strenv(NEW_TAG)" "$file"
+            # yq must touch only the tag line; anything else means it reformatted the file
+            changed=$(git diff --numstat -- "$file" | awk '{print $1 + 0}')
+            if [ "${changed:-0}" -gt 1 ]; then
+              git --no-pager diff -- "$file"
+              echo "::error file=$file::yq changed more than the tag line" >&2
+              exit 1
+            fi
+            echo "$file $path -> $NEW_TAG (${changed:-0} line changed)"
+          done <<< "$VALUES"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.HELM_PR_TOKEN || github.token }}
+          branch: ci/update-image-tag-${{ inputs.app }}-${{ steps.update.outputs.new_tag }}
+          delete-branch: true
+          commit-message: "chore: ${{ inputs.app }} image tag to ${{ steps.update.outputs.new_tag }}"
+          title: "chore: ${{ inputs.app }} image tag to ${{ steps.update.outputs.new_tag }}"
+          body: |
+            Automated update after a successful image build on `main`.
+
+            - App: `${{ inputs.app }}`
+            - Image tag: `${{ steps.update.outputs.new_tag }}`
+            - Build run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - Source commit: `${{ github.sha }}`
+          labels: |
+            automation
+            helm
+            image-tag
+          base: main
