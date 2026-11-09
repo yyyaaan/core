@@ -2,19 +2,15 @@
 # Daily: rotate yesterday's Frigate export, keep a light local copy, upload to R2 (+ B2 during transition).
 set -euo pipefail
 
-day=$(date -d "yesterday 13:00" +%Y%m%d)
+# set by the frigate-export init container, which only succeeds once the export is finished
+day=$(cat /handoff/day)
+input_file=$(cat /handoff/export_path)
 out=/media/DayIn1
 echo "@$(date +'%b%d %H:%M:%S') processing $day"
 
-# path handed over by the frigate-export init container; fall back to the newest export made today
-input_file=$(cat /handoff/export_path 2>/dev/null || true)
-if [ -z "$input_file" ] || [ ! -f "$input_file" ]; then
-    echo "No handoff path, falling back to newest export"
-    input_file=$(ls -t /media/frigate/exports/*.mp4 2>/dev/null | head -n 1) || true  # ls may SIGPIPE on a big dir
-    if [ -z "$input_file" ] || [ "$(date -r "$input_file" +%Y%m%d)" != "$(date +%Y%m%d)" ]; then
-        echo "Failed. Latest export '$input_file' was not created today."
-        exit 1
-    fi
+if [ ! -f "$input_file" ]; then
+    echo "Failed. Export file '$input_file' not found."
+    exit 1
 fi
 echo "Input $input_file ($(stat -c %s "$input_file" | numfmt --to=iec))"
 

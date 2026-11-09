@@ -28,8 +28,6 @@ spec:
                 from time import sleep
                 from requests import get, post
 
-                offset = 0                  # yesterday
-                hours = 24                  # a whole day
                 name_prefix = "day90sec"
                 max_polling_hours = 12
                 polling_interval_seconds = 300
@@ -39,42 +37,68 @@ spec:
                 end_polling_time = now + timedelta(hours=max_polling_hours)
                 print("Started", now)
 
-                yesterday_end = datetime(now.year, now.month, now.day)
-                ts = int(yesterday_end.timestamp()) - offset * 3600
-                ts0 = ts - hours * 3600
-
-                r = post(
-                    url=f"{frigate_url}/api/export/custom/yard/start/{ts0}/end/{ts}",
-                    json={
-                        "ffmpeg_output_args": "-vf setpts=0.001*PTS -r 120 -crf 30",
-                        "name": f"{name_prefix}_{datetime.fromtimestamp(ts0):%Y%m%d}.mp4",
-                    },
-                )
-
-                print(f"{datetime.fromtimestamp(ts0):%b%dT%H:%M:%S}--{datetime.fromtimestamp(ts):%b%dT%H:%M:%S}")
-                print(r.text, r.status_code, flush=True)
-
-                # polling for completion
-                r.raise_for_status()
-                export_id = r.json()["export_id"]
-
-                def find_export(export_id: str) -> dict:
-                    for item in get(url=f"{frigate_url}/api/exports").json():
-                        if item["id"] == export_id:
-                            return item
-                    raise Exception("Export ID not found in polling endpoint")
+                # yesterday, local midnight to midnight (TZ from tz-config; naive datetimes keep DST right)
+                day_end = datetime(now.year, now.month, now.day)
+                day_start = day_end - timedelta(days=1)
+                ts0, ts = int(day_start.timestamp()), int(day_end.timestamp())
+                name = f"{name_prefix}_{day_start:%Y%m%d}.mp4"  # unique per day, our handle for reruns
+                print(f"{name}: {day_start:%b%dT%H:%M:%S}--{day_end:%b%dT%H:%M:%S}")
 
 
-                while (export := find_export(export_id))["in_progress"]:
-                    print("waiting...", flush=True)
+                def find_existing(name: str) -> str | None:
+                    """ID of this day's export if already done, running or queued (Frigate doesn't dedupe)."""
+                    rows = get(url=f"{frigate_url}/api/exports", params={"cameras": "yard"})
+                    rows.raise_for_status()
+                    mine = sorted((e for e in rows.json() if e["name"] == name), key=lambda e: e["in_progress"])
+                    if mine:
+                        return mine[0]["id"]  # finished before running
+                    jobs = get(url=f"{frigate_url}/api/jobs/export")
+                    jobs.raise_for_status()
+                    queued = [j for j in jobs.json() if j.get("name") == name and j.get("status") in ("queued", "running")]
+                    return queued[0]["id"] if queued else None
+
+
+                if export_id := find_existing(name):
+                    print("Reusing existing export", export_id, flush=True)
+                else:
+                    r = post(
+                        url=f"{frigate_url}/api/export/custom/yard/start/{ts0}/end/{ts}",
+                        json={"ffmpeg_output_args": "-vf setpts=0.001*PTS -r 120 -crf 30", "name": name},
+                    )
+                    print(r.text, r.status_code, flush=True)
+                    r.raise_for_status()
+                    export_id = r.json()["export_id"]
+
+
+                def export_status(export_id: str) -> dict | None:
+                    """Export row once done, None while queued/running; raises on failure."""
+                    row = get(url=f"{frigate_url}/api/exports/{export_id}")
+                    if row.ok and not row.json().get("in_progress"):
+                        return row.json()
+                    # 0.18 queues exports: no DB row until the job starts; job entry dropped ~5s after it ends
+                    job = get(url=f"{frigate_url}/api/jobs/export/{export_id}")
+                    if job.ok:
+                        status = job.json().get("status")
+                        print(f"{status} {job.json().get('progress_percent', 0):.0f}%", flush=True)
+                        if status in ("failed", "cancelled"):
+                            raise Exception(f"Export {status}: {job.json().get('error_message')}")
+                        return None
+                    if row.ok:
+                        return None  # running, job entry not visible
+                    raise Exception("Export ID not found in exports or export jobs (Frigate restarted or export failed)")
+
+
+                while (export := export_status(export_id)) is None:
                     if datetime.now() > end_polling_time:
                         raise Exception("Polling ends due to time limit. Export not completed")
                     sleep(polling_interval_seconds)
 
                 # same path in this pod: Frigate's /media/frigate is our /media/frigate
                 with open("/handoff/export_path", "w") as f:
-                    f.write(export.get("video_path") or "")
-                print("Ready!", export.get("video_path"))
+                    f.write(export["video_path"])
+                with open("/handoff/day", "w") as f:  # main container must not recompute: a rerun may cross midnight
+                    f.write(f"{day_start:%Y%m%d}")
+                print("Ready!", export["video_path"])
                 EOF
             envFrom:
             {{- range .Values.ffmpeg.envFromSecretList }}

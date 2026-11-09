@@ -11,7 +11,8 @@ if [ ${#days[@]} -eq 0 ]; then
     echo "No daily files for $month"
     exit 1
 fi
-echo "@$(date +'%b%d %H:%M:%S') $month: ${#days[@]} days"
+expected=$(date -d "$(date +%Y-%m-01) -1 day" +%-d)
+echo "@$(date +'%b%d %H:%M:%S') $month: ${#days[@]} of $expected days"
 
 list=$(mktemp)
 trap 'rm -f "$list"' EXIT
