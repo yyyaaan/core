@@ -19,7 +19,7 @@ Uploads go through `upload.py` (`r2` or `b2` target, explicit object key): Cloud
 - `timelapse/daily/YYYYMMDD.mp4`: R2 lifecycle rule deletes after 7 days
 - `timelapse/monthly/YYYYMM.mp4`: R2 lifecycle rule deletes after 730 days (24 months)
 
-Retention lives in the R2 bucket's lifecycle rules (Cloudflare dashboard), not in code. Only the poller writes under `timelapse/`. Credentials: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` in `infra/credentials/poll.env` (token: Object Read & Write, scoped to the bucket).
+Retention lives in the R2 bucket's lifecycle rules, declared in `infra/terraform/r2.tf`. Only the poller writes under `timelapse/`. Credentials: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` in `infra/credentials/poll.env` (token: Object Read & Write, scoped to the bucket).
 
 ## Catalog and viewer
 

@@ -1,18 +1,17 @@
 namespace: web
-authMiddleware:
-  enabled: true
-  name: auth-oauth@kubernetescrd
 image:
   repository: ghcr.io/yyyaaan/core/play
   tag: "sha-c19d9b1"
   pullPolicy: IfNotPresent
 envFromSecretList:
   - email-credentials
+  - play-credentials
   - tz-config
 service:
   targetPort: 7999
 ingress:
   host: play.yan.fi
 mailing:
+  tokenSecret: play-credentials
   schedule: "39 9 * * *"
   timeZone: "Europe/Helsinki"

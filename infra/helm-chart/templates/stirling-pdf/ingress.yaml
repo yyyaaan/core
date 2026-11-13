@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: pdf-ingress
   namespace: {{ .Values.stirlingPdf.namespace }}
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: auth-oauth@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:

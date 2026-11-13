@@ -3,10 +3,6 @@ kind: Ingress
 metadata:
   name: play-ingress
   namespace: {{ .Values.namespace }}
-  annotations:
-    {{- if .Values.authMiddleware.enabled }}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.authMiddleware.name }}
-    {{- end }}
 spec:
   ingressClassName: traefik
   rules:

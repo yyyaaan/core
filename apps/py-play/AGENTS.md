@@ -1,6 +1,14 @@
 # apps/py-play (personal utilities)
 
-FastAPI app in the `web` namespace behind oauth2-proxy, plus its own allowlist (`auth.py`) on private routes. oauth2-proxy admits any Google account, so the allowlist is the real gate: it reads only `X-Auth-Request-Email`, which the Traefik middleware overwrites; never trust `X-Forwarded-Email` or other client-settable headers. No browser: every upstream is fetched with httpx.
+FastAPI app in the `web` namespace. No browser: every upstream is fetched with httpx.
+
+## Auth
+
+- Cloudflare Access gates `/view` and `/scheduled` at the edge (`play_private` app in `infra/terraform/access.tf`); the rest of the host (`/`, `/docs`, `/public/*`) is public.
+- `auth.py` (`require_user`) verifies the `Cf-Access-Jwt-Assertion` token itself: RS256 against the team's keys, issuer, and `aud` of that Access app. There is no email allowlist; the Access policy is the user list. Never trust `Cf-Access-Authenticated-User-Email` or any other plain header.
+- A new private route needs both `Depends(require_user)` and its path in `play_private`'s `destinations`. Without the second, the edge sends no token and the route returns 401.
+- In-cluster callers (the mailing CronJob) send `Authorization: Bearer $INTERNAL_TOKEN`.
+- `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD` and `INTERNAL_TOKEN` come from the `play-credentials` secret (`infra/credentials/play.env`). An unset value disables that path, so a missing secret fails closed.
 
 ## Routes
 
@@ -15,7 +23,7 @@ FastAPI app in the `web` namespace behind oauth2-proxy, plus its own allowlist (
 
 ## Layout (`src/play/`)
 
-- `config.py`: all settings (`pydantic-settings`, env vars). `TZ` comes from the `tz-config` secret, `SMTP2GO_API_KEY` from `email-credentials`.
+- `config.py`: all settings (`pydantic-settings`, env vars). `TZ` comes from the `tz-config` secret, `SMTP2GO_API_KEY` from `email-credentials`, the auth settings from `play-credentials`.
 - `digest/`: `bbc.py` (fixtures), `hok.py` (Bonus tuplana), `migri.py` (citizenship processing time), `build.py` (assemble + cache), rendered with `templates/digest.html` (email-safe inline styles).
 - `energy/`: `spot.py` (Elering prices + chart, cached per quarter-hour), `water.py` (Pillow crop).
 - `mail.py`: SMTP2GO MIME endpoint. `httpclient.py`: shared `httpx.AsyncClient` factory.

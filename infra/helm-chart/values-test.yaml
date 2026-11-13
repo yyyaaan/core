@@ -1,12 +1,15 @@
-domain: omop.fi
+domain: example.invalid  # no test domain yet
 
 migrationState:
   completed: true
   migrationPodEnabled: false
 
-homebridge.enabled: false
-ha.enabled: false
-frigate.enabled: false
+homebridge:
+  enabled: false
+ha:
+  enabled: false
+frigate:
+  enabled: false
 
 mariaDB:
   namespace: home-internal
@@ -21,28 +24,6 @@ mariaDB:
     tag: "12.3"
     pullPolicy: IfNotPresent
  
-auth:
-  replicas: 1
-  enableMultiAuth: false
-  image:
-    repository: quay.io/oauth2-proxy/oauth2-proxy
-    tag: "v7.15.5-alpine"
-    pullPolicy: IfNotPresent
-  cookieDomain: .omop.fi
-  cookieSecure: true
-  emailDomain: "*"
-  authDomain: auth.omop.fi
-  envFromSecret: oauth2-proxy-credentials
-  skipAuthRoutes:
-    - "^/$"
-    - "^/public/.*"
-    - "^/api/public/.*"
-    - "^/api/health$"
-    - "^/docs$"
-    - "^/openapi.json$"
-    - "^/favicon.ico$"
-    - "^/robots.txt$"
-
 stirlingPdf:
   namespace: web
   replicas: 1
@@ -51,7 +32,7 @@ stirlingPdf:
     tag: latest
     pullPolicy: IfNotPresent
   ingress:
-    host: pdf.omop.fi
+    host: pdf.example.invalid
 
 restic:
   namespace: home-internal

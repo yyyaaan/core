@@ -301,3 +301,9 @@ cython_debug/
 
 .claude/settings.local.json
 CLAUDE.local.md
+
+# OpenTofu
+.terraform/
+*.tfstate*
+*.tfplan
+*.tfvars

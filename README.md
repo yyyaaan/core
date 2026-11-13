@@ -26,7 +26,7 @@ Home automation components (Home Assistant, Homebridge, Frigate, etc.) are maint
 
 ## Technologies
 
-- Kubernetes, Helm, networking, oauth2-proxy
+- Kubernetes, Helm, networking, Cloudflare Access (OpenTofu)
 - Python, FastAPI, uv, pytest, ruff
 - GitHub Actions and go-task (`Taskfile`)
 - Cloudflare tunnel for public ingress (in-cluster)
@@ -56,14 +56,14 @@ cargo run -p rs-y-one
 uv run pytest -v
 
 # Local auth example for play
-ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev
+ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev
 ```
 
 ## Services 🏠
 
 - Home internal: Home Assistant, MariaDB, Homebridge, Frigate
 - General web: Play (FastAPI), Stirling PDF (on-demand)
-- Supporting: OAuth2 Proxy, Headlamp, Cloudflare tunnel, cert issuers
+- Supporting: Cloudflare tunnel and Access, cert issuers
 
 ## Restic Backups 💾
 

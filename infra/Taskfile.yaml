@@ -17,7 +17,7 @@ tasks:
   setup-namespaces:  # deps to secrets
     internal: true
     cmds:
-      - for: [argocd, auth, cert-manager, cloudflared, headlamp, home-internal, traefik, web]
+      - for: [argocd, cert-manager, cloudflared, home-internal, traefik, web]
         cmd: kubectl create namespace {{.ITEM}} --dry-run=client -o yaml | kubectl apply -f -
 
   # task infra:secrets ENV=test
@@ -30,8 +30,7 @@ tasks:
         - { NAME: oidc-secret,              NS: argocd,        FILE: ./credentials/oidc.env }
         - { NAME: cloudflare-api-token,     NS: cert-manager,  FILE: ./credentials/cloudflare.env }
         - { NAME: cloudflared-token,        NS: cloudflared,   FILE: "./credentials/cloudflare{{.SUFFIX}}.env" }
-        - { NAME: oidc-secret,              NS: headlamp,      FILE: ./credentials/oidc.env }
-        - { NAME: oauth2-proxy-credentials, NS: auth,          FILE: ./credentials/oauth.env }
+        - { NAME: play-credentials,         NS: web,           FILE: ./credentials/play.env }
         - { NAME: email-credentials,        NS: web,           FILE: ./credentials/email.env }
         - { NAME: tz-config,                NS: web,           FILE: ./credentials/tz.env }
         - { NAME: tz-config,                NS: home-internal, FILE: ./credentials/tz.env }
@@ -75,16 +74,6 @@ tasks:
         
         echo "🚀 Starting port-forward (Press Ctrl+C to stop)..."
         kubectl port-forward svc/argocd-server -n argocd 9080:80
-
-  headlamp:login:
-    desc: "Open headlamp and obtain token]"
-    cmds:
-      - |
-        echo "🔑 Fetching cluster token for headlamp"
-        TOKEN=$(kubectl create token headlamp -n headlamp)
-        HOST=$(kubectl get ingress headlamp -n headlamp -o jsonpath='{.spec.rules[0].host}')
-        echo "🔐 Token: $TOKEN"
-        open https://$HOST
 
   # --- DEPLOYMENT / GitOps with ArgoCD recommended ---
 

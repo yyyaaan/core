@@ -46,30 +46,6 @@ mariaDB:
     tag: "12.3"
     pullPolicy: IfNotPresent
  
-auth:
-  replicas: 1
-  enableMultiAuth: false
-  image:
-    repository: quay.io/oauth2-proxy/oauth2-proxy
-    tag: "v7.15.5-alpine"
-    pullPolicy: IfNotPresent
-  cookieDomain: .yan.fi
-  cookieSecure: true
-  emailDomain: "*"
-  authDomain: auth.yan.fi
-  envFromSecret: oauth2-proxy-credentials
-  skipAuthRoutes:
-    - "^/$"
-    - "^/about$"
-    - "^/public/.*"
-    - "^/api/public/.*"
-    - "^/api/health$"
-    - "^/docs$"
-    - "^/favicon.ico$"
-    - "^/healthz$"
-    - "^/openapi.json$"
-    - "^/robots.txt$"
-
 frigate:
   enabled: true
   replicas: 1

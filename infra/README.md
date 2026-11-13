@@ -8,7 +8,7 @@ Recommended to use git ops only! That is:
 1. Check domain is correct under infra/bootstrap
 2. run `task bootstrap(-test)`
 3. visit argocd `task infra:argocd:login`
-4. sync in order: traefik, cert-manager, cert-cloudflare-etc, headlamp ...
+4. sync in order: traefik, cert-manager, cert-cloudflare-etc ...
 3. after approving envs, disable configs.cm.admin.enabled in argocd.yaml
 
 
@@ -16,11 +16,11 @@ Recommended to use git ops only! That is:
 
 - Namespaces required
 - Local manifest deployments: cert issuer and Cloudflare tunnel
-- Helm chart with value files: headlamp, Argo CD
+- Helm chart with value files: Argo CD
 
 > Argo CD using community managed helm chart, which is arguably anti-pattern.
 
-Callback URL: /auth/callback for `ArgoCD`, /oidc-callback for `headlamp`
+Google OAuth client callback URLs: `https://cd.yan.fi/auth/callback` (ArgoCD) and `https://<team>.cloudflareaccess.com/cdn-cgi/access/callback` (Cloudflare Access)
 
 ## Restic Backup Repository
 
@@ -33,12 +33,11 @@ restic -r s3:s3.eu-central-003.backblazeb2.com/BucketNameHere init
 
 ## Networking with Cloudflare
 
-Cloudflare setups:
-- Enable Cloudflare tunnel
-- Zero Trust - Tunnel: Published application routes, add HTTP `traefik.traefik.svc.cluster.local:8080`, note for possible different namespace
-- DNS: [should be auto created by step above] CNAME * tunnel_id.cfargotunnel.com (proxied)
+Tunnel routes, DNS and Cloudflare Access (who may open which hostname) are code in `terraform/`, applied by the `tofu` GitHub workflow; see `terraform/README.md`. By hand, once: create the tunnel in Zero Trust and put its token in `credentials/cloudflare.env`.
 
-## Install `k3s` on Raspberry Pi and API Server with OIDC
+A fresh cluster with a new tunnel: every route points at `http://traefik.traefik.svc.cluster.local:8080`.
+
+## Install `k3s` on Raspberry Pi
 
 Raspberry Pi OS Lite is recommended for resource conservation. __DISABLE k3s default traefik__ to keep 80/443 port untouched.
 
@@ -48,20 +47,6 @@ Official docs at https://docs.k3s.io/installation/requirements?os=pi, and at a g
 - install `curl -sfL https://get.k3s.io | sh -s - --disable traefik`
 
 ### Port configured in traefik (8080 8443 in current taskfile)
-
-### Config API Server to trust OIDC
-K3s is easy to configure. You edit the server config file on your Pi:
-`sudo nano /etc/rancher/k3s/config.yaml`, and add these flags:
-
-```yaml
-kube-apiserver-arg:
-  - "oidc-issuer-url=https://accounts.google.com"
-  - "oidc-client-id=719690536564-hrk09vm3gjkqnpr2873q7mnff0qdcv4c.apps.googleusercontent.com"
-  - "oidc-username-claim=email"
-  - "oidc-required-claim=hd=yan.fi" 
-```
-
-*Restart K3s: `sudo systemctl restart k3s`.*
 
 ### Connecting to K3s remotely
 
@@ -87,8 +72,8 @@ Manual update non-git:
 - storageClassName for mariadb persistent volume
 - mqtt-service or mqtt-service.home-internal or mqtt-service.home-internal.svc.cluster.local (mqtt://...:1883)
 - play/public/spot & water.jpg update path in HA
-- start?rd=https:// for all login button
-- login page customization https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#page-template-options
+- frigate `config.yaml`: `auth.enabled: false` and `proxy.default_role: admin` (Cloudflare Access is the login)
+- homebridge `config.json`: UI platform `"auth": "none"`
 
 Gitignored
 - config/ha/secrets.yaml updated mariadb address

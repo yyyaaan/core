@@ -6,9 +6,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # auth (oauth2-proxy headers)
-    auth_url: str = "https://auth.yan.fi/oauth2/start"
-    allowed_emails: list[str] = ["yan@yan.fi", "internal@kube.system"]
+    # auth (Cloudflare Access; all three from the play-credentials secret)
+    access_team_domain: str = ""  # https://<team>.cloudflareaccess.com
+    access_aud: str = ""  # application ID of the play-private Access app
+    internal_token: SecretStr = SecretStr("")  # in-cluster callers
     allow_local_auth: bool = False
     local_auth_email: str | None = None
 

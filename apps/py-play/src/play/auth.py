@@ -1,13 +1,18 @@
 """
-Allowlist on X-Auth-Request-Email only: Traefik's oauth middleware overwrites it, whereas
-client-sent X-Forwarded-Email passes through and oauth2-proxy admits any Google account.
-Locally: curl -H 'X-Auth-Request-Email: yan@yan.fi' ..., or
-ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev
+Private routes accept, in order:
+- a Cloudflare Access token (`Cf-Access-Jwt-Assertion`), verified against the team's keys;
+  the Access policy is the user list, so there is no allowlist here
+- `Authorization: Bearer $INTERNAL_TOKEN`, for in-cluster callers (the mailing CronJob)
+- locally: ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev
+Unset ACCESS_TEAM_DOMAIN / ACCESS_AUD / INTERNAL_TOKEN disable that path (fail closed).
 """
 
+import asyncio
 import logging
-from urllib.parse import urlencode
+from functools import lru_cache
+from hmac import compare_digest
 
+import jwt
 from fastapi import Depends, Header, HTTPException, Request
 
 from play.config import Settings, get_settings
@@ -15,22 +20,53 @@ from play.config import Settings, get_settings
 log = logging.getLogger(__name__)
 
 
+@lru_cache
+def _jwks(team_domain: str) -> jwt.PyJWKClient:
+    # caches keys; refetches on an unknown kid (Access rotates keys)
+    return jwt.PyJWKClient(f"{team_domain}/cdn-cgi/access/certs", timeout=10)
+
+
+def _signing_key(token: str, team_domain: str):
+    return _jwks(team_domain).get_signing_key_from_jwt(token).key
+
+
+async def _access_email(token: str, settings: Settings) -> str:
+    team_domain = settings.access_team_domain.rstrip("/")
+    if not team_domain or not settings.access_aud:
+        raise HTTPException(401, "Access token validation is not configured")
+    try:
+        key = await asyncio.to_thread(_signing_key, token, team_domain)
+        claims = jwt.decode(
+            token,
+            key,
+            algorithms=["RS256"],
+            audience=settings.access_aud,
+            issuer=team_domain,
+            options={"require": ["exp", "iat", "aud", "iss"]},
+        )
+    except jwt.PyJWTError as exc:
+        log.warning("rejected Access token: %s", exc)
+        raise HTTPException(401, "Invalid Access token") from exc
+    # service tokens carry common_name instead of email
+    return (claims.get("email") or claims.get("common_name") or claims["sub"]).lower()
+
+
 async def require_user(
     request: Request,
-    x_auth_request_email: str | None = Header(None),
+    cf_access_jwt_assertion: str | None = Header(None),
+    authorization: str | None = Header(None),
     settings: Settings = Depends(get_settings),
 ) -> str:
-    email = x_auth_request_email
-    if not email and settings.allow_local_auth:
-        email = settings.local_auth_email
-    if not email:
-        auth_url = f"{settings.auth_url}?{urlencode({'rd': str(request.url)})}"
-        raise HTTPException(
-            401, f"Authentication required. Please authenticate at {auth_url}."
-        )
+    if cf_access_jwt_assertion:
+        return await _access_email(cf_access_jwt_assertion, settings)
 
-    email = email.lower().strip()
-    if email not in settings.allowed_emails:
-        log.warning("unauthorized email %s on %s", email, request.url.path)
-        raise HTTPException(403, "User not authorized")
-    return email
+    internal = settings.internal_token.get_secret_value()
+    scheme, _, credential = (authorization or "").partition(" ")
+    if internal and scheme.lower() == "bearer":
+        if compare_digest(credential.strip().encode(), internal.encode()):
+            return "internal"
+        log.warning("bad internal token on %s", request.url.path)
+
+    if settings.allow_local_auth and settings.local_auth_email:
+        return settings.local_auth_email.lower().strip()
+    raise HTTPException(401, "Authentication required")
