@@ -30,7 +30,7 @@ Everything here deploys from `main` through ArgoCD (manual sync). Ingress: Cloud
 
 **Cross-service dependencies**: `apps/bash-poller` calls Frigate's export API (`/api/export/custom/...`, `/api/exports[/{id}]`, `/api/jobs/export[/{id}]`, matching exports by `name`, reading `video_path`; relies on Frigate 0.18's export queue semantics) inline in `helm-chart/templates/cronjob-ffmpeg.yaml`. `apps/py-play` proxies Frigate's `/api/tech/latest.jpg` snapshot. Changing Frigate or MQTT means checking those.
 
-**Add a service**: copy the closest existing `templates/<svc>/` (deployment, service, ingress), add a values block with `enabled`, `namespace`, `image`, `ingress.host`, plus test overrides. A new namespace must also be added to `Taskfile.yaml` `setup-namespaces`. A new hostname is admins-only by default (wildcard Access app); add it to `gated_hosts` in `terraform/access.tf` to admit `users`, or to `public_hosts` plus a tunnel route to make it public.
+**Add a service**: copy the closest existing `templates/<svc>/` (deployment, service, ingress), add a values block with `enabled`, `namespace`, `image`, `ingress.host`, plus test overrides. A new namespace must also be added to `Taskfile.yaml` `setup-namespaces`. A new hostname is admins-only by default (wildcard Access app); and has no DNS record until it is in `terraform/`: add it to `gated_hosts` in `terraform/access.tf` (creates the CNAME and the Access app), or to `public_hosts` plus a route and `tunnel_hosts` entry in `terraform/tunnel.tf` to make it public.
 
 ## Verify
 
@@ -39,6 +39,6 @@ helm lint helm-chart && helm template t helm-chart > /dev/null
 helm template t helm-chart -f helm-chart/values-test.yaml > /dev/null
 ```
 
-`tofu` is not installed in the container; `terraform/` is checked by CI (`tofu fmt -check`, `validate`, `plan`).
+For `terraform/`: `tofu fmt && tofu init -backend=false && tofu validate` in that directory. `plan` needs credentials the container does not have; CI runs it on the PR.
 
 Rendering, not applying. Nothing here may run `kubectl` or `helm upgrade` against the cluster.

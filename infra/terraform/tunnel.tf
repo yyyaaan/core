@@ -41,28 +41,26 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "home" {
   }
 }
 
-import {
-  to = cloudflare_dns_record.wildcard
-  id = "${var.zone_id}/${var.dns_record_id_wildcard}"
-}
-
-resource "cloudflare_dns_record" "wildcard" {
-  zone_id = var.zone_id
-  name    = "*.${var.domain}"
-  type    = "CNAME"
-  content = "${var.tunnel_id}.cfargotunnel.com"
-  proxied = true
-  ttl     = 1
+# One proxied CNAME per hostname served from the cluster; there is no wildcard record,
+# so a hostname is unreachable until it is listed here.
+locals {
+  tunnel_hosts = toset(concat(
+    [var.domain, local.public_hosts.play, local.public_hosts.h],
+    [for name in keys(local.gated_hosts) : "${name}.${var.domain}"],
+  ))
 }
 
 import {
-  to = cloudflare_dns_record.apex
-  id = "${var.zone_id}/${var.dns_record_id_apex}"
+  for_each = var.dns_record_ids
+  to       = cloudflare_dns_record.tunnel[each.key]
+  id       = "${var.zone_id}/${each.value}"
 }
 
-resource "cloudflare_dns_record" "apex" {
+resource "cloudflare_dns_record" "tunnel" {
+  for_each = local.tunnel_hosts
+
   zone_id = var.zone_id
-  name    = var.domain
+  name    = each.key
   type    = "CNAME"
   content = "${var.tunnel_id}.cfargotunnel.com"
   proxied = true

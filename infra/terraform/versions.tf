@@ -11,7 +11,7 @@ terraform {
   # R2 over the S3 API. Endpoint and keys come from AWS_ENDPOINT_URL_S3,
   # AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
   backend "s3" {
-    bucket                      = "yan-fi-tofu-state"
+    bucket                      = "yan-fi-iac-state"
     key                         = "core/terraform.tfstate"
     region                      = "auto"
     use_lockfile                = true

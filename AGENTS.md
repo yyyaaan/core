@@ -17,7 +17,7 @@ Naming: `py-*` for Python, `rs-*` for Rust. Every deployable app owns a `helm-ch
 
 ## Environment
 
-Work happens in the devcontainer (`.devcontainer/`). By design it has **no kubectl, no kubeconfig and no Docker**, and `go-task` is not installed either. Don't try to reach the cluster or build images from here; Taskfile targets that call `kubectl`/`docker`/`helm upgrade` are for the host only.
+Work happens in the devcontainer (`.devcontainer/`). By design it has **no kubectl, no kubeconfig and no Docker**, and `go-task` is not installed either. Don't try to reach the cluster or build images from here; Taskfile targets that call `kubectl`/`docker`/`helm upgrade` are for the host only. `tofu` is installed for `fmt`, `validate` and the provider lock file only: the container has no Cloudflare or state credentials, so `plan` and `apply` happen in GitHub Actions.
 
 - Python: uv workspace (root `pyproject.toml`), Python `==3.14.*` only. Add deps with `uv add --package <name> <dep>`, never pip. Commit `uv.lock`; CI runs `uv lock --check`.
 - Rust: Cargo workspace (root `Cargo.toml`); shared deps in `[workspace.dependencies]`, members use `dep = { workspace = true }`. `CARGO_TARGET_DIR` lives outside the repo.
@@ -34,6 +34,7 @@ uv run web                                        # py-web locally, port 8001
 uv run scout marriott report --from 2027-10-01 --to 2027-10-31   # needs debug Chrome only for `scan`
 cargo build -p rs-y-one && cargo test
 helm lint <chart> && helm template t <chart> > /dev/null   # what CI checks
+cd infra/terraform && tofu fmt && tofu init -backend=false && tofu validate
 ```
 
 py-play's private routes need a Cloudflare Access token. Locally: `ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev`.

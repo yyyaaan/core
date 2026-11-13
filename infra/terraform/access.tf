@@ -10,14 +10,35 @@ locals {
   }
 
   admins_only      = [cloudflare_zero_trust_access_policy.admins.id]
-  admins_and_users = [cloudflare_zero_trust_access_policy.admins.id, cloudflare_zero_trust_access_policy.users.id]
+  admins_and_users = concat([cloudflare_zero_trust_access_policy.admins.id], cloudflare_zero_trust_access_policy.users[*].id)
 
-  # hosts that stay public at the edge and get their own tunnel route
+  # Access rejects a group without members, so `users` exists only once it has some
+  has_users = nonsensitive(length(var.user_emails) > 0)
+
+  # hosts that stay public at the edge; without an entry the wildcard app gates them
   public_hosts = {
     play   = "play.${var.domain}" # private paths are carved out by the play_private app
     h      = "h.${var.domain}"    # Home Assistant, out of scope: native login
     assets = "assets.${var.domain}"
+    # proxied records that do not go through the tunnel
+    www   = "www.${var.domain}"
+    inbox = "inbox.${var.domain}"
+    chat  = "chat.${var.domain}"
+    pi    = "pi.${var.domain}"
   }
+}
+
+# Login methods that already exist in the dashboard are imported, not duplicated.
+import {
+  for_each = { for k, id in var.idp_ids : k => id if k == "google" }
+  to       = cloudflare_zero_trust_access_identity_provider.google
+  id       = "accounts/${var.account_id}/${each.value}"
+}
+
+import {
+  for_each = { for k, id in var.idp_ids : k => id if k == "otp" }
+  to       = cloudflare_zero_trust_access_identity_provider.otp
+  id       = "accounts/${var.account_id}/${each.value}"
 }
 
 resource "cloudflare_zero_trust_access_identity_provider" "google" {
@@ -45,6 +66,8 @@ resource "cloudflare_zero_trust_access_group" "admins" {
 }
 
 resource "cloudflare_zero_trust_access_group" "users" {
+  count = local.has_users ? 1 : 0
+
   account_id = var.account_id
   name       = "users"
   include    = [for e in var.user_emails : { email = { email = e } }]
@@ -58,10 +81,12 @@ resource "cloudflare_zero_trust_access_policy" "admins" {
 }
 
 resource "cloudflare_zero_trust_access_policy" "users" {
+  count = local.has_users ? 1 : 0
+
   account_id = var.account_id
   name       = "Allow users"
   decision   = "allow"
-  include    = [{ group = { id = cloudflare_zero_trust_access_group.users.id } }]
+  include    = [{ group = { id = cloudflare_zero_trust_access_group.users[0].id } }]
 }
 
 resource "cloudflare_zero_trust_access_policy" "public" {

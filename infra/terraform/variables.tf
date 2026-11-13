@@ -26,14 +26,16 @@ variable "tunnel_origin" {
   default = "http://traefik.traefik.svc.cluster.local:8080"
 }
 
-variable "dns_record_id_wildcard" {
-  description = "ID of the existing proxied `*` CNAME, for import."
-  type        = string
+variable "dns_record_ids" {
+  description = "Hostname => ID of its existing CNAME, for import. Hostnames not listed are created."
+  type        = map(string)
+  default     = {}
 }
 
-variable "dns_record_id_apex" {
-  description = "ID of the existing proxied apex CNAME, for import."
-  type        = string
+variable "idp_ids" {
+  description = "IDs of login methods that already exist, for import. Keys: `google`, `otp`."
+  type        = map(string)
+  default     = {}
 }
 
 variable "admin_emails" {

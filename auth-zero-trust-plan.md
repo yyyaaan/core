@@ -14,12 +14,12 @@ Date: 2026-11-13. Scope: the `core` monorepo only (k3s on the Pi, `yan.fi`). Sta
 
 ## Current state
 
-- **Path:** Cloudflare tunnel (one wildcard route, configured by hand in the dashboard) → Traefik → service. Cloudflare terminates TLS.
+- **Path:** Cloudflare tunnel (routes configured by hand in the dashboard, one proxied CNAME per hostname, no wildcard record) → Traefik → service. Cloudflare terminates TLS.
 - **oauth2-proxy guards very little:** only py-play's `/view` and `/scheduled`, plus Stirling-PDF (0 replicas in prod). Every py-web route is in the skip list.
 - **oauth2-proxy admits any Google account** (`emailDomain: "*"`). py-play's own allowlist is the real gate; Stirling-PDF has none.
 - **Frigate, Home Assistant and Homebridge are on the internet with only their own login pages.** Their ingresses carry no auth middleware.
 - **Anything in the cluster can impersonate a user to py-play** by sending `X-Auth-Request-Email`. The mailing CronJob does exactly this.
-- **Every new ingress is public by default**, because the tunnel route is a wildcard.
+- **Every new hostname is public by default** as soon as it gets a DNS record and a route; nothing has to be decided about who may open it.
 - **ArgoCD and Headlamp** use Google OIDC directly. The k3s API server trusts Google tokens with `hd=yan.fi`.
 
 ## Why Cloudflare Access
@@ -50,6 +50,7 @@ Date: 2026-11-13. Scope: the `core` monorepo only (k3s on the Pi, `yan.fi`). Sta
 | Stirling-PDF | admins, users | Access | None needed |
 | ArgoCD (`cd.yan.fi`) | admins | Access | Keep Google OIDC and `policy.csv` RBAC |
 | `assets.yan.fi` | Everyone | Bypass app; it serves the public site's images and the timelapse viewer embedded in Home Assistant | None |
+| `www`, `inbox`, `chat`, `pi` (proxied, not via the tunnel) | Everyone | Bypass app each | Unchanged |
 | Home Assistant (`h.yan.fi`) | Unchanged | Bypass app, so the wildcard rule does not gate it | Unchanged |
 | Any other `*.yan.fi` hostname | admins | Wildcard default-deny | n/a |
 
@@ -106,7 +107,7 @@ Date: 2026-11-13. Scope: the `core` monorepo only (k3s on the Pi, `yan.fi`). Sta
 - **Secrets:** GitHub Actions secrets hold the Cloudflare API token, the R2 credentials, the state passphrase, the Google client secret and the members of the two groups. Nothing goes in the repo. The full list is in `infra/terraform/README.md`.
 - **One-time manual bootstrap:** create the R2 state bucket, the scoped API token and the GitHub secrets and variables, and add Cloudflare's callback URL to the Google OAuth client.
 - **Managed resources:** identity provider, the two groups, Access apps and policies, tunnel routes, DNS records for tunnel hostnames, and the existing R2 bucket with its lifecycle rules.
-- **Import, not recreate:** the tunnel's route configuration, the wildcard and apex CNAMEs and the `static` bucket, using `import` blocks so the import also runs in CI. The tunnel object itself is deliberately not managed: only its ID is passed in, so no plan can ever replace the tunnel or its token.
+- **Import, not recreate:** the tunnel's route configuration, the seven CNAMEs of the hostnames served from the cluster and the `static` bucket, using `import` blocks so the import also runs in CI. The tunnel object itself is deliberately not managed: only its ID is passed in, so no plan can ever replace the tunnel or its token.
 - **Token scopes:** Access apps, policies and identity providers; Cloudflare Tunnel; zone DNS; R2.
 
 ### Existing R2 resources
@@ -130,10 +131,10 @@ Date: 2026-11-13. Scope: the `core` monorepo only (k3s on the Pi, `yan.fi`). Sta
 Everything is on one branch. Merging it changes Cloudflare at once (the `tofu` workflow applies), while the cluster changes wait for manual ArgoCD syncs, and the fail-closed part waits for a switch. The order below keeps every state working.
 
 1. **Bootstrap, before the PR.** The steps in `infra/terraform/README.md`. Also create `infra/credentials/play.env` with `INTERNAL_TOKEN` and run `task infra:secrets`.
-2. **Open the PR and read the plan.** Four imports, no change to the DNS records, and the tunnel config changing from one wildcard route to the explicit routes with the same origin. Inventory the proxied DNS records so nothing is gated by surprise.
+2. **Open the PR and read the plan.** Nine imports, no change to the DNS records, and the tunnel config changing from one wildcard route to the explicit routes with the same origin. The other proxied records (`www`, `inbox`, `chat`, `pi`) do not go through the tunnel and their DNS is not managed; each has a bypass app so the wildcard app in step 6 leaves them public.
 3. **Merge.** Access is now in front of Frigate, Homebridge, ArgoCD, Stirling-PDF and py-play's two private paths, with every in-app login still on (a temporary double login, oauth2-proxy included). Test precedence on `play.yan.fi/public/spot`, `play.yan.fi/view` and `h.yan.fi`.
 4. **py-play.** Put the two outputs into `play.env`, run `task infra:secrets`, merge the tag-bump PRs, then sync `app-play`. Check `/view` in a browser and trigger the CronJob once.
-5. **Remove oauth2-proxy and Headlamp from the cluster.** Sync `app-web` first: if `core-infra` loses the middleware while the site's ingress still references it, Traefik drops the route and `yan.fi` goes down. Then sync `core-infra` with prune, delete the `headlamp` Application, sync `cert-cloudflare-etc` with prune. On the host: delete the `auth` and `headlamp` namespaces and remove the `oidc-*` flags from k3s. In Google: remove the `auth.yan.fi` and `dash.yan.fi` redirect URIs.
+5. **Remove oauth2-proxy and Headlamp from the cluster.** Sync `app-web` first: if `core-infra` loses the middleware while the site's ingress still references it, Traefik drops the route and `yan.fi` goes down. Then sync `core-infra` with prune, delete the `headlamp` Application, sync `cert-cloudflare-etc` with prune. On the host: delete the `auth` and `headlamp` namespaces and remove the `oidc-*` flags from k3s. In Google: remove the `auth.yan.fi` and `dash.yan.fi` redirect URIs. In Cloudflare DNS: delete the `auth`, `dash` and `staging` CNAMEs (never imported, so by hand).
 6. **Fail closed, then drop in-app logins.** Set the GitHub variable `ACCESS_FAIL_CLOSED=true` and run the `tofu` workflow on `main`. Check Home Assistant (app included), `assets.yan.fi` and an unknown hostname. Only then turn off the Frigate and Homebridge logins (manual edits on the Pi).
 
 Rolling back: steps 3 and 6 by reverting the Terraform change or the variable; steps 4 and 5 by reverting the merge and syncing.
