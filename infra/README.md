@@ -44,7 +44,7 @@ A fresh cluster with a new tunnel: every route points at `http://traefik.traefik
 - Access on the app's hostname breaks the companion app. It is a WebView plus a native background client (location, sensors, notification actions, widgets, watch); Access needs an interactive browser login and a cookie, which the background client cannot do. Reports: login loops, or it works until the session expires.
 - Service-token headers in the app are not possible; both the Android and the iOS pull requests for custom headers were rejected.
 - IP-bypass automation (a phone shortcut updating a Cloudflare list) works for some but is fragile, and carrier IPs are shared with strangers. Avoid.
-- Hardening that does not touch the app: MFA, `ip_ban_enabled` with a login-attempt threshold, `trusted_proxies` with `use_x_forwarded_for`, Cloudflare WAF rules (geo-restriction, rate limit on `/auth/*`).
+- Hardening that does not touch the app: MFA, IP banning with a login-attempt threshold (needs the real client address, see the manual checks below), Cloudflare WAF rules (geo-restriction, rate limit on `/auth/*`).
 - Real edge auth: split the hostnames. Browsers use one behind Access; the app uses a second that requires an mTLS client certificate (Cloudflare issues them, enforced by a WAF rule on `cf.tls_client_auth.cert_verified`), with `/api/webhook/*` exempted only if background updates fail without it. All family phones are iOS, where client certificates arrived in app version 2026.4 as experimental; use an EC key (the one reported WebSocket failure was RSA-2048).
 - Pilot on one phone for two weeks first: background location, actionable notifications, widgets, watch, behaviour after a reboot, certificate renewal.
 - Starting points: [mTLS guide](https://community.home-assistant.io/t/secure-remote-access-with-cloudflare-tunnel-and-mtls/1024873), [iOS secure channel thread](https://community.home-assistant.io/t/secure-communication-channel-for-ios-app/785129?page=4), [Cloudflare mTLS](https://developers.cloudflare.com/api-shield/security/mtls/configure/).
@@ -86,6 +86,7 @@ Manual update non-git:
 - play/public/spot & water.jpg update path in HA
 - frigate `config.yaml`: `auth.enabled: false` and `proxy.default_role: admin` (Cloudflare Access is the login)
 - homebridge `config.json`: UI platform `"auth": "none"`
+- HA, in the UI (Settings > System > Network > HTTP server; YAML `http:` is gone since 2026.8): "Trust X-Forwarded-For" on and "Trusted proxies" `10.42.0.0/16` (the pod network: Traefik and cloudflared), so HA sees the visitor's address instead of a proxy's. Traefik is told to keep the forwarded address in `gitops-config/bootstrap-cluster/apps.yaml`; without both, a login ban hits the shared proxy address and locks everyone out
 
 Gitignored
 - config/ha/secrets.yaml updated mariadb address
