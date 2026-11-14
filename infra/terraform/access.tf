@@ -27,19 +27,6 @@ locals {
   }
 }
 
-# Login methods that already exist in the dashboard are imported, not duplicated.
-import {
-  for_each = { for k, id in var.idp_ids : k => id if k == "google" }
-  to       = cloudflare_zero_trust_access_identity_provider.google
-  id       = "accounts/${var.account_id}/${each.value}"
-}
-
-import {
-  for_each = { for k, id in var.idp_ids : k => id if k == "otp" }
-  to       = cloudflare_zero_trust_access_identity_provider.otp
-  id       = "accounts/${var.account_id}/${each.value}"
-}
-
 resource "cloudflare_zero_trust_access_identity_provider" "google" {
   account_id = var.account_id
   name       = "Google"
