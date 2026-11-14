@@ -1,7 +1,7 @@
 namespace: web
 image:
   repository: ghcr.io/yyyaaan/core/web
-  tag: "sha-935312e"
+  tag: "sha-70350a5"
   pullPolicy: IfNotPresent
 envFromSecretList:
   - tz-config
