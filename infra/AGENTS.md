@@ -26,7 +26,7 @@ Everything here deploys from `main` through ArgoCD (manual sync). Ingress: Cloud
 
 ## Common tasks
 
-**Upgrade a service image or bootstrap chart**: use the `infra-upgrade` skill.
+**Upgrade a service image or bootstrap chart**: use the `infra-upgrade` skill. Dependabot opens the image bump PRs on the 9th and 23rd (`.github/dependabot.yml`); the skill then only reviews the release notes. Traefik, ArgoCD and the MariaDB version line stay manual.
 
 **Cross-service dependencies**: `apps/bash-poller` calls Frigate's export API (`/api/export/custom/...`, `/api/exports[/{id}]`, `/api/jobs/export[/{id}]`, matching exports by `name`, reading `video_path`; relies on Frigate 0.18's export queue semantics) inline in `helm-chart/templates/cronjob-ffmpeg.yaml`. `apps/py-play` proxies Frigate's `/api/tech/latest.jpg` snapshot. Changing Frigate or MQTT means checking those.
 

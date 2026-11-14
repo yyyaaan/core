@@ -41,7 +41,7 @@ py-play's private routes need a Cloudflare Access token. Locally: `ALLOW_LOCAL_A
 
 ## How changes ship
 
-- PR → CI (`test-play`, `test-web`: ruff + pytest, results as one PR comment per app updated in place by `.github/scripts/test_comment.py`; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML; `tofu`: fmt, validate and plan for `infra/terraform/`, with the changed resources as a PR comment).
+- PR → CI (`test-play`, `test-web`: ruff + pytest, results as one PR comment per app updated in place by `.github/scripts/test_comment.py`; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML; `tofu`: fmt, validate and plan for `infra/terraform/`, with the changed resources as a PR comment; skipped on Dependabot PRs, which get no secrets).
 - Merge to `main` → `build-<app>.yml` (thin caller of the reusable `_image.yml`) builds the arm64 image to `ghcr.io/yyyaaan/core/<app>` and, in the same run, opens a PR bumping the image tag in the app's values → ArgoCD (watching `main`, manual sync) deploys. If a bump is missing, re-run or manually dispatch the build on `main`; it bumps too.
 - Merge to `main` with changes under `infra/terraform/` → the `tofu` workflow plans again and, if there are changes, its `apply` job waits in the `cloudflare` GitHub Environment until the owner approves it in the Actions run.
 - `main` is protected by the `protect-main` ruleset: PR only, squash only, no force-push or deletion, no bypass. So `main` is production. Never run `helm upgrade`/`install` or `kubectl apply` as a way to deploy; propose a change instead.
@@ -50,6 +50,7 @@ py-play's private routes need a Cloudflare Access token. Locally: `ALLOW_LOCAL_A
 
 - The tag bump uses yq only to locate the line of each path in the `values:` input of `build-<app>.yml` (e.g. `.image.tag`, poller `.imageConfig.tag`), then rewrites just that line's value with sed (yq itself would reflow the file) and fails if anything else changed. Moving the tag key or adding a values file means updating that list; keep trailing comments off the tag line.
 - Image tags in app values are bot-managed (`sha-xxxxxxx`); don't hand-edit them.
+- Third-party actions in `tofu.yml` are pinned to commit SHAs. `.github/dependabot.yml` bumps all actions monthly in one grouped PR (merging it does not rebuild the app images: `build-*` skip commits starting `chore(actions)`; dispatch one by hand to test a bump of `_image.yml` actions), and infra images (Helm values, tunnel manifest) on the 9th and 23rd, one PR per image; MariaDB stays on its LTS line (moved by hand). Python deps get Dependabot security PRs only.
 - Images are built for `linux/arm64` (Pi). Don't add amd64-only dependencies.
 - Secrets live in `infra/credentials/*.env` (gitignored) and reach the cluster only via `task infra:secrets` on the host. Never inline secret values in code, values or manifests.
 - Login is Cloudflare Access at the edge (apps, policies and the `admins`/`users` groups in `infra/terraform/`); nothing in the cluster authenticates users except `apps/py-play`, which verifies the Access token itself (`play/auth.py`), and ArgoCD's own Google OIDC. The repo is public: group members and other account details come from GitHub secrets/variables, never from `.tf` files.

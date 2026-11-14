@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   image:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(actions)') }}
     uses: ./.github/workflows/_image.yml
     permissions:
       contents: write

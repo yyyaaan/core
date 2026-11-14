@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # bumps both tags (@v7) and SHA pins (keeps the "# vX.Y.Z" comment in step)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 3  # skip brand-new releases (hijacked tags usually surface by then)
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(actions)"
+
+  # infra images: image.repository/tag in Helm values, image: in the tunnel manifest; one PR per image
+  - package-ecosystem: docker
+    directories:
+      - /infra/helm-chart
+      - /infra/bootstrap/manifests
+    schedule:
+      interval: cron
+      cronjob: "0 6 9,23 * *"  # ~every two weeks
+      timezone: Europe/Helsinki
+    open-pull-requests-limit: 10  # default 5 is below the number of images
+    cooldown:
+      default-days: 3  # lets x.y.0 regressions get their quick patch first
+    ignore:
+      - dependency-name: mariadb  # stays on its LTS line; move by hand
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    commit-message:
+      prefix: "chore(infra)"
