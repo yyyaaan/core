@@ -7,6 +7,8 @@ description: Upgrade platform service images (Home Assistant, Homebridge, Frigat
 
 Goal: a reviewed tag bump plus a short risk report. The edit is trivial; the value is in the release-note review.
 
+Dependabot opens image bump PRs for `infra/helm-chart` and `infra/bootstrap/manifests` on the 9th and 23rd (`.github/dependabot.yml`). For such a PR, skip steps 1, 2 and 4 and do steps 3 and 5 for its from → to range. Traefik (`targetRevision`) and ArgoCD (`Taskfile.yaml`) are not covered by Dependabot and stay manual.
+
 ## 1. Inventory
 
 - Images: `image.repository` / `image.tag` in `infra/helm-chart/values.yaml`. `values-test.yaml` pins some services separately (often older); report the drift, ask before aligning.
