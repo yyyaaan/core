@@ -1,6 +1,6 @@
 # infra/terraform (Cloudflare as code)
 
-OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub workflow: a pull request plans, a merge to `main` applies. The repo is public, so nothing account-specific is in the `.tf` files; it all arrives as `TF_VAR_*` from GitHub secrets and variables.
+OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub workflow: a pull request plans; a merge to `main` plans again, then, only if that plan has changes, the `apply` job waits for approval in the `cloudflare` environment (owner as required reviewer, deployable from `main` only). The repo is public, so nothing account-specific is in the `.tf` files; it all arrives as `TF_VAR_*` from GitHub secrets and variables.
 
 | File | What |
 |------|------|
@@ -39,7 +39,7 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 
 - Changing who is in a group: edit the `ACCESS_*_EMAILS` secret, then run the workflow by hand on `main`.
 - A new gated hostname: add it to `gated_hosts` in `access.tf`; its CNAME is created with it. A new public one: `public_hosts`, plus a route and a `tunnel_hosts` entry in `tunnel.tf` if it is served from the cluster.
-- Read the plan before merging: merge applies at once.
+- Read the plan before merging, and the `plan` job of the `main` run before approving `apply` (Actions run → Review deployments). Approval re-plans that same commit and applies without another prompt. Reject an apply you don't want rather than leaving it pending: the waiting run holds the `tofu-state` concurrency group, so later runs queue behind it.
 - Everything here is tracked in the state; the `import` blocks used to adopt the hand-made tunnel routes, DNS records, bucket and One-time PIN were removed afterwards. To adopt another existing resource, add a temporary `import` block (ID formats are in the provider docs), merge, then delete it. If the state is ever lost, the same applies to all of them.
 - A token for the state bucket needs Object Read & Write (the lock is a write); a read-only one fails with 403 on `PutObject`.
 - A proxied DNS record added by hand in the dashboard (not through the tunnel) is admins-only until it gets an entry in `public_hosts`.
