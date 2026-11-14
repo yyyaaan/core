@@ -24,10 +24,7 @@ defaults:
 env:
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
   AWS_ENDPOINT_URL_S3: https://${{ vars.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
-  AWS_ACCESS_KEY_ID: ${{ secrets.TOFU_STATE_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.TOFU_STATE_SECRET_ACCESS_KEY }}
   TF_VAR_state_passphrase: ${{ secrets.TOFU_STATE_PASSPHRASE }}
   TF_VAR_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
   TF_VAR_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
@@ -47,12 +44,19 @@ jobs:
     permissions:
       contents: read
       pull-requests: write  # one comment, updated in place
+    outputs:
+      changes: ${{ steps.plan.outputs.changes }}
+    # repo secrets hold read-only values; the cloudflare environment overrides them with write ones
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.TOFU_STATE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TOFU_STATE_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Set up OpenTofu
-        uses: opentofu/setup-opentofu@v2
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4  # v2.0.2
         with:
           tofu_version: 1.13.9
           tofu_wrapper: false
@@ -67,12 +71,20 @@ jobs:
         run: tofu validate
 
       - name: Plan
+        id: plan
         run: |
-          tofu plan -out=tfplan
-          # the repo is public: comment only which resources change, not their attributes
+          set +e
+          # no lock: plan never writes state, and its state credentials are read-only
+          tofu plan -lock=false -detailed-exitcode -out=tfplan
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] && exit 1
+          echo "changes=$([ "$code" -eq 2 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # the repo is public: show only which resources change, not their attributes
           {
             tofu show -no-color tfplan | grep -E '^  # |^Plan:|^No changes' || true
           } > plan-summary.txt
+          printf '### OpenTofu plan\n```\n%s\n```\n' "$(cat plan-summary.txt)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment plan
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
@@ -92,7 +104,30 @@ jobs:
             gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -f body="$body" > /dev/null
           fi
 
-      # main is production: merge applies exactly what this run planned
+  apply:
+    needs: plan
+    if: needs.plan.outputs.changes == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: cloudflare  # waits for the owner's approval; deployable from main only
+    permissions:
+      contents: read
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.TOFU_STATE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TOFU_STATE_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4  # v2.0.2
+        with:
+          tofu_version: 1.13.9
+          tofu_wrapper: false
+
+      - name: Init
+        run: tofu init
+
+      # re-plans the same commit the plan job showed before approval
       - name: Apply
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        run: tofu apply tfplan
+        run: tofu apply -auto-approve

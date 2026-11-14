@@ -43,8 +43,8 @@ py-play's private routes need a Cloudflare Access token. Locally: `ALLOW_LOCAL_A
 
 - PR → CI (`test-play`, `test-web`: ruff + pytest, results as one PR comment per app updated in place by `.github/scripts/test_comment.py`; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML; `tofu`: fmt, validate and plan for `infra/terraform/`, with the changed resources as a PR comment).
 - Merge to `main` → `build-<app>.yml` (thin caller of the reusable `_image.yml`) builds the arm64 image to `ghcr.io/yyyaaan/core/<app>` and, in the same run, opens a PR bumping the image tag in the app's values → ArgoCD (watching `main`, manual sync) deploys. If a bump is missing, re-run or manually dispatch the build on `main`; it bumps too.
-- Merge to `main` with changes under `infra/terraform/` → the `tofu` workflow applies them to Cloudflare immediately (no manual sync step, unlike ArgoCD).
-- So `main` is production. Never run `helm upgrade`/`install` or `kubectl apply` as a way to deploy; propose a change instead.
+- Merge to `main` with changes under `infra/terraform/` → the `tofu` workflow plans again and, if there are changes, its `apply` job waits in the `cloudflare` GitHub Environment until the owner approves it in the Actions run.
+- `main` is protected by the `protect-main` ruleset: PR only, squash only, no force-push or deletion, no bypass. So `main` is production. Never run `helm upgrade`/`install` or `kubectl apply` as a way to deploy; propose a change instead.
 
 ## Gotchas
 
