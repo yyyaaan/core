@@ -6,11 +6,6 @@ locals {
   )
 }
 
-import {
-  to = cloudflare_zero_trust_tunnel_cloudflared_config.home
-  id = "${var.account_id}/${var.tunnel_id}"
-}
-
 # Replaces the routes configured by hand in the dashboard.
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "home" {
   account_id = var.account_id
@@ -48,13 +43,6 @@ locals {
     [var.domain, local.public_hosts.play, local.public_hosts.h],
     [for name in keys(local.gated_hosts) : "${name}.${var.domain}"],
   ))
-}
-
-import {
-  # IDs of hostnames no longer listed are ignored, not an error
-  for_each = { for host, id in var.dns_record_ids : host => id if contains(local.tunnel_hosts, host) }
-  to       = cloudflare_dns_record.tunnel[each.key]
-  id       = "${var.zone_id}/${each.value}"
 }
 
 resource "cloudflare_dns_record" "tunnel" {

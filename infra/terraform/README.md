@@ -14,7 +14,7 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 - Login happens at Cloudflare's edge, before a request enters the tunnel. oauth2-proxy is gone and nothing in the cluster keeps a user list; the `admins` and `users` groups here are the only ones.
 - `gated_hosts`: one Access app per hostname, admitting the listed groups. Frigate and Homebridge have their own logins switched off, so anyone admitted to them is an admin there; ArgoCD keeps its Google login behind Access because it maps emails to roles.
 - `public_hosts`: a bypass app per hostname. On `play.yan.fi` the host is public and only `/view` and `/scheduled` are gated by a more specific app (`play_private`); py-play verifies that app's token itself.
-- Fail closed (`ACCESS_FAIL_CLOSED=true`, on in production): a `*.yan.fi` app makes every proxied hostname without its own app admins-only, and cloudflared rejects requests on the catch-all route that carry no valid Access token. A deleted or broken app therefore blocks a service instead of exposing it. Hosts that must work without a token (`yan.fi`, `play`, `h`) have their own route above the catch-all.
+- Fail closed (on by default): a `*.yan.fi` app makes every proxied hostname without its own app admins-only, and cloudflared rejects requests on the catch-all route that carry no valid Access token. A deleted or broken app therefore blocks a service instead of exposing it. Hosts that must work without a token (`yan.fi`, `play`, `h`) have their own route above the catch-all.
 - Home Assistant (`h.yan.fi`) is deliberately public at the edge with its native login: Access breaks the companion app. Notes for a later round are in `infra/README.md`.
 
 ## One-time bootstrap (by hand)
@@ -33,15 +33,14 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 | secret | `ACCESS_GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | variable | `ACCESS_GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | variable | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_TEAM_NAME`, `CLOUDFLARE_TUNNEL_ID` | From the dashboard |
-| variable | `CLOUDFLARE_DNS_RECORD_IDS` | Only to adopt records that already exist: JSON map of full hostname to the ID of its CNAME (`GET /zones/<zone>/dns_records`). Used once at import; entries for hostnames not in the code are ignored |
-| variable | `CLOUDFLARE_ACCESS_IDP_IDS` | Only to adopt login methods that already exist: JSON map with the keys `google` and/or `otp` and their IDs (`GET /accounts/<account>/access/identity_providers`). Used once at import |
-| variable | `ACCESS_FAIL_CLOSED` | `true` in production. On a fresh setup leave it unset until every public host has been checked, then turn it on |
+| variable | `ACCESS_FAIL_CLOSED` | Optional; fail-closed is on unless this is `false`. Set `false` only as an emergency switch, or on a fresh setup until every public host has been checked |
 
 ## Working with it
 
 - Changing who is in a group: edit the `ACCESS_*_EMAILS` secret, then run the workflow by hand on `main`.
 - A new gated hostname: add it to `gated_hosts` in `access.tf`; its CNAME is created with it. A new public one: `public_hosts`, plus a route and a `tunnel_hosts` entry in `tunnel.tf` if it is served from the cluster.
-- Read the plan before merging: merge applies at once. An imported resource should show no change; if it differs from the code, fix the code, not the resource.
+- Read the plan before merging: merge applies at once.
+- Everything here is tracked in the state; the `import` blocks used to adopt the hand-made tunnel routes, DNS records, bucket and One-time PIN were removed afterwards. To adopt another existing resource, add a temporary `import` block (ID formats are in the provider docs), merge, then delete it. If the state is ever lost, the same applies to all of them.
 - A token for the state bucket needs Object Read & Write (the lock is a write); a read-only one fails with 403 on `PutObject`.
 - A proxied DNS record added by hand in the dashboard (not through the tunnel) is admins-only until it gets an entry in `public_hosts`.
 - Routes and DNS records edited in the dashboard are overwritten by the next apply.

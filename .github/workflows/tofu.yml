@@ -33,9 +33,7 @@ env:
   TF_VAR_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
   TF_VAR_team_name: ${{ vars.CLOUDFLARE_TEAM_NAME }}
   TF_VAR_tunnel_id: ${{ vars.CLOUDFLARE_TUNNEL_ID }}
-  TF_VAR_dns_record_ids: ${{ vars.CLOUDFLARE_DNS_RECORD_IDS || '{}' }}  # JSON map, hostname => record ID
-  TF_VAR_idp_ids: ${{ vars.CLOUDFLARE_ACCESS_IDP_IDS || '{}' }}  # JSON map, google/otp => ID, only if they already exist
-  TF_VAR_fail_closed: ${{ vars.ACCESS_FAIL_CLOSED || 'false' }}
+  TF_VAR_fail_closed: ${{ vars.ACCESS_FAIL_CLOSED || 'true' }}  # set the variable to false only as an emergency switch
   TF_VAR_google_client_id: ${{ vars.ACCESS_GOOGLE_CLIENT_ID }}
   TF_VAR_google_client_secret: ${{ secrets.ACCESS_GOOGLE_CLIENT_SECRET }}
   TF_VAR_admin_emails: ${{ secrets.ACCESS_ADMIN_EMAILS }}  # JSON list, e.g. ["a@x.fi","b@y.com"]

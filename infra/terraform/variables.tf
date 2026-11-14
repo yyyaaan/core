@@ -26,18 +26,6 @@ variable "tunnel_origin" {
   default = "http://traefik.traefik.svc.cluster.local:8080"
 }
 
-variable "dns_record_ids" {
-  description = "Hostname => ID of its existing CNAME, for import. Hostnames not listed are created."
-  type        = map(string)
-  default     = {}
-}
-
-variable "idp_ids" {
-  description = "IDs of login methods that already exist, for import. Keys: `google`, `otp`."
-  type        = map(string)
-  default     = {}
-}
-
 variable "admin_emails" {
   type      = list(string)
   sensitive = true
@@ -67,5 +55,5 @@ variable "state_passphrase" {
 variable "fail_closed" {
   description = "Wildcard default-deny app, and cloudflared requires an Access token on the catch-all route. On in production."
   type        = bool
-  default     = false
+  default     = true
 }
