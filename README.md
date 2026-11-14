@@ -62,7 +62,7 @@ ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev
 ## Services 🏠
 
 - Home internal: Home Assistant, MariaDB, Homebridge, Frigate
-- General web: Play (FastAPI), Stirling PDF (on-demand)
+- General web: Play (FastAPI)
 - Supporting: Cloudflare tunnel and Access, cert issuers
 
 ## Restic Backups 💾

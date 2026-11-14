@@ -51,7 +51,8 @@ locals {
 }
 
 import {
-  for_each = var.dns_record_ids
+  # IDs of hostnames no longer listed are ignored, not an error
+  for_each = { for host, id in var.dns_record_ids : host => id if contains(local.tunnel_hosts, host) }
   to       = cloudflare_dns_record.tunnel[each.key]
   id       = "${var.zone_id}/${each.value}"
 }

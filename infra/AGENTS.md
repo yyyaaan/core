@@ -4,7 +4,7 @@ Everything here deploys from `main` through ArgoCD (manual sync). Ingress: Cloud
 
 | Path | What |
 |------|------|
-| `helm-chart/` | Umbrella chart for platform services: HA, Frigate, MQTT, MariaDB, Homebridge, Stirling-PDF, Restic CronJob. One subdir per service under `templates/` |
+| `helm-chart/` | Umbrella chart for platform services: HA, Frigate, MQTT, MariaDB, Homebridge, Restic CronJob. One subdir per service under `templates/` |
 | `gitops-config/` | ArgoCD Applications: `bootstrap-cluster/` (external charts), `yan-fi/` (prod), `test-domain/` (test). Each env's app-of-apps tracks `bootstrap-cluster/` via `argocd-gitops-bootstrap`; ArgoCD itself is a pinned Helm install in `Taskfile.yaml` (`task infra:argocd`), outside ArgoCD |
 | `bootstrap/` | Manifests and values applied by hand at cluster bootstrap (ArgoCD, tunnel, Traefik middleware) |
 | `terraform/` | Cloudflare as code (OpenTofu, provider v5): Access identity providers, groups, policies and apps, tunnel routes, DNS, the `static` R2 bucket. Runs only in the `tofu` GitHub workflow; state is encrypted in R2. See `terraform/README.md` |

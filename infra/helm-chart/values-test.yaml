@@ -24,15 +24,6 @@ mariaDB:
     tag: "12.3"
     pullPolicy: IfNotPresent
  
-stirlingPdf:
-  namespace: web
-  replicas: 1
-  image:
-    repository: stirlingtools/stirling-pdf
-    tag: latest
-    pullPolicy: IfNotPresent
-  ingress:
-    host: pdf.example.invalid
 
 restic:
   namespace: home-internal

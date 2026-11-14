@@ -81,13 +81,3 @@ restic:
     tag: "0.19.1"
   resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
   hostPathConfig: /mnt/kingston/home/config
-
-stirlingPdf:
-  namespace: web
-  replicas: 0
-  image:
-    repository: stirlingtools/stirling-pdf
-    tag: latest
-    pullPolicy: IfNotPresent
-  ingress:
-    host: pdf.yan.fi

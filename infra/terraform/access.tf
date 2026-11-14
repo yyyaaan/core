@@ -6,7 +6,6 @@ locals {
     frigate    = local.admins_only
     homebridge = local.admins_only
     cd         = local.admins_only
-    pdf        = local.admins_and_users
   }
 
   admins_only      = [cloudflare_zero_trust_access_policy.admins.id]
