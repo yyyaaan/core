@@ -8,14 +8,14 @@ Recommended to use git ops only! That is:
 1. Check domain is correct under infra/bootstrap
 2. run `task bootstrap(-test)`
 3. visit argocd `task infra:argocd:login`
-4. sync in order: traefik, cert-manager, cert-cloudflare-etc ...
+4. sync in order: traefik, cert-cloudflare-etc ...
 3. after approving envs, disable configs.cm.admin.enabled in argocd.yaml
 
 
 ## Memo
 
 - Namespaces required
-- Local manifest deployments: cert issuer and Cloudflare tunnel
+- Local manifest deployments: Cloudflare tunnel and the Traefik force-https middleware
 - Helm chart with value files: Argo CD
 
 > Argo CD using community managed helm chart, which is arguably anti-pattern.
@@ -36,6 +36,18 @@ restic -r s3:s3.eu-central-003.backblazeb2.com/BucketNameHere init
 Tunnel routes, DNS and Cloudflare Access (who may open which hostname) are code in `terraform/`, applied by the `tofu` GitHub workflow; see `terraform/README.md`. By hand, once: create the tunnel in Zero Trust and put its token in `credentials/cloudflare.env`.
 
 A fresh cluster with a new tunnel: every route points at `http://traefik.traefik.svc.cluster.local:8080`.
+
+### Home Assistant behind Cloudflare Access (not done)
+
+`h.yan.fi` is public at the edge and relies on Home Assistant's own login. Findings from the 2026-11 migration, for a later round:
+
+- Access on the app's hostname breaks the companion app. It is a WebView plus a native background client (location, sensors, notification actions, widgets, watch); Access needs an interactive browser login and a cookie, which the background client cannot do. Reports: login loops, or it works until the session expires.
+- Service-token headers in the app are not possible; both the Android and the iOS pull requests for custom headers were rejected.
+- IP-bypass automation (a phone shortcut updating a Cloudflare list) works for some but is fragile, and carrier IPs are shared with strangers. Avoid.
+- Hardening that does not touch the app: MFA, `ip_ban_enabled` with a login-attempt threshold, `trusted_proxies` with `use_x_forwarded_for`, Cloudflare WAF rules (geo-restriction, rate limit on `/auth/*`).
+- Real edge auth: split the hostnames. Browsers use one behind Access; the app uses a second that requires an mTLS client certificate (Cloudflare issues them, enforced by a WAF rule on `cf.tls_client_auth.cert_verified`), with `/api/webhook/*` exempted only if background updates fail without it. All family phones are iOS, where client certificates arrived in app version 2026.4 as experimental; use an EC key (the one reported WebSocket failure was RSA-2048).
+- Pilot on one phone for two weeks first: background location, actionable notifications, widgets, watch, behaviour after a reboot, certificate renewal.
+- Starting points: [mTLS guide](https://community.home-assistant.io/t/secure-remote-access-with-cloudflare-tunnel-and-mtls/1024873), [iOS secure channel thread](https://community.home-assistant.io/t/secure-communication-channel-for-ios-app/785129?page=4), [Cloudflare mTLS](https://developers.cloudflare.com/api-shield/security/mtls/configure/).
 
 ## Install `k3s` on Raspberry Pi
 

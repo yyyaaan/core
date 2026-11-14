@@ -9,6 +9,14 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 | `r2.tf` | The `static` bucket (imported) and its lifecycle rules |
 | `versions.tf` | Provider pin, R2 state backend, state encryption |
 
+## How access is decided
+
+- Login happens at Cloudflare's edge, before a request enters the tunnel. oauth2-proxy is gone and nothing in the cluster keeps a user list; the `admins` and `users` groups here are the only ones.
+- `gated_hosts`: one Access app per hostname, admitting the listed groups. Frigate and Homebridge have their own logins switched off, so anyone admitted to them is an admin there; ArgoCD keeps its Google login behind Access because it maps emails to roles.
+- `public_hosts`: a bypass app per hostname. On `play.yan.fi` the host is public and only `/view` and `/scheduled` are gated by a more specific app (`play_private`); py-play verifies that app's token itself.
+- Fail closed (`ACCESS_FAIL_CLOSED=true`, on in production): a `*.yan.fi` app makes every proxied hostname without its own app admins-only, and cloudflared rejects requests on the catch-all route that carry no valid Access token. A deleted or broken app therefore blocks a service instead of exposing it. Hosts that must work without a token (`yan.fi`, `play`, `h`) have their own route above the catch-all.
+- Home Assistant (`h.yan.fi`) is deliberately public at the edge with its native login: Access breaks the companion app. Notes for a later round are in `infra/README.md`.
+
 ## One-time bootstrap (by hand)
 
 1. R2: create the bucket `yan-fi-iac-state` and an R2 API token with Object Read & Write on that bucket only.
@@ -25,15 +33,17 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 | secret | `ACCESS_GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | variable | `ACCESS_GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | variable | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_TEAM_NAME`, `CLOUDFLARE_TUNNEL_ID` | From the dashboard |
-| variable | `CLOUDFLARE_DNS_RECORD_IDS` | JSON map of hostname to the ID of its existing CNAME (`GET /zones/<zone>/dns_records`), for import: `yan.fi`, `play`, `h`, `cd`, `frigate`, `homebridge` (full names, e.g. `cd.yan.fi`) |
-| variable | `CLOUDFLARE_ACCESS_IDP_IDS` | Only if a login method already exists: JSON map with the keys `google` and/or `otp` and their IDs (`GET /accounts/<account>/access/identity_providers`), for import |
-| variable | `ACCESS_FAIL_CLOSED` | Unset at first; `true` for the last rollout step |
+| variable | `CLOUDFLARE_DNS_RECORD_IDS` | Only to adopt records that already exist: JSON map of full hostname to the ID of its CNAME (`GET /zones/<zone>/dns_records`). Used once at import; entries for hostnames not in the code are ignored |
+| variable | `CLOUDFLARE_ACCESS_IDP_IDS` | Only to adopt login methods that already exist: JSON map with the keys `google` and/or `otp` and their IDs (`GET /accounts/<account>/access/identity_providers`). Used once at import |
+| variable | `ACCESS_FAIL_CLOSED` | `true` in production. On a fresh setup leave it unset until every public host has been checked, then turn it on |
 
 ## Working with it
 
 - Changing who is in a group: edit the `ACCESS_*_EMAILS` secret, then run the workflow by hand on `main`.
 - A new gated hostname: add it to `gated_hosts` in `access.tf`; its CNAME is created with it. A new public one: `public_hosts`, plus a route and a `tunnel_hosts` entry in `tunnel.tf` if it is served from the cluster.
-- The first plan must show the imports (tunnel config, six DNS records, the bucket, any existing login method) and no change to the DNS records. If a record differs from the code, fix the code, not the record.
-- `ACCESS_FAIL_CLOSED=true` adds the `*.yan.fi` admins-only app and also gates every other proxied record in the zone that has no app of its own, tunnel or not, and makes cloudflared reject requests on the catch-all route that carry no valid Access token. Hosts that must be reachable without a token need their own route above the catch-all.
+- Read the plan before merging: merge applies at once. An imported resource should show no change; if it differs from the code, fix the code, not the resource.
+- A token for the state bucket needs Object Read & Write (the lock is a write); a read-only one fails with 403 on `PutObject`.
+- A proxied DNS record added by hand in the dashboard (not through the tunnel) is admins-only until it gets an entry in `public_hosts`.
+- Routes and DNS records edited in the dashboard are overwritten by the next apply.
 - In the devcontainer: `tofu fmt && tofu init -backend=false && tofu validate`. Commit `.terraform.lock.hcl`; after a provider bump, `tofu init -backend=false -upgrade` and `tofu providers lock -platform=linux_amd64 -platform=linux_arm64` so the lock covers the CI runner too.
 - Outputs `access_team_domain` and `play_access_aud` go into `infra/credentials/play.env`.

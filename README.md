@@ -21,7 +21,7 @@ Home automation components (Home Assistant, Homebridge, Frigate, etc.) are maint
 
 ## CI/CD ⚙️
 
-- GitHub Actions: build, test, lint, and image workflows
+- GitHub Actions: build, test, lint, and image workflows; OpenTofu plan on pull requests and apply on merge for the Cloudflare configuration
 - In-cluster Argo CD: Helm/Kubernetes deployment execution
 
 ## Technologies
@@ -38,6 +38,7 @@ Home automation components (Home Assistant, Homebridge, Frigate, etc.) are maint
 - `apps/`: main applications
 - `packages/`: shared Python packages
 - `crates/`: Rust crates
+- `infra/`: platform Helm chart, Argo CD applications, cluster bootstrap, Cloudflare configuration (`infra/terraform/`)
 
 Naming convention:
 - `py-*` for Python projects
@@ -63,7 +64,7 @@ ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev
 
 - Home internal: Home Assistant, MariaDB, Homebridge, Frigate
 - General web: Play (FastAPI)
-- Supporting: Cloudflare tunnel and Access, cert issuers
+- Supporting: Cloudflare tunnel and Access (login at the edge)
 
 ## Restic Backups 💾
 

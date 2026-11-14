@@ -65,7 +65,7 @@ variable "state_passphrase" {
 }
 
 variable "fail_closed" {
-  description = "Rollout step 6: wildcard default-deny app, and cloudflared requires an Access token on the catch-all route."
+  description = "Wildcard default-deny app, and cloudflared requires an Access token on the catch-all route. On in production."
   type        = bool
   default     = false
 }

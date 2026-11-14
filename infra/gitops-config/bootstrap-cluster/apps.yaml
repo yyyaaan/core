@@ -29,7 +29,7 @@ spec:
 # 2. cert-manager (Remote Helm Chart), not necessary - cloudflare proxied edge certificates are used for now, but this is for future use when we want to issue internal certificates for intra-cluster communication
 ---
 # 3. Cluster Bootstrap 
-# This will handle your Cloudflare Tunnel, Cert Issuer and Traefik Middleware
+# This will handle your Cloudflare Tunnel and Traefik Middleware
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
