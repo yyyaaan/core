@@ -23,7 +23,7 @@ ha: # mariaDB migration flag controls resource provisioning
   namespace: home-internal
   image:
     repository: ghcr.io/home-assistant/home-assistant
-    tag: "2026.10.2"
+    tag: "2026.11.1"
     pullPolicy: IfNotPresent
   envFromSecretList:
     - tz-config
