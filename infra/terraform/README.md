@@ -19,15 +19,15 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 
 ## One-time bootstrap (by hand)
 
-1. R2: create the bucket `yan-fi-iac-state` and an R2 API token with Object Read & Write on that bucket only.
-2. Cloudflare API token with: Account → Access: Apps and Policies (Edit), Access: Organizations, Identity Providers, and Groups (Edit), Cloudflare Tunnel (Edit), Workers R2 Storage (Edit); Zone `yan.fi` → DNS (Edit).
+1. R2: create the bucket `yan-fi-iac-state` and two R2 API tokens scoped to that bucket only: one with Object Read & Write (apply), one with Object Read only (plan).
+2. Two Cloudflare API tokens with the same permission list, one at Edit (apply) and one at Read (plan): Account → Access: Apps and Policies, Access: Organizations, Identity Providers, and Groups, Cloudflare Tunnel, Workers R2 Storage; Zone `yan.fi` → DNS.
 3. Google OAuth client: add the redirect URI `https://<team>.cloudflareaccess.com/cdn-cgi/access/callback`.
-4. GitHub repository secrets and variables:
+4. GitHub secrets and variables. The three credentials exist twice under the same name: the repository secret holds the read-only value (any run can read it), the secret in the `cloudflare` environment holds the write value (only the approved `apply` job gets it).
 
 | Kind | Name | Value |
 |------|------|-------|
-| secret | `CLOUDFLARE_API_TOKEN` | Token from step 2 |
-| secret | `TOFU_STATE_ACCESS_KEY_ID`, `TOFU_STATE_SECRET_ACCESS_KEY` | R2 token from step 1 |
+| secret | `CLOUDFLARE_API_TOKEN` | Repository: Read token from step 2. Environment `cloudflare`: Edit token |
+| secret | `TOFU_STATE_ACCESS_KEY_ID`, `TOFU_STATE_SECRET_ACCESS_KEY` | Repository: read-only R2 token from step 1. Environment `cloudflare`: Read & Write one |
 | secret | `TOFU_STATE_PASSPHRASE` | At least 16 characters. Keep a copy: without it the state is unreadable |
 | secret | `ACCESS_ADMIN_EMAILS`, `ACCESS_USER_EMAILS` | JSON lists, e.g. `["a@x.fi"]`; `[]` for none |
 | secret | `ACCESS_GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
@@ -41,7 +41,7 @@ OpenTofu with the Cloudflare provider v5. It runs only in the `tofu` GitHub work
 - A new gated hostname: add it to `gated_hosts` in `access.tf`; its CNAME is created with it. A new public one: `public_hosts`, plus a route and a `tunnel_hosts` entry in `tunnel.tf` if it is served from the cluster.
 - Read the plan before merging, and the `plan` job of the `main` run before approving `apply` (Actions run → Review deployments). Approval re-plans that same commit and applies without another prompt. Reject an apply you don't want rather than leaving it pending: the waiting run holds the `tofu-state` concurrency group, so later runs queue behind it.
 - Everything here is tracked in the state; the `import` blocks used to adopt the hand-made tunnel routes, DNS records, bucket and One-time PIN were removed afterwards. To adopt another existing resource, add a temporary `import` block (ID formats are in the provider docs), merge, then delete it. If the state is ever lost, the same applies to all of them.
-- A token for the state bucket needs Object Read & Write (the lock is a write); a read-only one fails with 403 on `PutObject`.
+- `apply` takes the state lock, a write: its R2 token needs Object Read & Write, or it fails with 403 on `PutObject`. `plan` runs with `-lock=false` and never writes, so its token is read-only.
 - A proxied DNS record added by hand in the dashboard (not through the tunnel) is admins-only until it gets an entry in `public_hosts`.
 - Routes and DNS records edited in the dashboard are overwritten by the next apply.
 - In the devcontainer: `tofu fmt && tofu init -backend=false && tofu validate`. Commit `.terraform.lock.hcl`; after a provider bump, `tofu init -backend=false -upgrade` and `tofu providers lock -platform=linux_amd64 -platform=linux_arm64` so the lock covers the CI runner too.
