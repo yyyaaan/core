@@ -7,6 +7,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG USERNAME=vscode
 # Bump deliberately; see https://github.com/openai/codex/releases
 ARG CODEX_VERSION=0.162.1
+# Keep in step with tofu_version in .github/workflows/tofu.yml
+ARG TOFU_VERSION=1.13.9
 
 # uv / uvx (pinned to a minor line)
 COPY --from=ghcr.io/astral-sh/uv:0.13 /uv /uvx /usr/local/bin/
@@ -25,6 +27,18 @@ RUN arch="$(uname -m)" \
        | tar -xz -C /usr/local/bin \
     && mv "/usr/local/bin/codex-${arch}-unknown-linux-musl" /usr/local/bin/codex \
     && codex --version
+
+# OpenTofu: fmt/validate/lock for infra/terraform only. No Cloudflare or state
+# credentials here; plan and apply run in GitHub Actions.
+RUN arch="$(dpkg --print-architecture)" \
+    && base="https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}" \
+    && file="tofu_${TOFU_VERSION}_linux_${arch}.tar.gz" \
+    && cd /tmp \
+    && curl -fsSLO "${base}/${file}" \
+    && curl -fsSL "${base}/tofu_${TOFU_VERSION}_SHA256SUMS" | grep " ${file}\$" | sha256sum -c - \
+    && tar -xzf "${file}" -C /usr/local/bin tofu \
+    && rm "${file}" \
+    && tofu version
 
 ENV UV_LINK_MODE=copy \
     UV_PYTHON_INSTALL_DIR=/home/${USERNAME}/.local/share/uv/python \

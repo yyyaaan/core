@@ -76,8 +76,7 @@ projects = [
         "icon": "cpu",
         "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
         "sublinks": [
-            {"label": "Dash", "url": "https://dash.yan.fi"},
-            {"label": "ArgoCD", "url": "https://argocd.yan.fi"},
+            {"label": "ArgoCD", "url": "https://cd.yan.fi"},
             {"label": "Home", "url": "https://h.yan.fi"},
             {"label": "Frigate", "url": "https://frigate.yan.fi"},
             {"label": "Bridge", "url": "https://homebridge.yan.fi"},

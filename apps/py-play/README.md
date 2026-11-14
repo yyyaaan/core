@@ -4,7 +4,7 @@ Personal utilities on the home cluster: a daily digest email (football, S-Bonus 
 
 Run locally (port 7999):
 
-- `ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev`
-- or `curl -H 'X-Auth-Request-Email: yan@yan.fi' http://localhost:7999/view`
+- `ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev`
+- or `INTERNAL_TOKEN=dev uv run play-dev` and `curl -H 'Authorization: Bearer dev' http://localhost:7999/view`
 
 Tests: `uv run pytest apps/py-play/tests/`

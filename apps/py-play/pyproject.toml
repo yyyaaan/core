@@ -12,6 +12,7 @@ dependencies = [
     "pillow",
     "plotly",
     "pydantic-settings",
+    "pyjwt[crypto]>=2.15.1",
     "uvicorn",
 ]
 

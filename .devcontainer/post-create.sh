@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# These two volumes sit on paths the image doesn't own (inside the workspace bind
-# and under the Rust feature's CARGO_HOME), so they start out root-owned.
-sudo chown vscode:vscode /workspace/.venv /usr/local/cargo/registry
+# Named volumes keep the owner they were created with. Two sit on paths the image
+# doesn't own, and the shared ones outlive a rebuild that changes vscode's UID, so
+# re-own any whose top directory isn't ours (recursive only then: the caches are big).
+for dir in /workspace/.venv /usr/local/cargo/registry \
+    ~/.cache/uv ~/.cache/cargo-target ~/.local/share/uv/python \
+    ~/.config/gh ~/.claude ~/.codex; do
+  if [ -d "$dir" ] && [ "$(stat -c %u "$dir")" != "$(id -u)" ]; then
+    sudo chown -R "$(id -u):$(id -g)" "$dir"
+  fi
+done
 
 # Personal agent config. ~/.agents is bind-mounted from the host and is the single
 # source of truth; Codex reads ~/.agents/skills natively, Claude gets symlinks.

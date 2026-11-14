@@ -19,11 +19,16 @@ spec:
           containers:
           - name: post-scheduler
             image: curlimages/curl:latest
-            # internal calls will have the header preserved.
+            env:
+            - name: INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mailing.tokenSecret | quote }}
+                  key: INTERNAL_TOKEN
             command: ["/bin/sh", "-c"]
             args:
               - |
-                curl -sSf --max-time 120 -H "X-Auth-Request-Email: internal@kube.system" -X POST "http://play-svc/scheduled?audience=2"
+                curl -sSf --max-time 120 -H "Authorization: Bearer $INTERNAL_TOKEN" -X POST "http://play-svc/scheduled?audience=2"
             resources:
               requests:
                 cpu: "10m"

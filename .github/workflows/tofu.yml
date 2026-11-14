@@ -1,0 +1,100 @@
+name: OpenTofu (Cloudflare)
+
+on:
+  pull_request:
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/tofu.yml'
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/tofu.yml'
+  workflow_dispatch:
+
+# one run at a time against the state; never cancel an apply
+concurrency:
+  group: tofu-state
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: infra/terraform
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  AWS_ENDPOINT_URL_S3: https://${{ vars.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+  AWS_ACCESS_KEY_ID: ${{ secrets.TOFU_STATE_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.TOFU_STATE_SECRET_ACCESS_KEY }}
+  TF_VAR_state_passphrase: ${{ secrets.TOFU_STATE_PASSPHRASE }}
+  TF_VAR_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+  TF_VAR_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
+  TF_VAR_team_name: ${{ vars.CLOUDFLARE_TEAM_NAME }}
+  TF_VAR_tunnel_id: ${{ vars.CLOUDFLARE_TUNNEL_ID }}
+  TF_VAR_dns_record_ids: ${{ vars.CLOUDFLARE_DNS_RECORD_IDS || '{}' }}  # JSON map, hostname => record ID
+  TF_VAR_idp_ids: ${{ vars.CLOUDFLARE_ACCESS_IDP_IDS || '{}' }}  # JSON map, google/otp => ID, only if they already exist
+  TF_VAR_fail_closed: ${{ vars.ACCESS_FAIL_CLOSED || 'false' }}
+  TF_VAR_google_client_id: ${{ vars.ACCESS_GOOGLE_CLIENT_ID }}
+  TF_VAR_google_client_secret: ${{ secrets.ACCESS_GOOGLE_CLIENT_SECRET }}
+  TF_VAR_admin_emails: ${{ secrets.ACCESS_ADMIN_EMAILS }}  # JSON list, e.g. ["a@x.fi","b@y.com"]
+  TF_VAR_user_emails: ${{ secrets.ACCESS_USER_EMAILS }}    # JSON list, [] if none
+
+jobs:
+  plan:
+    # fork PRs get no secrets
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # one comment, updated in place
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: 1.13.9
+          tofu_wrapper: false
+
+      - name: Format check
+        run: tofu fmt -check -diff
+
+      - name: Init
+        run: tofu init
+
+      - name: Validate
+        run: tofu validate
+
+      - name: Plan
+        run: |
+          tofu plan -out=tfplan
+          # the repo is public: comment only which resources change, not their attributes
+          {
+            tofu show -no-color tfplan | grep -E '^  # |^Plan:|^No changes' || true
+          } > plan-summary.txt
+
+      - name: Comment plan
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          marker='<!-- tofu-plan -->'
+          summary=$(cat plan-summary.txt 2>/dev/null || true)
+          body=$(printf '%s\n**OpenTofu plan** · [run](%s)\n\n```\n%s\n```\n' "$marker" "$RUN_URL" "${summary:-plan did not complete}")
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" --paginate \
+            --jq "map(select(.body | startswith(\"$marker\"))) | .[0].id // empty" | head -n1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -f body="$body" > /dev/null
+          fi
+
+      # main is production: merge applies exactly what this run planned
+      - name: Apply
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: tofu apply tfplan

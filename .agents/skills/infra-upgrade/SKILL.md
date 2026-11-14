@@ -1,6 +1,6 @@
 ---
 name: infra-upgrade
-description: Upgrade platform service images (Home Assistant, Homebridge, Frigate, MariaDB, Mosquitto, oauth2-proxy, Restic, Stirling-PDF) or bootstrap charts (Traefik, Headlamp) and the Cloudflare tunnel in infra/. Use when asked to bump, update or upgrade infra versions, or to check what's outdated.
+description: Upgrade platform service images (Home Assistant, Homebridge, Frigate, MariaDB, Mosquitto, Restic) or bootstrap charts (Traefik) and the Cloudflare tunnel in infra/. Use when asked to bump, update or upgrade infra versions, or to check what's outdated.
 ---
 
 # Infra upgrade
@@ -12,7 +12,7 @@ Goal: a reviewed tag bump plus a short risk report. The edit is trivial; the val
 - Images: `image.repository` / `image.tag` in `infra/helm-chart/values.yaml`. `values-test.yaml` pins some services separately (often older); report the drift, ask before aligning.
 - Bootstrap charts: `targetRevision` in `infra/gitops-config/bootstrap-cluster/apps.yaml`.
 - Cloudflare tunnel: `image` in `infra/bootstrap/manifests/deployment-cloudflared-tunnel.yaml` (ArgoCD app `cert-cloudflare-etc`). Releases: `cloudflare/cloudflared` `RELEASE_NOTES`.
-- Skip floating `latest` tags (Stirling-PDF) unless asked.
+- Skip floating `latest` tags unless asked.
 
 ## 2. Pick targets
 
@@ -28,8 +28,8 @@ Read release notes for all versions from current to target, not just the last on
 - Frigate: changes to `/api/export/custom/...` or `/api/exports` (used by bash-poller), and to MQTT topics.
 - Mosquitto: auth/listener defaults (py-play, HA and Frigate publish to it).
 - MariaDB: version line changes and data migrations; HA runs its own schema migration on start.
-- oauth2-proxy: renamed or removed flags vs `templates/oauth2-proxy/configmap.yaml`.
-- Traefik/Headlamp chart majors: values and CRD changes.
+- Frigate: changes to `auth` / `proxy` config (login is off, Cloudflare Access is the gate, `proxy.default_role: admin`).
+- Traefik chart majors: values and CRD changes.
 
 ## 4. Edit and verify
 

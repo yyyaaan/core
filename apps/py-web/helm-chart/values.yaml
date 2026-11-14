@@ -1,7 +1,4 @@
 namespace: web
-authMiddleware:
-  enabled: true
-  name: auth-oauth@kubernetescrd
 image:
   repository: ghcr.io/yyyaaan/core/web
   tag: "sha-c19d9b1"
@@ -13,6 +10,4 @@ service:
   targetPort: 8001
 ingress:
   host: yan.fi
-  additionalHosts:
-    - staging.yan.fi
-    - omop.fi
+  additionalHosts: []

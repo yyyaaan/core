@@ -11,13 +11,13 @@ Personal monorepo (private project): Python + Rust services and the Helm/ArgoCD 
 | `apps/bash-poller/` | CronJob workloads (Elenia energy, FFmpeg/timelapse), shell + Python helpers |
 | `packages/py-scout/` | CLI price scans through the user's own Chrome over CDP (Marriott first). Not deployed. See `packages/py-scout/AGENTS.md` |
 | `crates/rs-y-one/` | Rust learning project (tokio, serde, anyhow) |
-| `infra/` | Platform Helm chart, ArgoCD app-of-apps, cluster bootstrap. See `infra/AGENTS.md` |
+| `infra/` | Platform Helm chart, ArgoCD app-of-apps, cluster bootstrap, Cloudflare config as code (`infra/terraform/`). See `infra/AGENTS.md` |
 
 Naming: `py-*` for Python, `rs-*` for Rust. Every deployable app owns a `helm-chart/`.
 
 ## Environment
 
-Work happens in the devcontainer (`.devcontainer/`). By design it has **no kubectl, no kubeconfig and no Docker**, and `go-task` is not installed either. Don't try to reach the cluster or build images from here; Taskfile targets that call `kubectl`/`docker`/`helm upgrade` are for the host only.
+Work happens in the devcontainer (`.devcontainer/`). By design it has **no kubectl, no kubeconfig and no Docker**, and `go-task` is not installed either. Don't try to reach the cluster or build images from here; Taskfile targets that call `kubectl`/`docker`/`helm upgrade` are for the host only. `tofu` is installed for `fmt`, `validate` and the provider lock file only: the container has no Cloudflare or state credentials, so `plan` and `apply` happen in GitHub Actions.
 
 - Python: uv workspace (root `pyproject.toml`), Python `==3.14.*` only. Add deps with `uv add --package <name> <dep>`, never pip. Commit `uv.lock`; CI runs `uv lock --check`.
 - Rust: Cargo workspace (root `Cargo.toml`); shared deps in `[workspace.dependencies]`, members use `dep = { workspace = true }`. `CARGO_TARGET_DIR` lives outside the repo.
@@ -34,14 +34,16 @@ uv run web                                        # py-web locally, port 8001
 uv run scout marriott report --from 2027-10-01 --to 2027-10-31   # needs debug Chrome only for `scan`
 cargo build -p rs-y-one && cargo test
 helm lint <chart> && helm template t <chart> > /dev/null   # what CI checks
+cd infra/terraform && tofu fmt && tofu init -backend=false && tofu validate
 ```
 
-py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev ALLOWED_EMAILS='["t@t.dev"]' uv run play-dev`.
+py-play's private routes need a Cloudflare Access token. Locally: `ALLOW_LOCAL_AUTH=true LOCAL_AUTH_EMAIL=t@t.dev uv run play-dev`.
 
 ## How changes ship
 
-- PR → CI (`test-play`, `test-web`: ruff + pytest, results as one PR comment per app updated in place by `.github/scripts/test_comment.py`; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML).
+- PR → CI (`test-play`, `test-web`: ruff + pytest, results as one PR comment per app updated in place by `.github/scripts/test_comment.py`; `test-poller`: ruff, shellcheck, inline init script compiles; `lint-helm` on any YAML; `tofu`: fmt, validate and plan for `infra/terraform/`, with the changed resources as a PR comment).
 - Merge to `main` → `build-<app>.yml` (thin caller of the reusable `_image.yml`) builds the arm64 image to `ghcr.io/yyyaaan/core/<app>` and, in the same run, opens a PR bumping the image tag in the app's values → ArgoCD (watching `main`, manual sync) deploys. If a bump is missing, re-run or manually dispatch the build on `main`; it bumps too.
+- Merge to `main` with changes under `infra/terraform/` → the `tofu` workflow applies them to Cloudflare immediately (no manual sync step, unlike ArgoCD).
 - So `main` is production. Never run `helm upgrade`/`install` or `kubectl apply` as a way to deploy; propose a change instead.
 
 ## Gotchas
@@ -50,7 +52,7 @@ py-play routes need an oauth2-proxy email header. Locally: `ALLOW_LOCAL_AUTH=tru
 - Image tags in app values are bot-managed (`sha-xxxxxxx`); don't hand-edit them.
 - Images are built for `linux/arm64` (Pi). Don't add amd64-only dependencies.
 - Secrets live in `infra/credentials/*.env` (gitignored) and reach the cluster only via `task infra:secrets` on the host. Never inline secret values in code, values or manifests.
-- `apps/py-play` does its own auth check (`play/auth.py`, allowlist on `X-Auth-Request-Email` only, the header Traefik overwrites from oauth2-proxy) on top of oauth2-proxy; `apps/py-web` has none.
+- Login is Cloudflare Access at the edge (apps, policies and the `admins`/`users` groups in `infra/terraform/`); nothing in the cluster authenticates users except `apps/py-play`, which verifies the Access token itself (`play/auth.py`), and ArgoCD's own Google OIDC. The repo is public: group members and other account details come from GitHub secrets/variables, never from `.tf` files.
 
 ## Python conventions
 
