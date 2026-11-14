@@ -17,7 +17,7 @@ tasks:
   setup-namespaces:  # deps to secrets
     internal: true
     cmds:
-      - for: [argocd, cert-manager, cloudflared, home-internal, traefik, web]
+      - for: [argocd, cloudflared, home-internal, traefik, web]
         cmd: kubectl create namespace {{.ITEM}} --dry-run=client -o yaml | kubectl apply -f -
 
   # task infra:secrets ENV=test
@@ -28,7 +28,6 @@ tasks:
       SUFFIX: '{{if eq .ENV "test"}}.test{{else}}{{end}}'
       ITEMS:
         - { NAME: oidc-secret,              NS: argocd,        FILE: ./credentials/oidc.env }
-        - { NAME: cloudflare-api-token,     NS: cert-manager,  FILE: ./credentials/cloudflare.env }
         - { NAME: cloudflared-token,        NS: cloudflared,   FILE: "./credentials/cloudflare{{.SUFFIX}}.env" }
         - { NAME: play-credentials,         NS: web,           FILE: ./credentials/play.env }
         - { NAME: email-credentials,        NS: web,           FILE: ./credentials/email.env }
