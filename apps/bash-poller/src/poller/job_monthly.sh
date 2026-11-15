@@ -26,7 +26,7 @@ ffmpeg -hide_banner -loglevel error -y \
     "$full"
 echo "=Concat= $(date +%H:%M:%S) $(stat -c %s "$full" | numfmt --to=iec)"
 
-# ~6 Mbit/s cap: a 31-day month is ~4.5 min, so <=~200 MB and 24 months stay well under R2's 10 GB free tier
+# ~6 Mbit/s cap: a 31-day month is ~4.5 min, so <=~200 MB (+~50 MB lite); 24 months ~6 GB of R2's 10 GB free tier
 r2=monthly/${month}_r2.mp4
 ffmpeg -hide_banner -loglevel error -y \
     -i "$full" \
@@ -34,8 +34,19 @@ ffmpeg -hide_banner -loglevel error -y \
     -movflags +faststart \
     "$r2"
 python /app/upload.py r2 "$r2" "timelapse/monthly/$month.mp4"
-python /app/catalog.py || echo "Catalog update failed (non-fatal)"
 rm "$r2"
+
+# lite copy for mobile data, same cap as the daily one: ~50 MB for a 31-day month
+lite=monthly/${month}_lite.mp4
+ffmpeg -hide_banner -loglevel error -y \
+    -i "$full" \
+    -vf "scale=-2:'min(1280,ih)',setsar=1" -r 30 -crf 30 -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p \
+    -movflags +faststart \
+    "$lite" \
+    && python /app/upload.py r2 "$lite" "timelapse/monthly/${month}_lite.mp4" \
+    || echo "Lite copy failed (non-fatal)"
+rm -f "$lite"
+python /app/catalog.py || echo "Catalog update failed (non-fatal)"
 
 python /app/upload.py b2 "$full" "monthly/$month.mp4" --bucket yyyCam \
     || echo "B2 upload failed (non-fatal)"

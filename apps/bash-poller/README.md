@@ -18,13 +18,14 @@ Uploads go through `upload.py` (`r2` or `b2` target, explicit object key): Cloud
 
 - `timelapse/daily/YYYYMMDD.mp4`: R2 lifecycle rule deletes after 7 days
 - `timelapse/monthly/YYYYMM.mp4`: R2 lifecycle rule deletes after 730 days (24 months)
+- `..._lite.mp4` next to each (e.g. `timelapse/daily/YYYYMMDD_lite.mp4`): low-quality copy for mobile data (30 fps, at most 1280 px tall, capped at 1.5 Mbit/s), same prefix so the same rules expire it. Only in R2 (not B2 or local disk). The daily lite copy is encoded in the same ffmpeg run as the full one, so an encode failure fails the job; a failed lite upload, and anything failing in the monthly lite step, is non-fatal.
 
 Retention lives in the R2 bucket's lifecycle rules, declared in `infra/terraform/r2.tf`. Only the poller writes under `timelapse/`. Credentials: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` in `infra/credentials/poll.env` (token: Object Read & Write, scoped to the bucket).
 
 ## Catalog and viewer
 
-After each upload, `catalog.py` lists `timelapse/` and rewrites `timelapse/index.json` (newest first, `{date, key, url, size_mb}` per `daily`/`monthly` entry, `Cache-Control: max-age=300`) and the viewer `timelapse/index.html` (`timelapse.html` here, no external scripts). Lifecycle-expired videos drop out on the next run; the viewer shows a note if one 404s in between.
+After each upload, `catalog.py` lists `timelapse/` and rewrites `timelapse/index.json` (newest first, `{date, key, url, size_mb}` per `daily`/`monthly` entry, plus `lite: {key, url, size_mb}` when the lite copy exists, `Cache-Control: max-age=300`) and the viewer `timelapse/index.html` (`timelapse.html` here, no external scripts). Lifecycle-expired videos drop out on the next run; the viewer shows a note if one 404s in between.
 
-- Viewer: `https://assets.yan.fi/timelapse/index.html`, deep link `#daily/YYYY-MM-DD` or `#monthly/YYYY-MM`. Works as a Home Assistant Webpage card.
+- Viewer: `https://assets.yan.fi/timelapse/index.html`, deep link `#daily/YYYY-MM-DD` or `#monthly/YYYY-MM`. Works as a Home Assistant Webpage card. Its High/Low switch picks the full or lite copy: Low by default, the choice is remembered per browser, and videos without a lite copy play full quality.
 - Consumers of `index.json`: the viewer and Home Assistant. Keep its shape backwards compatible.
 - Public base URL: `ffmpeg.publicBaseUrl` in `helm-chart/values.yaml` (`R2_PUBLIC_URL`).
