@@ -49,6 +49,9 @@
   }
   button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
+  .seg button { border-color: transparent; min-height: 28px; padding: 4px 10px; }
+
   aside { display: grid; gap: 12px; }
   [role="tablist"] { display: flex; gap: 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
@@ -71,6 +74,10 @@
       <button id="older" aria-label="Older">‹</button>
       <button id="newer" aria-label="Newer">›</button>
       <span id="speeds"></span>
+      <span class="seg" role="group" aria-label="Quality">
+        <button id="q-high" data-q="high" title="Full quality">High</button>
+        <button id="q-low" data-q="low" title="Smaller copy for mobile data">Low</button>
+      </span>
       <a class="btn" id="open" target="_blank" rel="noopener">Open</a>
     </div>
     <div class="note" id="note"></div>
@@ -92,6 +99,13 @@ const SPEEDS = [0.5, 1, 2];
 let catalog = { daily: [], monthly: [] };
 let kind = "daily";
 let current = null;
+let pendingSeek = null;  // resume position for a quality switch, only for the video it was set for
+const QKEY = "timelapse-quality";
+let quality = "low";  // light by default; High is one tap and remembered
+try { quality = localStorage.getItem(QKEY) || quality; } catch {}
+
+// the copy to play: lite when Low is chosen and one exists (older videos have none)
+const variant = (entry) => (quality === "low" && entry.lite) || entry;
 
 function parse(d) {
   const [y, m, day] = d.split("-").map(Number);
@@ -105,7 +119,9 @@ function label(entry, long) {
     : { weekday: "short", day: "numeric", month: "short" });
 }
 
-function select(k, entry, push = true) {
+function select(k, entry, push = true, resumeAt = 0) {
+  if (pendingSeek) player.removeEventListener("loadedmetadata", pendingSeek);
+  pendingSeek = null;
   kind = k;
   current = entry;
   document.querySelectorAll("[role=tab]").forEach((t) => t.setAttribute("aria-selected", t.dataset.kind === k));
@@ -118,18 +134,25 @@ function select(k, entry, push = true) {
     $("now").textContent = "Nothing here yet";
     $("open").hidden = true;
     $("newer").disabled = $("older").disabled = true;
+    renderQuality();
     return;
   }
   const i = list.indexOf(entry);
   $("now").textContent = label(entry, true);
   $("newer").disabled = i <= 0;
   $("older").disabled = i >= list.length - 1;
-  const src = "/" + entry.key;  // same origin as the page, works on any R2 hostname
+  renderQuality();
+  if (quality === "low" && !entry.lite) $("note").textContent = "No low-quality copy of this one, playing full quality.";
+  const src = "/" + variant(entry).key;  // same origin as the page, works on any R2 hostname
   $("open").href = src;
   $("open").hidden = false;
   const rate = player.playbackRate;
   player.src = src;
   player.playbackRate = rate;
+  if (resumeAt) {
+    pendingSeek = () => { pendingSeek = null; player.currentTime = resumeAt; };
+    player.addEventListener("loadedmetadata", pendingSeek, { once: true });
+  }
   player.play().catch(() => {});  // autoplay may be blocked; controls remain
   if (push) history.replaceState(null, "", `#${k}/${entry.date}`);
 }
@@ -147,10 +170,27 @@ function renderList() {
     b.setAttribute("aria-pressed", entry === current);
     b.innerHTML = `<span></span><small></small>`;
     b.firstChild.textContent = label(entry, false);
-    b.lastChild.textContent = `${Math.round(entry.size_mb)} MB`;
+    b.lastChild.textContent = `${Math.round(variant(entry).size_mb)} MB`;
     b.onclick = () => select(kind, entry);
     el.append(b);
   }
+}
+
+function renderQuality() {
+  const playing = current && !current.lite ? "high" : quality;  // the preference stays low for the next one
+  for (const b of document.querySelectorAll("[data-q]")) b.setAttribute("aria-pressed", b.dataset.q === playing);
+  const low = $("q-low");
+  low.disabled = !!current && !current.lite;
+  low.title = current?.lite ? `Smaller copy for mobile data (${Math.round(current.lite.size_mb)} MB)` : "No smaller copy of this video";
+  $("q-high").title = current ? `Full quality (${Math.round(current.size_mb)} MB)` : "Full quality";
+}
+
+function setQuality(q) {
+  if (q === quality) return;
+  quality = q;
+  try { localStorage.setItem(QKEY, q); } catch {}
+  if (current) select(kind, current, false, player.currentTime);
+  else renderQuality();
 }
 
 function fromHash() {
@@ -180,6 +220,7 @@ for (const s of SPEEDS) {
   };
   $("speeds").append(b);
 }
+for (const b of document.querySelectorAll("[data-q]")) b.onclick = () => setQuality(b.dataset.q);
 player.addEventListener("error", () => {
   if (player.getAttribute("src")) $("note").textContent = "This video isn't available (it may have just expired). Pick another one.";
 });
