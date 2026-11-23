@@ -10,7 +10,7 @@ homebridge:
   namespace: home-internal
   image:
     repository: homebridge/homebridge
-    tag: "2026-11-10"
+    tag: "2026-11-15"
     pullPolicy: IfNotPresent
   hostPathConfig: /mnt/kingston/home/config/hb
   ingress:
