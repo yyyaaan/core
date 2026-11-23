@@ -78,6 +78,6 @@ restic:
   timezone: "Europe/Helsinki"
   image:
     repository: restic/restic
-    tag: "0.19.1"
+    tag: "0.20.0"
   resticRepository: "s3:s3.eu-central-003.backblazeb2.com/yyyRestic"
   hostPathConfig: /mnt/kingston/home/config
